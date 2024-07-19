@@ -1,0 +1,6 @@
+(library
+ (name konane)
+ (libraries async core core_kernel.enum core_unix.command_unix yojson)
+ (inline_tests)
+ (preprocess
+  (pps ppx_jane)))
