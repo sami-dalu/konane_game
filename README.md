@@ -1,1 +1,1 @@
-# kanane_game
+# konane_game
