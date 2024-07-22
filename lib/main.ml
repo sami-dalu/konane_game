@@ -139,12 +139,17 @@ match move_opts with
   |}];
   return ();;
 
+  let%expect_test "get_moves_in_initial_game" =
+  let initial_game = new_game in
+  let moves = available_captures_for_player initial_game ~my_piece:Piece.X in
+  print_s [%sexp (moves : Move.t list)];
+  [%expect {|
+  (((starting_pos ((row 0) (column 0))) (ending_pos ()))
+   ((starting_pos ((row 7) (column 7))) (ending_pos ()))
+   ((starting_pos ((row 4) (column 4))) (ending_pos ()))
+   ((starting_pos ((row 3) (column 3))) (ending_pos ())))
+  |}];
+  return ();;
 
     
 end
-
-
-let () =
-  Run.run ();
-  Core.never_returns (Async.Scheduler.go ())
-;;
