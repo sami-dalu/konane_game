@@ -184,5 +184,27 @@ match move_opts with
   |}];
   return ();;
 
+  let%expect_test "black_remove_top_left" =
+  let initial_game = new_game in
+  let next_game = make_move_exn ~game:(initial_game) {Move.starting_pos = {Position.row = 0; column = 0}; Move.ending_pos = None} in
+  Game.print next_game;
+  [%expect {|
+    | O | X | O | X | O | X | O
+  -----------------------------
+  O | X | O | X | O | X | O | X
+  -----------------------------
+  X | O | X | O | X | O | X | O
+  -----------------------------
+  O | X | O | X | O | X | O | X
+  -----------------------------
+  X | O | X | O | X | O | X | O
+  -----------------------------
+  O | X | O | X | O | X | O | X
+  -----------------------------
+  X | O | X | O | X | O | X | O
+  -----------------------------
+  O | X | O | X | O | X | O | X
+  |}];
+  return ();;
     
 end
