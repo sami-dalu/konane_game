@@ -9,10 +9,10 @@ end
 
 
 let () = Game.print Exercises.new_game *) *)
-(* open! Core
+open! Core
 open! Async
 
 let () =
-  Run.run ();
+  Demo1.Run.run ();
   Core.never_returns (Async.Scheduler.go ())
-;; *)
+;;
