@@ -1,1 +1,1 @@
-lib/position.pp.mli: Bin_prot Comparable Core Ppx_compare_lib Sexplib0
+lib/position.pp.mli: Bin_prot Comparable Core Game Ppx_compare_lib Sexplib0
