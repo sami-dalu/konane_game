@@ -3,4 +3,4 @@
  (name demo1)
  (libraries core)
  (preprocess
-  (pps ppx_inline_test)))
+  (pps ppx_jane ppx_inline_test)))
