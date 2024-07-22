@@ -1,6 +1,6 @@
 open! Core
 
-module Piece = struct
+
   type t =
     | X
     | O
@@ -13,4 +13,3 @@ module Piece = struct
     | X -> O
     | O -> X
   ;;
-end

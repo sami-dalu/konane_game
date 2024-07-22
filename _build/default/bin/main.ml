@@ -1,4 +1,4 @@
-open! Core
+(* open! Core
 open! Async
 
 
@@ -8,4 +8,4 @@ end
 
 
 
-let () = Game.print Exercises.new_game *)
+let () = Game.print Exercises.new_game *) *)
