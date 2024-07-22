@@ -3,5 +3,8 @@
 (** @canonical Demo1.Game *)
 module Game = Demo1__Game
 
-(** @canonical Demo1.Main *)
-module Main = Demo1__Main
+(** @canonical Demo1.Piece *)
+module Piece = Demo1__Piece
+
+(** @canonical Demo1.Position *)
+module Position = Demo1__Position
