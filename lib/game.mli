@@ -2,6 +2,7 @@ open! Core
 
 module Game_state : sig
     type t =
+    | First_moves
     | Game_continues
     | Game_over of { winner: Piece.t option}
   end
