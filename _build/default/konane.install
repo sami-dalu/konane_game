@@ -1,8 +1,0 @@
-lib: [
-  "_build/install/default/lib/konane/META"
-  "_build/install/default/lib/konane/dune-package"
-  "_build/install/default/lib/konane/opam"
-]
-bin: [
-  "_build/install/default/bin/konane"
-]

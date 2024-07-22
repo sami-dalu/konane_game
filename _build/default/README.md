@@ -1,0 +1,2 @@
+# konane_game
+poggeis

@@ -1,4 +1,4 @@
 (executable
- (public_name konane)
+ (public_name demo1)
  (name main)
- (libraries konane))
+ (libraries demo1 core))
