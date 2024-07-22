@@ -1,6 +1,5 @@
 open! Core
 
-module Position = struct
   module T = struct
     type t =
       { row    : int
@@ -8,6 +7,7 @@ module Position = struct
       }
     [@@deriving sexp, equal, bin_io, compare]
   end
+
   include T
-  
-end
+  include Comparable.Make_binable (T)
+  let to_string = Fn.compose Sexp.to_string_hum sexp_of_t

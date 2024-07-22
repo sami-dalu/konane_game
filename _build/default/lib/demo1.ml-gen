@@ -3,6 +3,12 @@
 (** @canonical Demo1.Game *)
 module Game = Demo1__Game
 
+<<<<<<< HEAD
+=======
+(** @canonical Demo1.Main *)
+module Main = Demo1__Main
+
+>>>>>>> b4a96cf1ee872882347b74658e8199a905e31aca
 (** @canonical Demo1.Piece *)
 module Piece = Demo1__Piece
 
