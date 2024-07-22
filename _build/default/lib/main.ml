@@ -1,6 +1,8 @@
 open! Core
 open! Async
 
+let in_board_range {Position.row = r; column = c} (game : Game.t ) = 
+  r >= 0 && c>= 0 && r < game.board_height && c < game.board_width
 
 module Exercises = struct
   module Move = struct
@@ -10,6 +12,45 @@ module Exercises = struct
       }
     [@@deriving sexp_of, equal, bin_io, compare]
   end
+
+  let possible_captures_from_occupied_pos_exn (game : Game.t) (pos : Position.t) = 
+  let my_piece = Map.find_exn (game.board) pos in
+  let opp_piece = Piece.flip my_piece in
+  let above_my = {Position.row = pos.row -1; column = pos.column} in
+  let below_my = {Position.row = pos.row + 1; column = pos.column} in
+  let left_my = {Position.row = pos.row; column = pos.column - 1 } in
+  let right_my = {Position.row = pos.row; column = pos.column + 1 } in
+  let capture_below = (
+    let piece_below = Map.find game.board below_my in
+    match piece_below with 
+    (* None => no piece to capture *)
+    | None -> None
+    | Some piece -> if (Piece.equal piece opp_piece) then (
+      let pos_two_below = {Position.row = below_my.row + 1; column = pos.column} in
+      match Map.find game.board pos_two_below with 
+      (* some => you can't jump to there *)
+      | Some _ -> None 
+      | None -> if (in_board_range pos_two_below game) then Some {Move.starting_pos = pos; ending_pos = Some pos_two_below} else None
+    )
+else None
+  ) in
+  let capture_right = (
+    let piece_right = Map.find game.board right_my in
+    match piece_right with 
+    (* None => no piece to capture *)
+    | None -> None
+    | Some piece -> if (Piece.equal piece opp_piece) then (
+      let pos_two_right = {Position.row = pos.row; column = right_my.column + 1} in
+      match Map.find game.board pos_two_right with 
+      (* some => you can't jump to there *)
+      | Some _ -> None 
+      | None -> if (in_board_range pos_two_right game) then (Some {Move.starting_pos = pos; ending_pos = Some pos_two_right}) else None
+    )
+else None
+  )
+in []
+
+;;
   let new_game = Game.new_game ~height:8 ~width:8
   let available_moves (game : Game.t) ~(my_piece : Piece.t) : Move.t list =
     match game.game_state with 
@@ -29,13 +70,12 @@ module Exercises = struct
       let below = {Position.row = black_move_pos.row + 1; column = black_move_pos.column} in
       let left = {Position.row = black_move_pos.row; column = black_move_pos.column - 1 } in
       let right = {Position.row = black_move_pos.row; column = black_move_pos.column + 1 } in
-      let adjacent_pos = [above; below; left; right] in
-      let adjacent_positions_on_board = [] in
-        (* List.filter adjacent_pos ~f:(fun pos -> Position.in_board_range pos) in *)
+      let adjacent_positions = [above; below; left; right] in
+      let adjacent_positions_on_board = List.filter adjacent_positions ~f:(fun pos -> in_board_range pos game) in
       List.map adjacent_positions_on_board ~f:(fun valid_pos -> {Move.starting_pos = valid_pos; ending_pos = None})
     )
     | _ -> 
-    (* let rows = List.range 0 len in
+    let rows = List.range 0 len in
     let cols = List.range 0 len in
     let positions_grid =
       List.map rows ~f:(fun r ->
@@ -45,8 +85,8 @@ module Exercises = struct
     List.filter positions_list ~f:(fun pos ->
       not
         (List.exists (Map.keys game.board) ~f:(fun p ->
-           Position.equal p pos))) *)
-           []
+           Position.equal p pos)))
+
   ;;
 
   let%expect_test "print_initial_game" =
@@ -71,11 +111,11 @@ module Exercises = struct
   return ();;
 
 
-  let demo_one =
-    Command.async
-    ~summary:"Demo 1: Printing a game board"
-
-
+    
 end
 
 
+let () =
+  Run.run ();
+  Core.never_returns (Async.Scheduler.go ())
+;;

@@ -12,7 +12,6 @@ open! Core
     [@@deriving sexp_of, equal, bin_io, compare]
   
     val to_string : t -> string
-    val in_board_range : t -> Game.t -> bool
     (** [all_offsets] is a list of functions to compute all 8 neighbors of a
       cell (i.e. left, up-left, up, up-right, right, right-down, down,
       down-left). *)
