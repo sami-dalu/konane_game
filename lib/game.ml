@@ -17,8 +17,8 @@ open! Core
 
   let new_board h w =
     let board = Position.Map.empty in
-    let all_positions = List.init h ~f:(fun row -> List.init w ~f:(fun column -> {Position.row; Position.column})) in
-    List.iter all_positions
+    let list_of_rows = List.init h ~f:(fun row -> List.init w ~f:(fun column -> {Position.row; Position.column})) in
+    List.mapi list_of_rows ~f:(fun row row_list -> List.mapi row_list ~f:(fun col position -> ))
 
 
     (* Map.set board ~key:{Position.Position.row; Position.Position.column=col} ~data:(match row%2=0 with | true -> (if col%2=0 then X else O) | false -> (if col%2=0 then O else X)) *)
