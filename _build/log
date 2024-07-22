@@ -13,4 +13,8 @@
 #  ; build_dir = In_build_dir "default"
 #  ; instrument_with = []
 #  }
+<<<<<<< HEAD
 $ /home/ubuntu/.opam/4.14.1/bin/ocamlc.opt -config > /tmp/dune_12bf7d_output
+=======
+$ /home/ubuntu/.opam/4.14.1/bin/ocamlc.opt -config > /tmp/dune_7a7228_output
+>>>>>>> fb838dfc4eebef13b263a3e46e9e82f3c052f02a
