@@ -118,6 +118,39 @@ match move_opts with
 
   ;;
 
+  let captured_pos (move : Move.t) = 
+    match move.ending_pos with
+    | None -> None
+    | Some end_pos -> 
+      let row = (move.starting_pos.row + end_pos.row)/2 in
+      let col = (move.starting_pos.column + end_pos.column)/2 in
+      Some {Position.row = row; column = col}
+    ;;
+
+  let make_move_exn ~(game : Game.t) (move : Move.t) = 
+    let ending_position_opt = move.ending_pos in
+    let new_board = 
+    (match ending_position_opt with
+    | None -> (
+      (* no ending position <==> one of the intial moves *)
+      match game.game_state with
+      | Game.Game_state.First_moves -> 
+        (* first move so "starting position" simply has to be removed from map *)
+        Map.remove game.board (move.starting_pos)
+      | _ -> failwith "no ending position for a Move.t but game is in the first_moves state"
+
+    )
+    | Some end_pos -> 
+      let my_piece = Map.find_exn game.board move.starting_pos in
+      let intermediate_map = (Map.set game.board ~key:(end_pos) ~data:(my_piece))
+    in 
+    let map_with_captured_piece = Map.remove intermediate_map move.starting_pos in
+    let pos_of_captured_piece = Option.value_exn (captured_pos move) in
+    Map.remove map_with_captured_piece pos_of_captured_piece
+    )
+  in
+  {game with board = new_board}
+  ;;
   let%expect_test "print_initial_game" =
   Game.print new_game;
   [%expect {|
