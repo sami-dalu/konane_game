@@ -6,8 +6,8 @@ module Game = Demo1__Game
 (** @canonical Demo1.Game_graphics *)
 module Game_graphics = Demo1__Game_graphics
 
-(** @canonical Demo1.Main *)
-module Main = Demo1__Main
+(** @canonical Demo1.Move *)
+module Move = Demo1__Move
 
 (** @canonical Demo1.Piece *)
 module Piece = Demo1__Piece

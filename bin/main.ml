@@ -13,6 +13,7 @@ open! Core
 open! Async
 
 let () =
+Demo1.Game.print Demo1.Move.Exercises.new_game;
   Demo1.Run.run ();
   Core.never_returns (Async.Scheduler.go ())
 ;;
