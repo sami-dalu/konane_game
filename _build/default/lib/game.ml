@@ -5,7 +5,8 @@ open! Core
     type t =
     | First_moves
     | Game_continues
-    | Game_over of { winner: Piece.t option}
+    | Game_over of { winner: Piece.t }
+    (* [@@deriving sexp, equal] *)
   end
 
   type t =

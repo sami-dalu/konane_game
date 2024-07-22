@@ -27,11 +27,11 @@ module Exercises = struct
   return ();;
 
 
-  let demo_one =
-    Command.async
-    ~summary:"Demo 1: Printing a game board"
-
-
+    
 end
 
 
+let () =
+  Run.run ();
+  Core.never_returns (Async.Scheduler.go ())
+;;

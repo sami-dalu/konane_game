@@ -3,6 +3,9 @@
 (** @canonical Demo1.Game *)
 module Game = Demo1__Game
 
+(** @canonical Demo1.Game_graphics *)
+module Game_graphics = Demo1__Game_graphics
+
 (** @canonical Demo1.Main *)
 module Main = Demo1__Main
 
@@ -11,3 +14,6 @@ module Piece = Demo1__Piece
 
 (** @canonical Demo1.Position *)
 module Position = Demo1__Position
+
+(** @canonical Demo1.Run *)
+module Run = Demo1__Run
