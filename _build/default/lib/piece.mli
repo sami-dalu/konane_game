@@ -1,7 +1,7 @@
 type t =
     | X
     | O
-  [@@deriving sexp_of, equal, bin_io, enumerate]
+  [@@deriving sexp, equal, bin_io, enumerate]
 
   val of_string : string -> t
   val to_string : t -> string

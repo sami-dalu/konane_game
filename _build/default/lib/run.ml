@@ -15,7 +15,6 @@ let every seconds ~f ~stop =
   in
   don't_wait_for (loop ())
 ;;
-
 let handle_keys (game : Game.t) ~game_over =
   every ~stop:game_over 0.001 ~f:(fun () ->
     match Game_graphics.read_key game with
