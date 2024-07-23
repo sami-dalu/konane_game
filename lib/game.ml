@@ -222,7 +222,8 @@ let in_board_range {Position.row = r; column = c} (game : t ) =
     in
     game.board <- new_board;
     game.game_state <- new_game_state;
-    game.piece_to_move <- Piece.flip game.piece_to_move
+    game.piece_to_move <- Piece.flip game.piece_to_move;
+    print game
     
 
     let _evaluate_game (game) = 
