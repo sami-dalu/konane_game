@@ -15,6 +15,7 @@ open! Core
     board_width:int;
     board:Piece.t Position.Map.t;
     game_state:Game_state.t
+    ; piece_to_move: Piece.t
   }
   let new_board ~height ~width : Piece.t Position.Map.t=
     let board = Position.Map.empty in
@@ -24,7 +25,7 @@ open! Core
 
 
   let new_game ~height ~width =
-    {board_height=height; board_width=width; board=(new_board ~height ~width); game_state=Game_state.First_moves}
+    {board_height=height; board_width=width; board=(new_board ~height ~width); game_state=Game_state.First_moves; piece_to_move=Piece.X}
 
   let print t =
     let height = t.board_height in
