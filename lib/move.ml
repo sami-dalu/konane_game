@@ -10,7 +10,7 @@ module Exercises = struct
       { starting_pos : Position.t
       ; ending_pos : Position.t option
       }
-    [@@deriving sexp_of, equal, bin_io, compare]
+    [@@deriving sexp, equal, bin_io, compare]
   end
 
   let possible_captures_from_occupied_pos_exn (game : Game.t) (pos : Position.t) = 
@@ -160,6 +160,13 @@ match move_opts with
   in
   {game with board = new_board; game_state = new_game_state; piece_to_move=(Piece.flip game.piece_to_move)}
   ;;
+
+  let evaluate_game (game : Game.t) = 
+    match available_captures_for_player game ~my_piece:game.piece_to_move with
+    | [] -> Game.Game_state.Game_over {winner = Piece.flip game.piece_to_move}
+    | _ -> game.game_state
+  ;;
+  
   let%expect_test "print_initial_game" =
   Game.print new_game;
   [%expect {|

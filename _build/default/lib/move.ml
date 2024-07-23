@@ -10,7 +10,7 @@ module Exercises = struct
       { starting_pos : Position.t
       ; ending_pos : Position.t option
       }
-    [@@deriving sexp_of, equal, bin_io, compare]
+    [@@deriving sexp, equal, bin_io, compare]
   end
 
   let possible_captures_from_occupied_pos_exn (game : Game.t) (pos : Position.t) = 

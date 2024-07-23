@@ -9,7 +9,7 @@ open! Core
       { row    : int
       ; column : int
       }
-    [@@deriving sexp_of, equal, bin_io, compare]
+    [@@deriving sexp, equal, bin_io, compare]
   
     val to_string : t -> string
     (** [all_offsets] is a list of functions to compute all 8 neighbors of a
