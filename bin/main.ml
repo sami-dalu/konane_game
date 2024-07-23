@@ -25,6 +25,6 @@ Demo1.Move.Exercises.Move.ending_pos = Some {Demo1.Position.row = 2; column = 0}
 let av_moves = Demo1.Move.Exercises.available_captures_for_player next5 ~my_piece:(Demo1.Piece.O) in
 Demo1.Game.print next5; 
 Core.print_s [%sexp (av_moves : Demo1.Move.Exercises.Move.t list )];
-  (* Demo1.Run.run (); *)
-  (* Core.never_returns (Async.Scheduler.go ()) *)
+  Demo1.Run.run ();
+  Core.never_returns (Async.Scheduler.go ())
 ;;
