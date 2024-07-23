@@ -52,8 +52,8 @@ let draw_block { Position.row; column } ~color ~color2 =
   let open Constants in
   let col = column * block_size in
   let row = row * block_size in
-  Graphics.set_color color2;
-  Graphics.fill_rect (col + 1) (row + 1) (block_size - 1) (block_size - 1);
+  (* Graphics.set_color color2;
+  Graphics.fill_rect (col + 1) (row + 1) (block_size - 1) (block_size - 1); *)
 
   Graphics.set_color color;
   
@@ -99,12 +99,37 @@ let draw_highlighted_blocks (available_moves_list:Move.Exercises.Move.t list) =
   Graphics.set_color Colors.yellow;
   Graphics.fill_circle (row+(block_size/2)) (col+(block_size/2)) (block_size/4));;
 
+  let undraw_highlighted_blocks (available_moves_list:Move.Exercises.Move.t list) ~init_color = 
+    let open Constants in
+    List.iter available_moves_list ~f:(fun move -> let row = move.starting_pos.row in let col = move.starting_pos.column in
+    let col = col * block_size in
+    let row = row * block_size in
+    Graphics.set_color init_color;
+    Graphics.fill_circle (row+(block_size/2)) (col+(block_size/2)) (block_size/4));;
+  
+let highlight_ending_positions (move_list:Move.Exercises.Move.t list) =
+  let open Constants in
+  List.iter move_list ~f:(fun move -> match move.ending_pos with | Some pos ->let row = pos.row in let col = pos.column in
+  let col = col * block_size in
+  let row = row * block_size in
+  Graphics.set_color Colors.gold;
+  Graphics.fill_circle (row+(block_size/2)) (col+(block_size/2)) (block_size/4) | _ -> ());;
+
+
+
   let mouse_in_piece_to_move_spot game =
     let open Constants in
     let mouse_pos_x, mouse_pos_y = Graphics.mouse_pos () in
-    List.filter_map (Move.Exercises.available_captures_for_player game ~my_piece:Piece.X) ~f:(fun move -> let row = move.starting_pos.row in let col = move.starting_pos.column in
+
+    List.filter_map (Move.Exercises.available_captures_for_player game ~my_piece:game.piece_to_move) ~f:(fun move -> let row = move.starting_pos.row in let col = move.starting_pos.column in
     let col = col * block_size in
     let row = row * block_size in if (col<=mouse_pos_x && row<=mouse_pos_y && mouse_pos_x<col+block_size && mouse_pos_y<row+block_size) then Some move else None)
+
+    let mouse_in_place_to_move ~mouse_x ~mouse_y (move_list:Move.Exercises.Move.t list) =
+      let open Constants in
+      List.filter_map move_list ~f:(fun move -> match move.ending_pos with | Some pos ->let row = pos.row in let col = pos.column in
+      let col = col * block_size in
+      let row = row * block_size in if (col<=mouse_x && row<=mouse_y && mouse_x<col+block_size && mouse_y<row+block_size) then Some move else None | _ -> None)
 
 
 
@@ -127,7 +152,7 @@ let render (game:Game.t)=
   draw_header ~game_state;
   draw_play_area ~board_height ~board_width;
   draw_pieces board;
-  draw_highlighted_blocks (Move.Exercises.available_captures_for_player game ~my_piece:Piece.X);
+  draw_highlighted_blocks (Move.Exercises.available_captures_for_player game ~my_piece:game.piece_to_move);
   
   Graphics.display_mode true;
   Graphics.synchronize ()
@@ -135,5 +160,15 @@ let render (game:Game.t)=
 
 let read_key game =
   let move_list_to_take = mouse_in_piece_to_move_spot game in
+  match game.game_state with | Game.Game_state.First_moves ->
   if Graphics.button_down () && not ((List.length move_list_to_take)=0) then Some (List.hd_exn move_list_to_take) else None
+  | Game.Game_state.Game_continues -> if Graphics.button_down () && not ((List.length move_list_to_take)=0) then (undraw_highlighted_blocks move_list_to_take ~init_color:(match game.piece_to_move with |Piece.X -> Colors.black | Piece.O -> Colors.white);
+  highlight_ending_positions move_list_to_take;
+    let status = Graphics.wait_next_event [Button_down] in
+    let mouse_x = status.mouse_x in let mouse_y = status.mouse_y in
+    let move_to = mouse_in_place_to_move ~mouse_x ~mouse_y move_list_to_take in
+    if not ((List.length move_to)=0) then Some (List.hd_exn move_to) else None
+
+    ) else None
+  | _ -> None
 ;;
