@@ -130,12 +130,18 @@ match move_opts with
   let make_move_exn ~(game : Game.t) (move : Move.t) = 
     let ending_position_opt = move.ending_pos in
     let new_board = 
+    let state_ref = ref game.game_state in 
     (match ending_position_opt with
     | None -> (
       (* no ending position <==> one of the intial moves *)
       match game.game_state with
       | Game.Game_state.First_moves -> 
         (* first move so "starting position" simply has to be removed from map *)
+        let _ = (
+          let removed_color = Map.find_exn game.board move.starting_pos in
+          if (Piece.equal removed_color Piece.O) then
+          state_ref := Game.Game_state.Game_continues
+          ) in
         Map.remove game.board (move.starting_pos)
       | _ -> failwith "no ending position for a Move.t but game is in the first_moves state"
 
@@ -149,7 +155,7 @@ match move_opts with
     Map.remove map_with_captured_piece pos_of_captured_piece
     )
   in
-  {game with board = new_board}
+  {game with board = new_board; game_state = !state_ref}
   ;;
   let%expect_test "print_initial_game" =
   Game.print new_game;

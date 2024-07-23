@@ -149,7 +149,16 @@ match move_opts with
     Map.remove map_with_captured_piece pos_of_captured_piece
     )
   in
-  {game with board = new_board}
+  let new_game_state = match ending_position_opt with 
+    | None -> (
+      let removed_piece = Map.find_exn game.board move.starting_pos in
+      if Piece.equal removed_piece Piece.O then
+      Game.Game_state.Game_continues
+      else Game.Game_state.First_moves
+    )
+    | _ -> game.game_state
+  in
+  {game with board = new_board; game_state = new_game_state}
   ;;
   let%expect_test "print_initial_game" =
   Game.print new_game;
