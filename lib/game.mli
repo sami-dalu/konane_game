@@ -11,7 +11,8 @@ module Game_state : sig
          board_height:int;
          board_width:int;
          board:Piece.t Position.Map.t;
-         game_state:Game_state.t
+         game_state:Game_state.t;
+         piece_to_move:Piece.t
        }
 
        val new_board : height:int -> width:int -> Piece.t Position.Map.t

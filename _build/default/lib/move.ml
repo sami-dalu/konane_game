@@ -158,7 +158,7 @@ match move_opts with
     )
     | _ -> game.game_state
   in
-  {game with board = new_board; game_state = new_game_state}
+  {game with board = new_board; game_state = new_game_state; piece_to_move=(Piece.flip game.piece_to_move)}
   ;;
   let%expect_test "print_initial_game" =
   Game.print new_game;

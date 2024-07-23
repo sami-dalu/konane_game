@@ -1,1 +1,1 @@
-lib/game_graphics.pp.mli: Core Game
+lib/game_graphics.pp.mli: Core Game Move
