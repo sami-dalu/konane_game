@@ -91,7 +91,7 @@ let draw_pieces board_map =
 
 ;;
 
-let draw_highlighted_blocks (available_moves_list:Move.Exercises.Move.t list) = 
+let draw_highlighted_blocks (available_moves_list:Move.t list) = 
   let open Constants in
   List.iter available_moves_list ~f:(fun move -> let row = move.starting_pos.row in let col = move.starting_pos.column in
   let col = col * block_size in
@@ -99,7 +99,7 @@ let draw_highlighted_blocks (available_moves_list:Move.Exercises.Move.t list) =
   Graphics.set_color Colors.yellow;
   Graphics.fill_circle (row+(block_size/2)) (col+(block_size/2)) (block_size/4));;
 
-  let undraw_highlighted_blocks (available_moves_list:Move.Exercises.Move.t list) ~init_color = 
+  let undraw_highlighted_blocks (available_moves_list:Move.t list) ~init_color = 
     let open Constants in
     List.iter available_moves_list ~f:(fun move -> let row = move.starting_pos.row in let col = move.starting_pos.column in
     let col = col * block_size in
@@ -107,7 +107,7 @@ let draw_highlighted_blocks (available_moves_list:Move.Exercises.Move.t list) =
     Graphics.set_color init_color;
     Graphics.fill_circle (row+(block_size/2)) (col+(block_size/2)) (block_size/4));;
   
-let highlight_ending_positions (move_list:Move.Exercises.Move.t list) =
+let highlight_ending_positions (move_list:Move.t list) =
   let open Constants in
   List.iter move_list ~f:(fun move -> match move.ending_pos with | Some pos ->let row = pos.row in let col = pos.column in
   let col = col * block_size in
@@ -121,11 +121,11 @@ let highlight_ending_positions (move_list:Move.Exercises.Move.t list) =
     let open Constants in
     let mouse_pos_x, mouse_pos_y = Graphics.mouse_pos () in
 
-    List.filter_map (Move.Exercises.available_captures_for_player game ~my_piece:game.piece_to_move) ~f:(fun move -> let row = move.starting_pos.row in let col = move.starting_pos.column in
+    List.filter_map (Game.available_captures_for_player game ~my_piece:game.piece_to_move) ~f:(fun move -> let row = move.starting_pos.row in let col = move.starting_pos.column in
     let col = col * block_size in
     let row = row * block_size in if (col<=mouse_pos_x && row<=mouse_pos_y && mouse_pos_x<col+block_size && mouse_pos_y<row+block_size) then Some move else None)
 
-    let mouse_in_place_to_move ~mouse_x ~mouse_y (move_list:Move.Exercises.Move.t list) =
+    let mouse_in_place_to_move ~mouse_x ~mouse_y (move_list:Move.t list) =
       let open Constants in
       List.filter_map move_list ~f:(fun move -> match move.ending_pos with | Some pos ->let row = pos.row in let col = pos.column in
       let col = col * block_size in
@@ -152,7 +152,7 @@ let render (game:Game.t)=
   draw_header ~game_state;
   draw_play_area ~board_height ~board_width;
   draw_pieces board;
-  draw_highlighted_blocks (Move.Exercises.available_captures_for_player game ~my_piece:game.piece_to_move);
+  draw_highlighted_blocks (Game.available_captures_for_player game ~my_piece:game.piece_to_move);
   
   Graphics.display_mode true;
   Graphics.synchronize ()

@@ -12,4 +12,4 @@ val init_exn : unit -> Game.t
 val render : Game.t -> unit
 
 (** [read_key] returns a keyboard input, if it's available. *)
-val read_key : Game.t -> Move.Exercises.Move.t option
+val read_key : Game.t -> Move.t option

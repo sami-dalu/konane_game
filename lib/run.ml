@@ -21,8 +21,8 @@ let handle_keys (game : Game.t) ~game_over =
     | None -> ()
     (* | Some 'r' -> Game.restart ~height:600 ~width:675 ~initial_snake_length:2 *)
     | Some move ->
-      let new_game = Move.Exercises.make_move_exn ~game move in
-      Game_graphics.render new_game)
+      Game.make_move_exn ~game move;
+      Game_graphics.render game)
 ;;
 
 (* let handle_steps (game : Game.t) ~game_over =
