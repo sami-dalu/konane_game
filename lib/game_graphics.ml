@@ -5,8 +5,8 @@ module Colors = struct
   let dark_gray = Graphics.rgb 100 100 100
   let white = Graphics.rgb 255 255 255
   let light_gray = Graphics.rgb 200 200 200
-  (* let green = Graphics.rgb 000 255 000 *)
-  let blue = Graphics.rgb 000 000 255
+  let _green = Graphics.rgb 000 255 000
+  let _blue = Graphics.rgb 000 000 255
   (* let red = Graphics.rgb 255 000 000 *)
   let gold = Graphics.rgb 255 223 0
 
@@ -47,8 +47,7 @@ let init_exn () =
 
 (* let draw_board ~color1 ~color2 =
   List.iter  *)
-let draw_block { Position.row; column } ~color ~color2 =
-  ignore color2;
+let draw_block { Position.row; column } ~color  =
   let open Constants in
   let col = column * block_size in
   let row = row * block_size in
@@ -80,13 +79,17 @@ let draw_header ~game_state =
 
 let draw_play_area ~board_height ~board_width =
   let open Constants in
-  Graphics.set_color Colors.blue;
-  Graphics.fill_rect 0 0 (board_width*block_size) (board_height*block_size)
+  Map.iteri (Game.new_game ~height:board_height ~width:board_width).board ~f:(fun ~key:pos ~data:piece -> match piece with 
+  | Piece.X -> Graphics.set_color Colors.light_gray;
+  Graphics.fill_rect (pos.column*block_size) (pos.row*block_size) (block_size) (block_size)
+  | Piece.O -> Graphics.set_color Colors.dark_gray;
+  Graphics.fill_rect (pos.column*block_size) (pos.row*block_size) (block_size) (block_size))
+
 ;;
 
 
 let draw_pieces board_map =
-    Map.iteri board_map ~f:(fun ~key:pos ~data:piece -> match piece with | Piece.X -> draw_block pos ~color:Colors.black ~color2:Colors.light_gray| Piece.O -> draw_block pos ~color:Colors.white ~color2:Colors.dark_gray);
+    Map.iteri board_map ~f:(fun ~key:pos ~data:piece -> match piece with | Piece.X -> draw_block pos ~color:Colors.black| Piece.O -> draw_block pos ~color:Colors.white);
     (* Snake head is a different color *)
 
 ;;
@@ -162,7 +165,8 @@ let read_key game =
   let move_list_to_take = mouse_in_piece_to_move_spot game in
   match game.game_state with | Game.Game_state.First_moves ->
   if Graphics.button_down () && not ((List.length move_list_to_take)=0) then Some (List.hd_exn move_list_to_take) else None
-  | Game.Game_state.Game_continues -> if Graphics.button_down () && not ((List.length move_list_to_take)=0) then (undraw_highlighted_blocks move_list_to_take ~init_color:(match game.piece_to_move with |Piece.X -> Colors.black | Piece.O -> Colors.white);
+  | Game.Game_state.Game_continues -> if Graphics.button_down () && not ((List.length move_list_to_take)=0) then 
+    (undraw_highlighted_blocks move_list_to_take ~init_color:(match game.piece_to_move with |Piece.X -> Colors.black | Piece.O -> Colors.white);
   highlight_ending_positions move_list_to_take;
     let status = Graphics.wait_next_event [Button_down] in
     let mouse_x = status.mouse_x in let mouse_y = status.mouse_y in
