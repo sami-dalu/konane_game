@@ -1,5 +1,5 @@
 open! Core
-open! Async
+
       type t =
         { starting_pos : Position.t
         ; ending_pos : Position.t option

@@ -1,5 +1,5 @@
 open! Core
-open! Async
+
 
     module Game_state = struct
     type t =
@@ -165,7 +165,7 @@ let in_board_range {Position.row = r; column = c} (game : t ) =
           -----------------------------
           O | X | O | X | O | X | O | X
           |}];
-          return ();;
+          ;;
         
           let%expect_test "get_moves_in_initial_game" =
           let new_game = new_game ~height:8 ~width:8 in
@@ -178,7 +178,7 @@ let in_board_range {Position.row = r; column = c} (game : t ) =
            ((starting_pos ((row 4) (column 4))) (ending_pos ()))
            ((starting_pos ((row 3) (column 3))) (ending_pos ())))
           |}];
-          return ();;
+          ;;
 
     let make_move_exn ~game (move : Move.t) = 
       let captured_pos () = 
@@ -252,4 +252,4 @@ let in_board_range {Position.row = r; column = c} (game : t ) =
     -----------------------------
     O | X | O | X | O | X | O | X
     |}];
-    return ();;
+    ;;
