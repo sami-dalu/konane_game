@@ -25,7 +25,7 @@ let handle_keys (game : Game.t) ~game_over =
        ~initial_snake_length:2 *)
     | Some move ->
       Game.make_move_exn ~game move;
-      Game_graphics.render game;
+      (* Game_graphics.render game; *)
       (match move.ending_pos with
        | None -> game.piece_to_move <- Piece.flip game.piece_to_move
        | Some pos ->
@@ -39,8 +39,8 @@ let handle_keys (game : Game.t) ~game_over =
          then (
            game.piece_to_move <- Piece.flip game.piece_to_move;
            game.last_move_from_piece_to_move <- None)
-         else game.last_move_from_piece_to_move <- Some move)
-    (* Game_graphics.render game) *))
+         else game.last_move_from_piece_to_move <- Some move);
+      Game_graphics.render game)
 ;;
 
 (* let handle_steps (game : Game.t) ~game_over = every ~stop:game_over 0.1

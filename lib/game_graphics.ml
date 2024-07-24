@@ -242,7 +242,15 @@ let render (game : Game.t) =
    | None ->
      draw_highlighted_blocks
        (Game.available_captures_for_player game ~my_piece:game.piece_to_move)
-   | Some move -> draw_highlighted_blocks [ move ]);
+   | Some move ->
+     draw_highlighted_blocks
+       (match move.ending_pos with
+        | None -> []
+        | Some pos ->
+          Game.possible_captures_from_occupied_pos_exn
+            ?dir_opt:move.dir
+            game
+            pos));
   Graphics.display_mode true;
   Graphics.synchronize ()
 ;;
