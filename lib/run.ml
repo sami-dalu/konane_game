@@ -30,13 +30,17 @@ let handle_keys (game : Game.t) ~game_over =
        | None -> game.piece_to_move <- Piece.flip game.piece_to_move
        | Some pos ->
          let possible_moves =
-           Game.possible_captures_from_occupied_pos_exn ~direction game pos
+           Game.possible_captures_from_occupied_pos_exn
+             ?dir_opt:move.dir
+             game
+             pos
          in
          if List.length possible_moves = 0
          then (
            game.piece_to_move <- Piece.flip game.piece_to_move;
            game.last_move_from_piece_to_move <- None)
-         else game.last_move_from_piece_to_move <- Some move))
+         else game.last_move_from_piece_to_move <- Some move)
+    (* Game_graphics.render game) *))
 ;;
 
 (* let handle_steps (game : Game.t) ~game_over = every ~stop:game_over 0.1

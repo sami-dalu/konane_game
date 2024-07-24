@@ -162,7 +162,7 @@ let highlight_ending_positions (move_list : Move.t list) =
     | _ -> ())
 ;;
 
-let mouse_in_piece_to_move_spot game =
+let mouse_in_piece_to_move_spot (game : Game.t) =
   let open Constants in
   let mouse_pos_x, mouse_pos_y = Graphics.mouse_pos () in
   match game.last_move_from_piece_to_move with
@@ -180,8 +180,29 @@ let mouse_in_piece_to_move_spot game =
            && mouse_pos_y < row + block_size
         then Some move
         else None)
-  | Some move -> [ move ]
+  | Some move ->
+    (match move.ending_pos with
+     | None -> []
+     | Some pos ->
+       List.filter_map
+         (Game.possible_captures_from_occupied_pos_exn
+            ?dir_opt:move.dir
+            game
+            pos)
+         ~f:(fun move ->
+           let row = move.starting_pos.row in
+           let col = move.starting_pos.column in
+           let col = col * block_size in
+           let row = convert row * block_size in
+           if col <= mouse_pos_x
+              && row <= mouse_pos_y
+              && mouse_pos_x < col + block_size
+              && mouse_pos_y < row + block_size
+           then Some move
+           else None))
 ;;
+
+(* call available moves from move.ending_pos and return the list *)
 
 let mouse_in_place_to_move ~mouse_x ~mouse_y (move_list : Move.t list) =
   let open Constants in
@@ -217,15 +238,18 @@ let render (game : Game.t) =
   draw_header ~game_state;
   draw_play_area ~board_height ~board_width;
   draw_pieces board;
-  match game.last_move_from_piece_to_move with
-  | None ->
-    draw_highlighted_blocks
-      (Game.available_captures_for_player game ~my_piece:game.piece_to_move)
-  | Some move ->
-    draw_highlighted_blocks [ move ];
-    Graphics.display_mode true;
-    Graphics.synchronize ()
+  (match game.last_move_from_piece_to_move with
+   | None ->
+     draw_highlighted_blocks
+       (Game.available_captures_for_player game ~my_piece:game.piece_to_move)
+   | Some move -> draw_highlighted_blocks [ move ]);
+  Graphics.display_mode true;
+  Graphics.synchronize ()
 ;;
+
+(* (match move.ending_pos with | None -> [] | Some pos ->
+   Game.possible_captures_from_occupied_pos_exn ?dir_opt:move.dir game
+   pos) *)
 
 let read_key game =
   let move_list_to_take = mouse_in_piece_to_move_spot game in
