@@ -181,7 +181,7 @@ let possible_captures_from_occupied_pos_exn
             Some
               { Move.starting_pos = pos
               ; ending_pos = Some pos_two_above
-              ; dir = Some Move.Direction.Left
+              ; dir = Some Move.Direction.Up
               }
           else None)
       else None

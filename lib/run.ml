@@ -43,14 +43,16 @@ let handle_keys (game : Game.t) ~game_over =
       Game_graphics.render game)
 ;;
 
-(* let handle_steps (game : Game.t) ~game_over = every ~stop:game_over 0.1
-   ~f:(fun () -> Game.step game; Snake_graphics.render game; match
-   Game.game_state game with | Game_over _ | Win -> game_over := true |
-   In_progress -> ()) *)
+let handle_steps (game : Game.t) ~game_over =
+  every ~stop:game_over 0.1 ~f:(fun () ->
+    check_for_win game;
+    match game.game_state with Game_over _ -> game_over := true | _ -> ())
+;;
+
 let run () =
   let game = Game_graphics.init_exn () in
   Game_graphics.render game;
   let game_over = ref false in
-  handle_keys game ~game_over
+  handle_keys game ~game_over;
+  handle_steps game ~game_over
 ;;
-(* handle_steps game ~game_over *)
