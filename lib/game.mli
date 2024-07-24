@@ -28,3 +28,4 @@ val possible_captures_from_occupied_pos_exn
   -> Move.t list
 
 val available_captures_for_player : t -> my_piece:Piece.t -> Move.t list
+val check_for_win : t -> unit
