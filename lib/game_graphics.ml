@@ -165,19 +165,22 @@ let highlight_ending_positions (move_list : Move.t list) =
 let mouse_in_piece_to_move_spot game =
   let open Constants in
   let mouse_pos_x, mouse_pos_y = Graphics.mouse_pos () in
-  List.filter_map
-    (Game.available_captures_for_player game ~my_piece:game.piece_to_move)
-    ~f:(fun move ->
-      let row = move.starting_pos.row in
-      let col = move.starting_pos.column in
-      let col = col * block_size in
-      let row = convert row * block_size in
-      if col <= mouse_pos_x
-         && row <= mouse_pos_y
-         && mouse_pos_x < col + block_size
-         && mouse_pos_y < row + block_size
-      then Some move
-      else None)
+  match game.last_move_from_piece_to_move with
+  | None ->
+    List.filter_map
+      (Game.available_captures_for_player game ~my_piece:game.piece_to_move)
+      ~f:(fun move ->
+        let row = move.starting_pos.row in
+        let col = move.starting_pos.column in
+        let col = col * block_size in
+        let row = convert row * block_size in
+        if col <= mouse_pos_x
+           && row <= mouse_pos_y
+           && mouse_pos_x < col + block_size
+           && mouse_pos_y < row + block_size
+        then Some move
+        else None)
+  | Some move -> [ move ]
 ;;
 
 let mouse_in_place_to_move ~mouse_x ~mouse_y (move_list : Move.t list) =
@@ -214,10 +217,14 @@ let render (game : Game.t) =
   draw_header ~game_state;
   draw_play_area ~board_height ~board_width;
   draw_pieces board;
-  draw_highlighted_blocks
-    (Game.available_captures_for_player game ~my_piece:game.piece_to_move);
-  Graphics.display_mode true;
-  Graphics.synchronize ()
+  match game.last_move_from_piece_to_move with
+  | None ->
+    draw_highlighted_blocks
+      (Game.available_captures_for_player game ~my_piece:game.piece_to_move)
+  | Some move ->
+    draw_highlighted_blocks [ move ];
+    Graphics.display_mode true;
+    Graphics.synchronize ()
 ;;
 
 let read_key game =
