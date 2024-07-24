@@ -18,13 +18,23 @@ let every seconds ~f ~stop =
 
 let handle_keys (game : Game.t) ~game_over =
   every ~stop:game_over 0.001 ~f:(fun () ->
+    Game_graphics.render game;
     match Game_graphics.read_key game with
     | None -> ()
     (* | Some 'r' -> Game.restart ~height:600 ~width:675
        ~initial_snake_length:2 *)
     | Some move ->
       Game.make_move_exn ~game move;
-      Game_graphics.render game)
+      Game_graphics.render game;
+      (match move.ending_pos with
+       | None -> game.piece_to_move <- Piece.flip game.piece_to_move
+       | Some pos ->
+         let possible_moves =
+           Game.possible_captures_from_occupied_pos_exn game pos
+         in
+         if List.length possible_moves = 0
+         then game.piece_to_move <- Piece.flip game.piece_to_move
+         else ()))
 ;;
 
 (* let handle_steps (game : Game.t) ~game_over = every ~stop:game_over 0.1

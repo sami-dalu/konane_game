@@ -8,6 +8,8 @@ module Game_state = struct
   (* [@@deriving sexp, equal] *)
 end
 
+(* module Direction = struct type t = | Up | Down | Left | Right end *)
+
 type t =
   { board_height : int
   ; board_width : int
@@ -332,7 +334,7 @@ let make_move_exn ~game (move : Move.t) =
   in
   game.board <- new_board;
   game.game_state <- new_game_state;
-  game.piece_to_move <- Piece.flip game.piece_to_move;
+  (* game.piece_to_move <- Piece.flip game.piece_to_move; *)
   print game
 ;;
 
