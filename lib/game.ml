@@ -181,7 +181,7 @@ let possible_captures_from_occupied_pos_exn
             Some
               { Move.starting_pos = pos
               ; ending_pos = Some pos_two_above
-              ; dir = Some Move.Direction.Left
+              ; dir = Some Move.Direction.Up
               }
           else None)
       else None
@@ -367,10 +367,12 @@ let make_move_exn ~game (move : Move.t) =
   print game
 ;;
 
-let _evaluate_game game =
+let check_for_win game =
   match available_captures_for_player game ~my_piece:game.piece_to_move with
-  | [] -> Game_state.Game_over { winner = Piece.flip game.piece_to_move }
-  | _ -> game.game_state
+  | [] ->
+    game.game_state
+    <- Game_state.Game_over { winner = Piece.flip game.piece_to_move }
+  | _ -> ()
 ;;
 
 let%expect_test "black_remove_top_left" =
