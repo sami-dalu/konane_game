@@ -162,6 +162,19 @@ let highlight_ending_positions (move_list : Move.t list) =
     | _ -> ())
 ;;
 
+let display_win_message winner =
+  let open Constants in
+  Graphics.set_color Colors.yellow;
+  Graphics.fill_rect
+    ((play_area_width / 2) - 60)
+    ((play_area_height / 2) - 30)
+    120
+    60;
+  Graphics.moveto (play_area_width / 2) (play_area_height / 2);
+  Graphics.set_color Colors._green;
+  Graphics.draw_string (Piece.to_string winner ^ "WINS")
+;;
+
 let mouse_in_piece_to_move_spot (game : Game.t) =
   let open Constants in
   let mouse_pos_x, mouse_pos_y = Graphics.mouse_pos () in

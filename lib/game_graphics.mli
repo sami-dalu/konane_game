@@ -13,3 +13,5 @@ val render : Game.t -> unit
 
 (** [read_key] returns a keyboard input, if it's available. *)
 val read_key : Game.t -> Move.t option
+
+val display_win_message : Piece.t -> unit

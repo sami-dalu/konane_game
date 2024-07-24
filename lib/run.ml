@@ -46,7 +46,12 @@ let handle_keys (game : Game.t) ~game_over =
 let handle_steps (game : Game.t) ~game_over =
   every ~stop:game_over 0.1 ~f:(fun () ->
     Game.check_for_win game;
-    match game.game_state with Game_over _ -> game_over := true | _ -> ())
+    match game.game_state with
+    | Game_over { winner } ->
+      game_over := true;
+      print_endline (Piece.to_string winner ^ " WINSSSSSS!!!!!");
+      Game_graphics.display_win_message winner
+    | _ -> ())
 ;;
 
 let run () =
