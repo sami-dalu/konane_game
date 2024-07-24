@@ -75,7 +75,11 @@ let print t =
     then print_endline "-----------------------------")
 ;;
 
-let possible_captures_from_occupied_pos_exn (game : t) (pos : Position.t) =
+let possible_captures_from_occupied_pos_exn
+  ?(dir_opt : Move.Direction.t option)
+  (game : t)
+  (pos : Position.t)
+  =
   let my_piece = Map.find_exn game.board pos in
   let opp_piece = Piece.flip my_piece in
   let above_my = { Position.row = pos.row - 1; column = pos.column } in
@@ -183,7 +187,14 @@ let possible_captures_from_occupied_pos_exn (game : t) (pos : Position.t) =
       else None
   in
   let potential_moves =
-    [ capture_above; capture_below; capture_left; capture_right ]
+    if Option.is_none dir_opt
+    then [ capture_above; capture_below; capture_left; capture_right ]
+    else (
+      match Option.value_exn dir_opt with
+      | Move.Direction.Up -> [ capture_above ]
+      | Down -> [ capture_below ]
+      | Left -> [ capture_left ]
+      | Right -> [ capture_right ])
   in
   let move_opts =
     List.filter potential_moves ~f:(fun potential_move ->
