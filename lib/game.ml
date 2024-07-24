@@ -16,6 +16,7 @@ type t =
   ; mutable board : Piece.t Position.Map.t
   ; mutable game_state : Game_state.t
   ; mutable piece_to_move : Piece.t
+  ; mutable last_move_from_piece_to_move : Move.t option
   }
 
 let new_board ~height ~width : Piece.t Position.Map.t =
@@ -48,6 +49,7 @@ let new_game ~height ~width =
   ; board = new_board ~height ~width
   ; game_state = Game_state.First_moves
   ; piece_to_move = Piece.X
+  ; last_move_from_piece_to_move = None
   }
 ;;
 
@@ -97,7 +99,11 @@ let possible_captures_from_occupied_pos_exn (game : t) (pos : Position.t) =
         | None ->
           if in_board_range pos_two_below game
           then
-            Some { Move.starting_pos = pos; ending_pos = Some pos_two_below }
+            Some
+              { Move.starting_pos = pos
+              ; ending_pos = Some pos_two_below
+              ; dir = Some Move.Direction.Down
+              }
           else None)
       else None
   in
@@ -118,7 +124,11 @@ let possible_captures_from_occupied_pos_exn (game : t) (pos : Position.t) =
         | None ->
           if in_board_range pos_two_right game
           then
-            Some { Move.starting_pos = pos; ending_pos = Some pos_two_right }
+            Some
+              { Move.starting_pos = pos
+              ; ending_pos = Some pos_two_right
+              ; dir = Some Move.Direction.Right
+              }
           else None)
       else None
   in
@@ -139,7 +149,11 @@ let possible_captures_from_occupied_pos_exn (game : t) (pos : Position.t) =
         | None ->
           if in_board_range pos_two_left game
           then
-            Some { Move.starting_pos = pos; ending_pos = Some pos_two_left }
+            Some
+              { Move.starting_pos = pos
+              ; ending_pos = Some pos_two_left
+              ; dir = Some Move.Direction.Left
+              }
           else None)
       else None
   in
@@ -160,7 +174,11 @@ let possible_captures_from_occupied_pos_exn (game : t) (pos : Position.t) =
         | None ->
           if in_board_range pos_two_above game
           then
-            Some { Move.starting_pos = pos; ending_pos = Some pos_two_above }
+            Some
+              { Move.starting_pos = pos
+              ; ending_pos = Some pos_two_above
+              ; dir = Some Move.Direction.Left
+              }
           else None)
       else None
   in
@@ -204,7 +222,7 @@ let available_captures_for_player (game : t) ~(my_piece : Piece.t)
     if Piece.equal my_piece Piece.X
     then
       List.map first_positions_for_black ~f:(fun pos ->
-        { Move.starting_pos = pos; Move.ending_pos = None })
+        { Move.starting_pos = pos; Move.ending_pos = None; dir = None })
       (* ending move is None because you're not moving a piece from a
          starting pos to an ending pos *)
     else (
@@ -239,7 +257,7 @@ let available_captures_for_player (game : t) ~(my_piece : Piece.t)
           in_board_range pos game)
       in
       List.map adjacent_positions_on_board ~f:(fun valid_pos ->
-        { Move.starting_pos = valid_pos; ending_pos = None }))
+        { Move.starting_pos = valid_pos; ending_pos = None; dir = None }))
   | _ ->
     List.fold (Map.keys game.board) ~init:[] ~f:(fun captures_so_far pos ->
       let piece_at_pos = Map.find_exn game.board pos in
@@ -351,6 +369,7 @@ let%expect_test "black_remove_top_left" =
       ~game:initial_game
       { Move.starting_pos = { Position.row = 0; column = 0 }
       ; Move.ending_pos = None
+      ; dir = None
       }
   in
   print initial_game;
