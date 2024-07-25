@@ -23,7 +23,7 @@ let handle_keys (game : Game.t) ~game_over =
     | None -> ()
     (* | Some 'r' -> Game.restart ~height:600 ~width:675
        ~initial_snake_length:2 *)
-    | Some move ->
+    | Move move ->
       Game.make_move_exn ~game move;
       (* Game_graphics.render game; *)
       (match move.ending_pos with
@@ -39,8 +39,12 @@ let handle_keys (game : Game.t) ~game_over =
          then (
            game.piece_to_move <- Piece.flip game.piece_to_move;
            game.last_move_from_piece_to_move <- None)
-         else game.last_move_from_piece_to_move <- Some move);
-      Game_graphics.render game)
+         else game.last_move_from_piece_to_move <- Some move)
+      (* Game_graphics.render game *)
+    | Restart -> Game.restart game
+    | End_turn ->
+      game.piece_to_move <- Piece.flip game.piece_to_move;
+      game.last_move_from_piece_to_move <- None)
 ;;
 
 let handle_steps (game : Game.t) ~game_over =
@@ -53,6 +57,11 @@ let handle_steps (game : Game.t) ~game_over =
     | _ -> ())
 ;;
 
+(* let handle_restart (game : Game.t) ~game_over = every ~stop:(ref (not
+   !game_over)) 0.01 ~f:(fun () -> match Game_graphics.read_key game with |
+   Restart -> Game.restart game; game_over := false; print_endline "test" | _
+   -> ()) ;; *)
+
 let run () =
   let game = Game_graphics.init_exn () in
   Game_graphics.render game;
@@ -60,3 +69,4 @@ let run () =
   handle_keys game ~game_over;
   handle_steps game ~game_over
 ;;
+(* handle_restart game ~game_over *)

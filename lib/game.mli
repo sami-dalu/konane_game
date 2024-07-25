@@ -20,6 +20,7 @@ val make_move_exn : game:t -> Move.t -> unit
 val new_board : height:int -> width:int -> Piece.t Position.Map.t
 val new_game : height:int -> width:int -> t
 val print : t -> unit
+val restart : t -> unit
 
 val possible_captures_from_occupied_pos_exn
   :  ?dir_opt:Move.Direction.t

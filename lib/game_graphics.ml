@@ -7,8 +7,7 @@ module Colors = struct
   let light_gray = Graphics.rgb 200 200 200
   let _green = Graphics.rgb 000 255 000
   let _blue = Graphics.rgb 000 000 255
-
-  (* let red = Graphics.rgb 255 000 000 *)
+  let red = Graphics.rgb 255 000 000
   let gold = Graphics.rgb 255 223 0
   let yellow = Graphics.rgb 255 248 150
   let game_in_progress = Graphics.rgb 100 100 200
@@ -170,6 +169,12 @@ let display_win_message winner =
     (play_area_height / 2)
     (block_size * 2)
     block_size;
+  Graphics.set_color Colors.gold;
+  Graphics.fill_ellipse
+    (play_area_width / 2)
+    (play_area_height / 2)
+    (block_size * 2)
+    block_size;
   Graphics.moveto
     ((play_area_width / 2) - (2 * 16))
     ((play_area_height / 2) - 8);
@@ -239,6 +244,36 @@ let mouse_in_place_to_move ~mouse_x ~mouse_y (move_list : Move.t list) =
     | _ -> None)
 ;;
 
+let draw_end_turn_button () =
+  let open Constants in
+  Graphics.set_color Colors._green;
+  Graphics.fill_rect play_area_width 0 block_size (block_size / 2);
+  Graphics.set_color Colors.black;
+  Graphics.moveto (play_area_width + (block_size / 4)) (block_size / 8);
+  Graphics.draw_string "END TURN"
+;;
+
+let undraw_end_turn_button (game : Game.t) =
+  let open Constants in
+  Graphics.set_color Colors.white;
+  Graphics.fill_rect play_area_width 0 block_size (block_size / 2);
+  Graphics.set_color Colors.red;
+  Graphics.moveto (play_area_width + (block_size / 8)) (block_size / 8);
+  Graphics.draw_string
+    (match game.piece_to_move with
+     | Piece.X -> "Black Move"
+     | Piece.O -> "White Move")
+;;
+
+let mouse_in_end_move_button () =
+  let open Constants in
+  let mouse_x, mouse_y = Graphics.mouse_pos () in
+  mouse_x > play_area_width
+  && mouse_x < play_area_width + block_size
+  && mouse_y < block_size / 2
+  && mouse_y > 0
+;;
+
 let render (game : Game.t) =
   (* We want double-buffering. See
      https://v2.ocaml.org/releases/4.03/htmlman/libref/Graphics.html for more
@@ -263,8 +298,10 @@ let render (game : Game.t) =
         draw_highlighted_blocks
           (Game.available_captures_for_player
              game
-             ~my_piece:game.piece_to_move)
+             ~my_piece:game.piece_to_move);
+        undraw_end_turn_button game
       | Some move ->
+        draw_end_turn_button ();
         draw_highlighted_blocks
           (match move.ending_pos with
            | None -> []
@@ -281,29 +318,48 @@ let render (game : Game.t) =
    Game.possible_captures_from_occupied_pos_exn ?dir_opt:move.dir game
    pos) *)
 
-let read_key game =
+module Action = struct
+  type t =
+    | Move of Move.t
+    | Restart
+    | End_turn
+    | None
+end
+
+let read_key (game : Game.t) : Action.t =
   let move_list_to_take = mouse_in_piece_to_move_spot game in
-  if Graphics.button_down () && not (List.length move_list_to_take = 0)
-  then (
-    match game.game_state with
-    | Game.Game_state.First_moves -> Some (List.hd_exn move_list_to_take)
-    | Game.Game_state.Game_continues ->
-      undraw_highlighted_blocks
-        move_list_to_take
-        ~init_color:
-          (match game.piece_to_move with
-           | Piece.X -> Colors.black
-           | Piece.O -> Colors.white);
-      highlight_ending_positions move_list_to_take;
-      let status = Graphics.wait_next_event [ Button_down ] in
-      let mouse_x = status.mouse_x in
-      let mouse_y = status.mouse_y in
-      let move_to =
-        mouse_in_place_to_move ~mouse_x ~mouse_y move_list_to_take
-      in
-      if not (List.length move_to = 0)
-      then Some (List.hd_exn move_to)
-      else None
-    | _ -> None)
+  if Graphics.button_down ()
+  then
+    if not (List.length move_list_to_take = 0)
+    then (
+      match game.game_state with
+      | Game.Game_state.First_moves -> Move (List.hd_exn move_list_to_take)
+      | Game.Game_state.Game_continues ->
+        undraw_highlighted_blocks
+          move_list_to_take
+          ~init_color:
+            (match game.piece_to_move with
+             | Piece.X -> Colors.black
+             | Piece.O -> Colors.white);
+        highlight_ending_positions move_list_to_take;
+        let status = Graphics.wait_next_event [ Button_down ] in
+        let mouse_x = status.mouse_x in
+        let mouse_y = status.mouse_y in
+        let move_to =
+          mouse_in_place_to_move ~mouse_x ~mouse_y move_list_to_take
+        in
+        if not (List.length move_to = 0)
+        then Move (List.hd_exn move_to)
+        else None
+      | _ ->
+        None
+        (* else if Graphics.key_pressed () then if Char.equal
+           (Graphics.read_key ()) 'r' then Restart else None *))
+    else if mouse_in_end_move_button ()
+    then (
+      match game.last_move_from_piece_to_move with
+      | None -> None
+      | Some _ -> End_turn)
+    else None
   else None
 ;;

@@ -5,6 +5,14 @@ open! Core
     and once you have the game, feel free to alter this file to make things
     fancier! *)
 
+module Action : sig
+  type t =
+    | Move of Move.t
+    | Restart
+    | End_turn
+    | None
+end
+
 (** [init_exn] fails if called twice. *)
 val init_exn : unit -> Game.t
 
@@ -12,6 +20,6 @@ val init_exn : unit -> Game.t
 val render : Game.t -> unit
 
 (** [read_key] returns a keyboard input, if it's available. *)
-val read_key : Game.t -> Move.t option
+val read_key : Game.t -> Action.t
 
 val display_win_message : Piece.t -> unit
