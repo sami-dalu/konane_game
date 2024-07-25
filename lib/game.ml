@@ -5,7 +5,7 @@ module Game_state = struct
     | First_moves
     | Game_continues
     | Game_over of { winner : Piece.t }
-  (* [@@deriving sexp, equal] *)
+  [@@deriving sexp, equal, bin_io]
 end
 
 (* module Direction = struct type t = | Up | Down | Left | Right end *)
@@ -18,6 +18,7 @@ type t =
   ; mutable piece_to_move : Piece.t
   ; mutable last_move_from_piece_to_move : Move.t option
   }
+[@@deriving sexp, bin_io]
 
 let new_board ~height ~width : Piece.t Position.Map.t =
   let board = Position.Map.empty in
