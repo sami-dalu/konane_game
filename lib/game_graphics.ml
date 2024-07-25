@@ -165,14 +165,18 @@ let highlight_ending_positions (move_list : Move.t list) =
 let display_win_message winner =
   let open Constants in
   Graphics.set_color Colors.yellow;
-  Graphics.fill_rect
-    ((play_area_width / 2) - 60)
-    ((play_area_height / 2) - 30)
-    120
-    60;
-  Graphics.moveto (play_area_width / 2) (play_area_height / 2);
-  Graphics.set_color Colors._green;
-  Graphics.draw_string (Piece.to_string winner ^ "WINS")
+  Graphics.fill_ellipse
+    (play_area_width / 2)
+    (play_area_height / 2)
+    (block_size * 2)
+    block_size;
+  Graphics.moveto
+    ((play_area_width / 2) - (2 * 16))
+    ((play_area_height / 2) - 8);
+  Graphics.set_color Colors.black;
+  Graphics.set_text_size 36;
+  Graphics.draw_string
+    (match winner with Piece.X -> "BLACK WINS!" | Piece.O -> "WHITE WINS!")
 ;;
 
 let mouse_in_piece_to_move_spot (game : Game.t) =
@@ -251,19 +255,24 @@ let render (game : Game.t) =
   draw_header ~game_state;
   draw_play_area ~board_height ~board_width;
   draw_pieces board;
-  (match game.last_move_from_piece_to_move with
-   | None ->
-     draw_highlighted_blocks
-       (Game.available_captures_for_player game ~my_piece:game.piece_to_move)
-   | Some move ->
-     draw_highlighted_blocks
-       (match move.ending_pos with
-        | None -> []
-        | Some pos ->
-          Game.possible_captures_from_occupied_pos_exn
-            ?dir_opt:move.dir
-            game
-            pos));
+  (match game.game_state with
+   | Game_over { winner } -> display_win_message winner
+   | _ ->
+     (match game.last_move_from_piece_to_move with
+      | None ->
+        draw_highlighted_blocks
+          (Game.available_captures_for_player
+             game
+             ~my_piece:game.piece_to_move)
+      | Some move ->
+        draw_highlighted_blocks
+          (match move.ending_pos with
+           | None -> []
+           | Some pos ->
+             Game.possible_captures_from_occupied_pos_exn
+               ?dir_opt:move.dir
+               game
+               pos)));
   Graphics.display_mode true;
   Graphics.synchronize ()
 ;;

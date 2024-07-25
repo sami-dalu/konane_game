@@ -49,8 +49,7 @@ let handle_steps (game : Game.t) ~game_over =
     match game.game_state with
     | Game_over { winner } ->
       game_over := true;
-      print_endline (Piece.to_string winner ^ " WINSSSSSS!!!!!");
-      Game_graphics.display_win_message winner
+      print_endline (Piece.to_string winner ^ " WINSSSSSS!!!!!")
     | _ -> ())
 ;;
 

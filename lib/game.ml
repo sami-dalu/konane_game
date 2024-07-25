@@ -53,6 +53,13 @@ let new_game ~height ~width =
   }
 ;;
 
+let restart game =
+  game.board <- new_board ~height:game.board_height ~width:game.board_width;
+  game.game_state <- Game_state.First_moves;
+  game.last_move_from_piece_to_move <- None;
+  game.piece_to_move <- Piece.X
+;;
+
 let print t =
   let height = t.board_height in
   let width = t.board_width in
