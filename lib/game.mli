@@ -15,6 +15,7 @@ type t =
   ; mutable piece_to_move : Piece.t
   ; mutable last_move_from_piece_to_move : Move.t option
   }
+[@@deriving sexp, bin_io]
 
 val make_move_exn : game:t -> Move.t -> unit
 val new_board : height:int -> width:int -> Piece.t Position.Map.t

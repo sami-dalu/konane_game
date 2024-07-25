@@ -1,6 +1,6 @@
 (executable
  (public_name demo1)
  (name main)
- (libraries demo1 core async)
+ (libraries demo1 core async fzf core_unix.command_unix)
  (preprocess
   (pps ppx_jane)))
