@@ -383,6 +383,12 @@ let check_for_win game =
   | _ -> ()
 ;;
 
+let evaluate t =
+  match available_captures_for_player t ~my_piece:t.piece_to_move with
+  | [] -> Game_state.Game_over { winner = Piece.flip t.piece_to_move }
+  | _ -> Game_state.Game_continues
+;;
+
 let%expect_test "black_remove_top_left" =
   let initial_game = new_game ~height:8 ~width:8 in
   let _ =

@@ -11,6 +11,9 @@ module Colors = struct
   let gold = Graphics.rgb 255 223 0
   let yellow = Graphics.rgb 255 248 150
   let game_in_progress = Graphics.rgb 100 100 200
+  let _brown = Graphics.rgb 212 134 0
+  let _light_blue = Graphics.rgb 88 182 237
+  let _darker_green = Graphics.rgb 53 166 53
 end
 
 module Constants = struct
@@ -120,7 +123,7 @@ let draw_highlighted_blocks (available_moves_list : Move.t list) =
     let col = move.starting_pos.column in
     let col = col * block_size in
     let row = convert row * block_size in
-    Graphics.set_color Colors.yellow;
+    Graphics.set_color Colors._light_blue;
     Graphics.fill_circle
       (col + (block_size / 2))
       (row + (block_size / 2))
