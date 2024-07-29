@@ -20,8 +20,52 @@ open! Async
 (* function which tries to start a test game *)
 (* let start_test_impl _client (query : Rpcs.Start_game.Query.t) = let ;; *)
 
-let handle_test_query _client (query : Rpcs.Test.Query.t)
-  : Rpcs.Test.Response.t Deferred.t
+module Player = struct
+  type t =
+    { name : string
+    ; piece : Piece.t
+    }
+end
+
+type t =
+  { player_queue : Player.t Queue.t
+  ; game_player_piece_tbl : (Player.t, Game.t) Hashtbl.t
+  }
+
+(* let _handle_test_query _client (query : Rpcs.Test.Query.t) :
+   Rpcs.Test.Response.t Deferred.t = return (query + 1) ;; *)
+
+let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
+  : Rpcs.Start_game.Response.t Deferred.t
   =
-  return (query + 1)
+  if Queue.is_empty server.player_queue
+  then (
+    let _ =
+      Queue.enqueue
+        server.player_queue
+        { Player.name = query.name; piece = Piece.X }
+    in
+    return Rpcs.Start_game.Response.Game_not_started)
+  else (
+    (* there's someone in the queue already *)
+    let existing_player = Queue.peek_exn server.player_queue in
+    if Hashtbl.existsi server.game_player_piece_tbl ~f:(fun ~key ~data ->
+         ignore data;
+         String.equal key.name existing_player.name)
+    then return Rpcs.Start_game.Response.Game_not_started
+    else (
+      let g = Game.new_game ~height:8 ~width:8 in
+      let _ =
+        Hashtbl.add_exn
+          server.game_player_piece_tbl
+          ~key:existing_player
+          ~data:g
+      in
+      let _ =
+        Hashtbl.add_exn
+          server.game_player_piece_tbl
+          ~key:{ Player.name = query.name; piece = Piece.O }
+          ~data:g
+      in
+      return Rpcs.Start_game.Response.Game_started))
 ;;

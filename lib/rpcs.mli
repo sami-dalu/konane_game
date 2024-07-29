@@ -7,17 +7,11 @@ open! Async
    module Response : sig type t = | Game_started | Game_not_started
    [@@deriving sexp_of, bin_io] end end *)
 
-module Test : sig
-  module Query : sig
-    type t = int
-  end
+(* module Test : sig module Query : sig type t = int end
 
-  module Response : sig
-    type t = int
-  end
+   module Response : sig type t = int end
 
-  val rpc : (Query.t, Response.t) Rpc.Rpc.t
-end
+   val rpc : (Query.t, Response.t) Rpc.Rpc.t end *)
 
 module Start_game : sig
   module Query : sig
@@ -40,19 +34,11 @@ end
 
 module Take_turn : sig
   module Query : sig
-    type t =
-      { game : Game.t
-      ; you_play : Piece.t
-      }
-    [@@deriving sexp_of, bin_io]
+    type t = { move : Move.t } [@@deriving sexp_of, bin_io]
   end
 
   module Response : sig
-    type t =
-      { piece : Piece.t
-      ; move : Move.t
-      }
-    [@@deriving sexp_of, bin_io]
+    type t = { game : Game.t } [@@deriving sexp_of, bin_io]
   end
 
   val rpc : (Query.t, Response.t) Rpc.Rpc.t

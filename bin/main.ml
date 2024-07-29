@@ -6,11 +6,13 @@ open! Async
 
    let () = Game.print Exercises.new_game *)
 
-let implementations =
+let implementations_w_server server =
   Rpc.Implementations.create_exn
     ~on_unknown_rpc:`Close_connection
     ~implementations:
-      [ Rpc.Rpc.implement Demo1.Rpcs.Test.rpc Demo1.Server.handle_test_query
+      [ Rpc.Rpc.implement
+          Demo1.Rpcs.Start_game.rpc
+          (Demo1.Server.handle_start_query server)
       ]
 ;;
 
@@ -21,9 +23,14 @@ let start_server =
      and port = flag "-port" (required int) ~doc:"INT server port" in
      fun () ->
        let _ = print_int port in
+       let s =
+         { Demo1.Server.player_queue = Queue.create ()
+         ; game_player_piece_tbl = Demo1.Player.Table.create ()
+         }
+       in
        let%bind server =
          Rpc.Connection.serve
-           ~implementations
+           ~implementations:()
            ~initial_connection_state:(fun _client_identity _client_addr ->
              ())
            ~where_to_listen:(Tcp.Where_to_listen.of_port port)
