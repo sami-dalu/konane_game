@@ -78,9 +78,9 @@ let print t =
       String.concat ~sep:" | " row_list)
   in
   List.iteri rows_as_strings ~f:(fun row_num row ->
-    print_endline row;
+    Core.print_endline row;
     if row_num < height - 1
-    then print_endline "-----------------------------")
+    then Core.print_endline "-----------------------------")
 ;;
 
 let possible_captures_from_occupied_pos_exn
