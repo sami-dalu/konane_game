@@ -5,6 +5,7 @@ module Game_state : sig
     | First_moves
     | Game_continues
     | Game_over of { winner : Piece.t }
+  [@@deriving sexp, equal, bin_io]
 end
 
 type t =

@@ -6,26 +6,72 @@ open! Async
 
    let () = Game.print Exercises.new_game *)
 
-let command =
-  Command.async
-    ~summary:"start menu"
-    (Core.print_endline "Welcome to Joenane!";
-     let results =
-       Fzf.Blocking.pick_one
-         ~prompt_at_top:()
-         (Pick_from.inputs [ "Player v. Player" ])
-     in
-     print_s [%message (results : string option)];
-     Demo1.Run.run ();
-     Core.never_returns (Async.Scheduler.go ()))
+let implementations =
+  Rpc.Implementations.create_exn
+    ~on_unknown_rpc:`Close_connection
+    ~implementations:
+      [ Rpc.Rpc.implement Demo1.Rpcs.Test.rpc Demo1.Server.handle_test_query
+      ]
 ;;
+
+let start_server =
+  Command.async
+    ~summary:"Server start"
+    (let%map_open.Command () = return ()
+     and port = flag "-port" (required int) ~doc:"INT server port" in
+     fun () ->
+       let _ = print_int port in
+       let%bind server =
+         Rpc.Connection.serve
+           ~implementations
+           ~initial_connection_state:(fun _client_identity _client_addr ->
+             ())
+           ~where_to_listen:(Tcp.Where_to_listen.of_port port)
+           ()
+       in
+       Tcp.Server.close_finished server)
+;;
+
+let start_game =
+  Command.async
+    ~summary:"connect to server and begin game"
+    (let%map_open.Command () = return ()
+     and port = flag "-port" (required int) ~doc:"INT server port"
+     and num = flag "-num" (required int) ~doc:"num to inc" in
+     fun () ->
+       let%bind start_game_response =
+         Rpc.Connection.with_client
+           (Tcp.Where_to_connect.of_host_and_port
+              { Host_and_port.port; Host_and_port.host = "localhost" })
+           (fun conn -> Rpc.Rpc.dispatch_exn Demo1.Rpcs.Test.rpc conn num)
+       in
+       (match start_game_response with
+        | Error _ -> print_string "error lol"
+        | Ok n ->
+          print_int n;
+          print_string "\n");
+       return ())
+;;
+
+let command =
+  Command.group
+    ~summary:"Game Strategies"
+    [ "start-server", start_server; "start-game", start_game ]
+;;
+
+(* Menu stuff lol *)
+(* Command.async ~summary:"start menu" (Core.print_endline "Welcome to
+   Jonane!"; let results = Fzf.Blocking.pick_one ~prompt_at_top:()
+   (Pick_from.inputs [ "Player v. Player" ]) in print_s [%message (results :
+   string option)]; Demo1.Run.run (); Core.never_returns (Async.Scheduler.go
+   ())) *)
 
 let () =
   (* let results = Fzf.Blocking.pick_one (Pick_from.inputs [ "a"; "b"; "c" ])
      in print_s [%message (results : string option)]; let initial_game =
      Demo1.Game.new_game ~height:8 ~width:8 in *)
   (* Demo1.Game.print initial_game; *)
-  print_string "hello\n";
+  print_string "hello, about to run command\n";
   (* Demo1.Game.make_move_exn ~game:(initial_game) {Demo1.Move.starting_pos =
      {Demo1.Position.row = 0; column = 0}; Demo1.Move.ending_pos = None};
      Demo1.Game.make_move_exn ~game:(initial_game) {Demo1.Move.starting_pos =
