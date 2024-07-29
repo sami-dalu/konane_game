@@ -86,8 +86,8 @@ let score game ~me ~depth maximizing_player ~evaluated_game =
   match evaluated_game with
   | Game.Game_state.Game_over { winner } ->
     if Piece.equal me winner
-    then Int.max_value - 3 + depth
-    else Int.min_value + 3 - depth
+    then Int.max_value - 6 + depth
+    else Int.min_value + 6 - depth
   | _ ->
     let available_moves_at_current_state =
       Game.available_captures_for_player game ~my_piece:game.piece_to_move
@@ -96,11 +96,11 @@ let score game ~me ~depth maximizing_player ~evaluated_game =
       List.length available_moves_at_current_state
     in
     if maximizing_player
-    then Int.max_value - 20 + number_of_available_moves
-    else Int.min_value + 20 - number_of_available_moves
+    then Int.max_value - 20 + number_of_available_moves - 6 + depth
+    else Int.min_value + 20 - number_of_available_moves + 6 - depth
 ;;
 
-let rec minimax game ~me ?(depth = 3) maximizing_player =
+let rec minimax game ~me ~depth maximizing_player =
   let evaluated_game = Game.evaluate game in
   match depth = 0, evaluated_game with
   | true, _ | _, Game.Game_state.Game_over { winner = _ } ->
@@ -132,7 +132,7 @@ let rec minimax game ~me ?(depth = 3) maximizing_player =
           if acc < child_minimax then acc else child_minimax))
 ;;
 
-let use_minimax_to_find_best_move game ~me =
+let use_minimax_to_find_best_move game ~depth ~me =
   let possible_moves =
     Game.available_captures_for_player game ~my_piece:me
   in
@@ -153,7 +153,7 @@ let use_minimax_to_find_best_move game ~me =
           }
         , Int.min_value )
       ~f:(fun (current_best_move, current_highest_heuristic) (move, state) ->
-        let heuristic_calculated = minimax state ~me false in
+        let heuristic_calculated = minimax state ~me ~depth false in
         if heuristic_calculated > current_highest_heuristic
         then move, heuristic_calculated
         else current_best_move, current_highest_heuristic)
@@ -164,7 +164,8 @@ let use_minimax_to_find_best_move game ~me =
 let%expect_test "print_initial_game" =
   let new_game = Game.new_game ~height:8 ~width:8 in
   print_s
-    (Move.sexp_of_t (use_minimax_to_find_best_move new_game ~me:Piece.X));
+    (Move.sexp_of_t
+       (use_minimax_to_find_best_move ~depth:6 ~me:Piece.X new_game));
   [%expect {|
           lol
           |}]
