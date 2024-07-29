@@ -78,9 +78,9 @@ let print t =
       String.concat ~sep:" | " row_list)
   in
   List.iteri rows_as_strings ~f:(fun row_num row ->
-    print_endline row;
+    Core.print_endline row;
     if row_num < height - 1
-    then print_endline "-----------------------------")
+    then Core.print_endline "-----------------------------")
 ;;
 
 let possible_captures_from_occupied_pos_exn
@@ -381,6 +381,12 @@ let check_for_win game =
     game.game_state
     <- Game_state.Game_over { winner = Piece.flip game.piece_to_move }
   | _ -> ()
+;;
+
+let evaluate t =
+  match available_captures_for_player t ~my_piece:t.piece_to_move with
+  | [] -> Game_state.Game_over { winner = Piece.flip t.piece_to_move }
+  | _ -> Game_state.Game_continues
 ;;
 
 let%expect_test "black_remove_top_left" =
