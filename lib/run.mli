@@ -1,3 +1,3 @@
 open! Core
 
-val run : unit -> unit
+val run : string -> int -> unit

@@ -37,19 +37,27 @@ let start_game =
     ~summary:"connect to server and begin game"
     (let%map_open.Command () = return ()
      and port = flag "-port" (required int) ~doc:"INT server port"
-     and num = flag "-num" (required int) ~doc:"num to inc" in
+     and name = flag "-name" (required string) ~doc:"name of player" in
+     let query =
+       { Demo1.Rpcs.Start_game.Query.name
+       ; host_and_port = { Host_and_port.host = "localhost"; port }
+       }
+     in
      fun () ->
        let%bind start_game_response =
          Rpc.Connection.with_client
            (Tcp.Where_to_connect.of_host_and_port
               { Host_and_port.port; Host_and_port.host = "localhost" })
-           (fun conn -> Rpc.Rpc.dispatch_exn Demo1.Rpcs.Test.rpc conn num)
+           (fun conn ->
+             Rpc.Rpc.dispatch_exn Demo1.Rpcs.Start_game.rpc conn query)
        in
        (match start_game_response with
         | Error _ -> print_string "error lol"
-        | Ok n ->
-          print_int n;
-          print_string "\n");
+        | Ok response ->
+          print_s (Demo1.Rpcs.Start_game.Response.sexp_of_t response);
+          (match response with
+           | Game_started who_am_i -> Demo1.Run.run host port who_am_i
+           | _ -> print_endline "waiting"));
        return ())
 ;;
 

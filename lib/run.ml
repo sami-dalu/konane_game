@@ -1,4 +1,5 @@
 open! Core
+open! Async
 
 (* This is the core logic that actually runs the game. We have implemented
    all of this for you, but feel free to read this file as a reference. *)
@@ -7,54 +8,63 @@ let every seconds ~f ~stop =
   let rec loop () =
     if !stop
     then return ()
-    else
-      Clock.after (Time_float.Span.of_sec seconds)
-      >>= fun () ->
-      f ();
-      loop ()
+    else (
+      let%bind () = Clock.after (Time_float.Span.of_sec seconds) in
+      let%bind () = f () in
+      loop ())
   in
   don't_wait_for (loop ())
 ;;
 
-let handle_keys (game : Game.t) ~game_over =
+let handle_keys (game : Game.t) ~game_over host port player =
   every ~stop:game_over 0.001 ~f:(fun () ->
     Game_graphics.render game;
     match Game_graphics.read_key game with
-    | None -> ()
+    | None -> Deferred.return ()
     (* | Some 'r' -> Game.restart ~height:600 ~width:675
        ~initial_snake_length:2 *)
     | Move move ->
-      Game.make_move_exn ~game move;
-      (* Game_graphics.render game; *)
-      (match move.ending_pos with
-       | None -> game.piece_to_move <- Piece.flip game.piece_to_move
-       | Some pos ->
-         let possible_moves =
-           Game.possible_captures_from_occupied_pos_exn
-             ?dir_opt:move.dir
-             game
-             pos
-         in
-         if List.length possible_moves = 0
-         then (
-           game.piece_to_move <- Piece.flip game.piece_to_move;
-           game.last_move_from_piece_to_move <- None)
-         else game.last_move_from_piece_to_move <- Some move)
+      let make_move_query = { Rpcs.Take_turn.Query.player; move } in
+      let%bind start_game_response =
+        Rpc.Connection.with_client
+          (Tcp.Where_to_connect.of_host_and_port
+             { Host_and_port.port; Host_and_port.host })
+          (fun conn ->
+            Rpc.Rpc.dispatch_exn Rpcs.Take_turn.rpc conn make_move_query)
+      in
+      (match start_game_response with
+       | Error _ -> print_string "test"
+       | Ok response ->
+         print_string "test";
+         let game = response.game in
+         Game_graphics.render game);
+      Deferred.return ()
+      (* Game.make_move_exn ~game move; (* Game_graphics.render game; *)
+         (match move.ending_pos with | None -> game.piece_to_move <-
+         Piece.flip game.piece_to_move | Some pos -> let possible_moves =
+         Game.possible_captures_from_occupied_pos_exn ?dir_opt:move.dir game
+         pos in if List.length possible_moves = 0 then ( game.piece_to_move
+         <- Piece.flip game.piece_to_move; game.last_move_from_piece_to_move
+         <- None) else game.last_move_from_piece_to_move <- Some move) *)
       (* Game_graphics.render game *)
-    | Restart -> Game.restart game
+    | Restart ->
+      Game.restart game;
+      Deferred.return ()
     | End_turn ->
       game.piece_to_move <- Piece.flip game.piece_to_move;
-      game.last_move_from_piece_to_move <- None)
+      game.last_move_from_piece_to_move <- None;
+      Deferred.return ())
 ;;
 
-let handle_steps (game : Game.t) ~game_over =
+let handle_steps (game : Game.t) ~game_over host port =
   every ~stop:game_over 0.1 ~f:(fun () ->
     Game.check_for_win game;
     match game.game_state with
     | Game_over { winner } ->
       game_over := true;
-      print_endline (Piece.to_string winner ^ " WINSSSSSS!!!!!")
-    | _ -> ())
+      print_endline (Piece.to_string winner ^ " WINSSSSSS!!!!!");
+      Deferred.return ()
+    | _ -> Deferred.return ())
 ;;
 
 (* let handle_restart (game : Game.t) ~game_over = every ~stop:(ref (not
@@ -62,11 +72,16 @@ let handle_steps (game : Game.t) ~game_over =
    Restart -> Game.restart game; game_over := false; print_endline "test" | _
    -> ()) ;; *)
 
-let run () =
+let run host port who_am_i =
+  (* let query = { Rpcs.Start_game.Query.name ; host_and_port = {
+     Host_and_port.host; port } } in let%bind start_game_response =
+     Rpc.Connection.with_client (Tcp.Where_to_connect.of_host_and_port {
+     Host_and_port.port; Host_and_port.host = "localhost" }) (fun conn ->
+     Rpc.Rpc.dispatch_exn Demo1.Rpcs.Test.rpc conn num) in *)
   let game = Game_graphics.init_exn () in
   Game_graphics.render game;
   let game_over = ref false in
-  handle_keys game ~game_over;
-  handle_steps game ~game_over
+  handle_keys game ~game_over host port who_am_i;
+  handle_steps game ~game_over host port
 ;;
 (* handle_restart game ~game_over *)

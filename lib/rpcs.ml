@@ -53,18 +53,14 @@ end
 module Take_turn = struct
   module Query = struct
     type t =
-      { game : Game.t
-      ; you_play : Piece.t
+      { player : Player.t
+      ; move : Move.t
       }
     [@@deriving sexp_of, bin_io]
   end
 
   module Response = struct
-    type t =
-      { piece : Piece.t
-      ; move : Move.t
-      }
-    [@@deriving sexp_of, bin_io]
+    type t = { game : Game.t } [@@deriving sexp_of, bin_io]
   end
 
   let rpc =

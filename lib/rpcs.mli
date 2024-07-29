@@ -41,18 +41,14 @@ end
 module Take_turn : sig
   module Query : sig
     type t =
-      { game : Game.t
-      ; you_play : Piece.t
+      { player : Player.t
+      ; move : Move.t
       }
     [@@deriving sexp_of, bin_io]
   end
 
   module Response : sig
-    type t =
-      { piece : Piece.t
-      ; move : Move.t
-      }
-    [@@deriving sexp_of, bin_io]
+    type t = { game : Game.t } [@@deriving sexp_of, bin_io]
   end
 
   val rpc : (Query.t, Response.t) Rpc.Rpc.t
