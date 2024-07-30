@@ -36,7 +36,7 @@ let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
     let _ =
       Queue.enqueue
         server.player_queue
-        { Player.name = query.name; piece = Piece.X }
+        (Player.init ~name:query.name ~piece:Piece.X)
     in
     return Rpcs.Start_game.Response.Game_not_started)
   else (
@@ -44,7 +44,7 @@ let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
     let existing_player = Queue.peek_exn server.player_queue in
     if Hashtbl.existsi server.game_player_piece_tbl ~f:(fun ~key ~data ->
          ignore data;
-         String.equal key.name existing_player.name)
+         String.equal (Player.get_name key) (Player.get_name existing_player))
     then return Rpcs.Start_game.Response.Game_not_started
     else (
       let g = Game.new_game ~height:8 ~width:8 in
@@ -54,15 +54,12 @@ let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
           ~key:existing_player
           ~data:g
       in
+      let new_p = Player.init ~name:query.name ~piece:Piece.O in
       let _ =
-        Hashtbl.add_exn
-          server.game_player_piece_tbl
-          ~key:{ Player.name = query.name; piece = Piece.O }
-          ~data:g
+        Hashtbl.add_exn server.game_player_piece_tbl ~key:new_p ~data:g
       in
       let response =
-        Rpcs.Start_game.Response.Game_started
-          { your_player = { Player.name = query.name; piece = Piece.O } }
+        Rpcs.Start_game.Response.Game_started { your_player = new_p }
       in
       return response))
 ;;
