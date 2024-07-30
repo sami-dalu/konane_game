@@ -20,13 +20,6 @@ open! Async
 (* function which tries to start a test game *)
 (* let start_test_impl _client (query : Rpcs.Start_game.Query.t) = let ;; *)
 
-module Player = struct
-  type t =
-    { name : string
-    ; piece : Piece.t
-    }
-end
-
 type t =
   { player_queue : Player.t Queue.t
   ; game_player_piece_tbl : (Player.t, Game.t) Hashtbl.t
@@ -67,5 +60,9 @@ let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
           ~key:{ Player.name = query.name; piece = Piece.O }
           ~data:g
       in
-      return Rpcs.Start_game.Response.Game_started))
+      let response =
+        Rpcs.Start_game.Response.Game_started
+          { your_player = { Player.name = query.name; piece = Piece.O } }
+      in
+      return response))
 ;;

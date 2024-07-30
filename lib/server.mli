@@ -9,13 +9,6 @@ open! Async
 (* val handle_test_query : 'a -> Rpcs.Test.Query.t -> Rpcs.Test.Response.t
    Deferred.t *)
 
-module Player : sig
-  type t =
-    { name : string
-    ; piece : Piece.t
-    }
-end
-
 type t =
   { player_queue : Player.t Queue.t
   ; game_player_piece_tbl : (Player.t, Game.t) Hashtbl.t

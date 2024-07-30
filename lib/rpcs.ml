@@ -36,7 +36,7 @@ module Start_game = struct
 
   module Response = struct
     type t =
-      | Game_started
+      | Game_started of { your_player : Player.t }
       | Game_not_started
     [@@deriving sexp_of, bin_io]
   end

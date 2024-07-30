@@ -5,8 +5,9 @@ module T = struct
     { name : string
     ; piece : Piece.t
     }
-  [@@deriving sexp, equal, bin_io, compare]
+  [@@deriving sexp, equal, bin_io, compare, hash]
 end
 
 include T
 include Comparable.Make_binable (T)
+include Hashable.Make_binable (T)
