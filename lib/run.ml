@@ -60,6 +60,7 @@ let handle_keys (game : Game.t ref) ~game_over host port player =
          | Error _ -> print_string "error end"
          | Ok response ->
            let new_game = response.game in
+           print_s (Piece.sexp_of_t new_game.piece_to_move);
            game := new_game);
         Deferred.return ())
     else (
