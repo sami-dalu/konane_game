@@ -93,6 +93,9 @@ let handle_end_query (server : t) _client (query : Rpcs.End_turn.Query.t) =
   let g = Hashtbl.find_exn server.game_player_piece_tbl query.player in
   return
     { Rpcs.End_turn.Response.game =
-        { g with piece_to_move = Piece.flip g.piece_to_move }
+        { g with
+          piece_to_move = Piece.flip g.piece_to_move
+        ; last_move_from_piece_to_move = None
+        }
     }
 ;;
