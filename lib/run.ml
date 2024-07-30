@@ -18,9 +18,9 @@ let every seconds ~f ~stop =
 
 let handle_keys (game : Game.t ref) ~game_over host port player =
   every ~stop:game_over 0.001 ~f:(fun () ->
+    Game_graphics.render !game;
     if Piece.equal !game.piece_to_move (Player.get_piece player)
     then (
-      Game_graphics.render !game;
       match Game_graphics.read_key !game with
       | None -> Deferred.return ()
       (* | Some 'r' -> Game.restart ~height:600 ~width:675
