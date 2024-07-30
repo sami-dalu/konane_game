@@ -13,6 +13,9 @@ let implementations_w_server server =
       [ Rpc.Rpc.implement
           Demo1.Rpcs.Start_game.rpc
           (Demo1.Server.handle_start_query server)
+      ; Rpc.Rpc.implement
+          Demo1.Rpcs.Take_turn.rpc
+          (Demo1.Server.handle_move_query server)
       ]
 ;;
 

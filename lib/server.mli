@@ -22,3 +22,9 @@ val handle_start_query
   -> 'a
   -> Rpcs.Start_game.Query.t
   -> Rpcs.Start_game.Response.t Deferred.t
+
+val handle_move_query
+  :  t
+  -> 'a
+  -> Rpcs.Take_turn.Query.t
+  -> Rpcs.Take_turn.Response.t Deferred.t
