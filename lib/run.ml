@@ -19,47 +19,65 @@ let every seconds ~f ~stop =
 let handle_keys (game : Game.t ref) ~game_over host port player =
   every ~stop:game_over 0.001 ~f:(fun () ->
     if Piece.equal !game.piece_to_move (Player.get_piece player)
-    then Game_graphics.render !game;
-    match Game_graphics.read_key !game with
-    | None -> Deferred.return ()
-    (* | Some 'r' -> Game.restart ~height:600 ~width:675
-       ~initial_snake_length:2 *)
-    | Move move ->
-      let make_move_query = { Rpcs.Take_turn.Query.player; move } in
-      let%bind make_move_response =
+    then (
+      Game_graphics.render !game;
+      match Game_graphics.read_key !game with
+      | None -> Deferred.return ()
+      (* | Some 'r' -> Game.restart ~height:600 ~width:675
+         ~initial_snake_length:2 *)
+      | Move move ->
+        let make_move_query = { Rpcs.Take_turn.Query.player; move } in
+        let%bind make_move_response =
+          Rpc.Connection.with_client
+            (Tcp.Where_to_connect.of_host_and_port
+               { Host_and_port.port; Host_and_port.host })
+            (fun conn ->
+              Rpc.Rpc.dispatch_exn Rpcs.Take_turn.rpc conn make_move_query)
+        in
+        (match make_move_response with
+         | Error _ -> print_string "error start"
+         | Ok response ->
+           (match response with
+            | Success { game = new_game } -> game := new_game
+            | Failure -> ()));
+        Deferred.return ()
+      | Restart ->
+        Game.restart !game;
+        Deferred.return ()
+      | End_turn ->
+        (* flip the piece on the server side and set
+           last_move_from_piece_to_move to None *)
+        let end_turn_query = { Rpcs.End_turn.Query.player } in
+        let%bind end_turn_response =
+          Rpc.Connection.with_client
+            (Tcp.Where_to_connect.of_host_and_port
+               { Host_and_port.port; Host_and_port.host })
+            (fun conn ->
+              Rpc.Rpc.dispatch_exn Rpcs.End_turn.rpc conn end_turn_query)
+        in
+        (match end_turn_response with
+         | Error _ -> print_string "error end"
+         | Ok response ->
+           let new_game = response.game in
+           game := new_game);
+        Deferred.return ())
+    else (
+      (* send query to server to get game state and update the game_ref *)
+      let wait_turn_query = { Rpcs.Wait_turn.Query.player } in
+      let%bind wait_turn_response =
         Rpc.Connection.with_client
           (Tcp.Where_to_connect.of_host_and_port
              { Host_and_port.port; Host_and_port.host })
           (fun conn ->
-            Rpc.Rpc.dispatch_exn Rpcs.Take_turn.rpc conn make_move_query)
+            Rpc.Rpc.dispatch_exn Rpcs.Wait_turn.rpc conn wait_turn_query)
       in
-      (match make_move_response with
-       | Error _ -> print_string "error start"
+      (match wait_turn_response with
+       | Error _ -> print_string "error wait"
        | Ok response ->
          (match response with
           | Success { game = new_game } -> game := new_game
           | Failure -> ()));
-      Deferred.return ()
-    | Restart ->
-      Game.restart !game;
-      Deferred.return ()
-    | End_turn ->
-      (* flip the piece on the server side and set
-         last_move_from_piece_to_move to None *)
-      let end_turn_query = { Rpcs.End_turn.Query.player } in
-      let%bind end_turn_response =
-        Rpc.Connection.with_client
-          (Tcp.Where_to_connect.of_host_and_port
-             { Host_and_port.port; Host_and_port.host })
-          (fun conn ->
-            Rpc.Rpc.dispatch_exn Rpcs.End_turn.rpc conn end_turn_query)
-      in
-      (match end_turn_response with
-       | Error _ -> print_string "error end"
-       | Ok response ->
-         let new_game = response.game in
-         game := new_game);
-      Deferred.return ())
+      Deferred.return ()))
 ;;
 
 let handle_steps (game : Game.t ref) ~game_over =
