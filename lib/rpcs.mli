@@ -25,7 +25,7 @@ module Start_game : sig
   module Response : sig
     type t =
       | Game_started of { your_player : Player.t }
-      | Game_not_started
+      | Game_not_started of { your_player : Player.t }
     [@@deriving sexp_of, bin_io]
   end
 
