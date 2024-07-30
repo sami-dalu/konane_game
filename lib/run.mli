@@ -1,3 +1,3 @@
 open! Core
 
-val run : string -> int -> unit
+val run : string -> int -> Player.t -> unit

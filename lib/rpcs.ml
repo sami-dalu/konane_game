@@ -52,7 +52,11 @@ end
 
 module Take_turn = struct
   module Query = struct
-    type t = { move : Move.t } [@@deriving sexp_of, bin_io]
+    type t =
+      { player : Player.t
+      ; move : Move.t
+      }
+    [@@deriving sexp_of, bin_io]
   end
 
   module Response = struct
@@ -84,6 +88,24 @@ module Game_over = struct
   let rpc =
     Rpc.Rpc.create
       ~name:"game-over"
+      ~version:0
+      ~bin_query:Query.bin_t
+      ~bin_response:Response.bin_t
+  ;;
+end
+
+module End_turn = struct
+  module Query = struct
+    type t = { player : Player.t } [@@deriving sexp_of, bin_io]
+  end
+
+  module Response = struct
+    type t = { game : Game.t } [@@deriving sexp_of, bin_io]
+  end
+
+  let rpc =
+    Rpc.Rpc.create
+      ~name:"end-turn"
       ~version:0
       ~bin_query:Query.bin_t
       ~bin_response:Response.bin_t
