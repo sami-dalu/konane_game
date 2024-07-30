@@ -71,7 +71,7 @@ let start_game =
 
 let command =
   Command.group
-    ~summary:"Game Strategies"
+    ~summary:"Konane Game"
     [ "start-server", start_server; "start-game", start_game ]
 ;;
 
