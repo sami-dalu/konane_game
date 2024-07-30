@@ -78,3 +78,15 @@ module End_turn : sig
 
   val rpc : (Query.t, Response.t) Rpc.Rpc.t
 end
+
+module Wait_turn : sig
+  module Query : sig
+    type t = Player.t
+  end
+
+  module Response : sig
+    type t = Game.t
+  end
+
+  val rpc : (Query.t, Response.t) Rpc.Rpc.t
+end

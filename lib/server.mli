@@ -28,3 +28,9 @@ val handle_move_query
   -> 'a
   -> Rpcs.Take_turn.Query.t
   -> Rpcs.Take_turn.Response.t Deferred.t
+
+val handle_wait_query
+  :  t
+  -> 'a
+  -> Rpcs.Wait_turn.Query.t
+  -> Game.t Deferred.t
