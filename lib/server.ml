@@ -63,3 +63,29 @@ let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
       in
       return response))
 ;;
+
+let handle_move_query (server : t) _client (query : Rpcs.Take_turn.Query.t) =
+  match Hashtbl.find server.game_player_piece_tbl query.player with
+  | None ->
+    print_string "You're trying to make a move but not in the game.";
+    Rpcs.Take_turn.Response.Failure
+  | Some game ->
+    let move = query.move in
+    Game.make_move_exn ~game move;
+    (* Game_graphics.render game; *)
+    (match move.ending_pos with
+     | None -> game.piece_to_move <- Piece.flip game.piece_to_move
+     | Some pos ->
+       let possible_moves =
+         Game.possible_captures_from_occupied_pos_exn
+           ?dir_opt:move.dir
+           game
+           pos
+       in
+       if List.length possible_moves = 0
+       then (
+         game.piece_to_move <- Piece.flip game.piece_to_move;
+         game.last_move_from_piece_to_move <- None)
+       else game.last_move_from_piece_to_move <- Some move);
+    Success { game }
+;;
