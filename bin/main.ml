@@ -66,7 +66,7 @@ let start_game =
            | Game_started { your_player = who_am_i } ->
              Demo1.Run.run "localhost" port who_am_i
            | _ -> print_endline "waiting"));
-       return ())
+       Deferred.never ())
 ;;
 
 let command =
