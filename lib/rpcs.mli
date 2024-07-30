@@ -63,3 +63,15 @@ module Game_over : sig
 
   val rpc : (Query.t, Response.t) Rpc.Rpc.t
 end
+
+module End_turn : sig
+  module Query : sig
+    type t = { player : Player.t } [@@deriving sexp_of, bin_io]
+  end
+
+  module Response : sig
+    type t = { game : Game.t } [@@deriving sexp_of, bin_io]
+  end
+
+  val rpc : (Query.t, Response.t) Rpc.Rpc.t
+end

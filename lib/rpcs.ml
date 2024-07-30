@@ -7,23 +7,13 @@ open! Async
    module Response = struct type t = | Game_started | Game_not_started
    [@@deriving sexp_of, bin_io] end end *)
 
-module Test = struct
-  module Query = struct
-    type t = int [@@deriving bin_io]
-  end
+(* module Test = struct module Query = struct type t = int [@@deriving
+   bin_io] end
 
-  module Response = struct
-    type t = int [@@deriving bin_io]
-  end
+   module Response = struct type t = int [@@deriving bin_io] end
 
-  let rpc =
-    Rpc.Rpc.create
-      ~name:"test"
-      ~version:0
-      ~bin_query:Query.bin_t
-      ~bin_response:Response.bin_t
-  ;;
-end
+   let rpc = Rpc.Rpc.create ~name:"test" ~version:0 ~bin_query:Query.bin_t
+   ~bin_response:Response.bin_t ;; end *)
 
 module Start_game = struct
   module Query = struct
@@ -52,7 +42,11 @@ end
 
 module Take_turn = struct
   module Query = struct
-    type t = { move : Move.t } [@@deriving sexp_of, bin_io]
+    type t =
+      { player : Player.t
+      ; move : Move.t
+      }
+    [@@deriving sexp_of, bin_io]
   end
 
   module Response = struct
@@ -84,6 +78,24 @@ module Game_over = struct
   let rpc =
     Rpc.Rpc.create
       ~name:"game-over"
+      ~version:0
+      ~bin_query:Query.bin_t
+      ~bin_response:Response.bin_t
+  ;;
+end
+
+module End_turn = struct
+  module Query = struct
+    type t = { player : Player.t } [@@deriving sexp_of, bin_io]
+  end
+
+  module Response = struct
+    type t = { game : Game.t } [@@deriving sexp_of, bin_io]
+  end
+
+  let rpc =
+    Rpc.Rpc.create
+      ~name:"end-turn"
       ~version:0
       ~bin_query:Query.bin_t
       ~bin_response:Response.bin_t

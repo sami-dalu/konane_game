@@ -63,7 +63,8 @@ let start_game =
         | Ok response ->
           print_s (Demo1.Rpcs.Start_game.Response.sexp_of_t response);
           (match response with
-           | Game_started who_am_i -> Demo1.Run.run host port who_am_i
+           | Game_started { your_player = who_am_i } ->
+             Demo1.Run.run "localhost" port who_am_i
            | _ -> print_endline "waiting"));
        return ())
 ;;

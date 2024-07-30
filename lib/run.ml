@@ -16,28 +16,27 @@ let every seconds ~f ~stop =
   don't_wait_for (loop ())
 ;;
 
-let handle_keys (game : Game.t) ~game_over host port player =
+let handle_keys (game : Game.t ref) ~game_over host port player =
   every ~stop:game_over 0.001 ~f:(fun () ->
-    Game_graphics.render game;
-    match Game_graphics.read_key game with
+    Game_graphics.render !game;
+    match Game_graphics.read_key !game with
     | None -> Deferred.return ()
     (* | Some 'r' -> Game.restart ~height:600 ~width:675
        ~initial_snake_length:2 *)
     | Move move ->
       let make_move_query = { Rpcs.Take_turn.Query.player; move } in
-      let%bind start_game_response =
+      let%bind make_move_response =
         Rpc.Connection.with_client
           (Tcp.Where_to_connect.of_host_and_port
              { Host_and_port.port; Host_and_port.host })
           (fun conn ->
             Rpc.Rpc.dispatch_exn Rpcs.Take_turn.rpc conn make_move_query)
       in
-      (match start_game_response with
-       | Error _ -> print_string "test"
+      (match make_move_response with
+       | Error _ -> print_string "error start"
        | Ok response ->
-         print_string "test";
-         let game = response.game in
-         Game_graphics.render game);
+         let new_game = response.game in
+         game := new_game);
       Deferred.return ()
       (* Game.make_move_exn ~game move; (* Game_graphics.render game; *)
          (match move.ending_pos with | None -> game.piece_to_move <-
@@ -48,18 +47,31 @@ let handle_keys (game : Game.t) ~game_over host port player =
          <- None) else game.last_move_from_piece_to_move <- Some move) *)
       (* Game_graphics.render game *)
     | Restart ->
-      Game.restart game;
+      Game.restart !game;
       Deferred.return ()
     | End_turn ->
-      game.piece_to_move <- Piece.flip game.piece_to_move;
-      game.last_move_from_piece_to_move <- None;
+      (* flip the piece on the server side and set
+         last_move_from_piece_to_move to None *)
+      let end_turn_query = { Rpcs.End_turn.Query.player } in
+      let%bind end_turn_response =
+        Rpc.Connection.with_client
+          (Tcp.Where_to_connect.of_host_and_port
+             { Host_and_port.port; Host_and_port.host })
+          (fun conn ->
+            Rpc.Rpc.dispatch_exn Rpcs.End_turn.rpc conn end_turn_query)
+      in
+      (match end_turn_response with
+       | Error _ -> print_string "error end"
+       | Ok response ->
+         let new_game = response.game in
+         game := new_game);
       Deferred.return ())
 ;;
 
-let handle_steps (game : Game.t) ~game_over host port =
+let handle_steps (game : Game.t ref) ~game_over =
   every ~stop:game_over 0.1 ~f:(fun () ->
-    Game.check_for_win game;
-    match game.game_state with
+    Game.check_for_win !game;
+    match !game.game_state with
     | Game_over { winner } ->
       game_over := true;
       print_endline (Piece.to_string winner ^ " WINSSSSSS!!!!!");
@@ -81,7 +93,8 @@ let run host port who_am_i =
   let game = Game_graphics.init_exn () in
   Game_graphics.render game;
   let game_over = ref false in
+  let game = ref (Game.new_game ~height:8 ~width:8) in
   handle_keys game ~game_over host port who_am_i;
-  handle_steps game ~game_over host port
+  handle_steps game ~game_over
 ;;
 (* handle_restart game ~game_over *)
