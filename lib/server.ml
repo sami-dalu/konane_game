@@ -88,3 +88,11 @@ let handle_wait_query (server : t) _client (query : Rpcs.Wait_turn.Query.t) =
   let g = Hashtbl.find_exn server.game_player_piece_tbl query in
   return g
 ;;
+
+let handle_end_query (server : t) _client (query : Rpcs.End_turn.Query.t) =
+  let g = Hashtbl.find_exn server.game_player_piece_tbl query.player in
+  return
+    { Rpcs.End_turn.Response.game =
+        { g with piece_to_move = Piece.flip g.piece_to_move }
+    }
+;;

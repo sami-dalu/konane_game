@@ -19,6 +19,9 @@ let implementations_w_server server =
       ; Rpc.Rpc.implement
           Demo1.Rpcs.Wait_turn.rpc
           (Demo1.Server.handle_wait_query server)
+      ; Rpc.Rpc.implement
+          Demo1.Rpcs.End_turn.rpc
+          (Demo1.Server.handle_end_query server)
       ]
 ;;
 
