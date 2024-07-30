@@ -10,3 +10,4 @@ include Hashable.S_binable with type t := t
 
 val init : name:string -> piece:Piece.t -> t
 val get_name : t -> string
+val get_piece : t -> Piece.t
