@@ -98,7 +98,7 @@ module Wait_turn = struct
 
   let rpc =
     Rpc.Rpc.create
-      ~name:"end-turn"
+      ~name:"wait-turn"
       ~version:0
       ~bin_query:Query.bin_t
       ~bin_response:Response.bin_t
