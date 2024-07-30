@@ -39,14 +39,6 @@ let handle_keys (game : Game.t ref) ~game_over host port player =
           | Success { game = new_game } -> game := new_game
           | Failure -> ()));
       Deferred.return ()
-      (* Game.make_move_exn ~game move; (* Game_graphics.render game; *)
-         (match move.ending_pos with | None -> game.piece_to_move <-
-         Piece.flip game.piece_to_move | Some pos -> let possible_moves =
-         Game.possible_captures_from_occupied_pos_exn ?dir_opt:move.dir game
-         pos in if List.length possible_moves = 0 then ( game.piece_to_move
-         <- Piece.flip game.piece_to_move; game.last_move_from_piece_to_move
-         <- None) else game.last_move_from_piece_to_move <- Some move) *)
-      (* Game_graphics.render game *)
     | Restart ->
       Game.restart !game;
       Deferred.return ()
@@ -86,11 +78,6 @@ let handle_steps (game : Game.t ref) ~game_over =
    -> ()) ;; *)
 
 let run host port who_am_i =
-  (* let query = { Rpcs.Start_game.Query.name ; host_and_port = {
-     Host_and_port.host; port } } in let%bind start_game_response =
-     Rpc.Connection.with_client (Tcp.Where_to_connect.of_host_and_port {
-     Host_and_port.port; Host_and_port.host = "localhost" }) (fun conn ->
-     Rpc.Rpc.dispatch_exn Demo1.Rpcs.Test.rpc conn num) in *)
   let game = Game_graphics.init_exn () in
   Game_graphics.render game;
   let game_over = ref false in

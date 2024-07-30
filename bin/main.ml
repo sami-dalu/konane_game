@@ -69,7 +69,8 @@ let start_game =
           (match response with
            | Game_started { your_player = who_am_i } ->
              Demo1.Run.run host port who_am_i
-           | _ -> print_endline "waiting"));
+           | Game_not_started { your_player = who_am_i } ->
+             Demo1.Run.run host port who_am_i));
        Deferred.never ())
 ;;
 
