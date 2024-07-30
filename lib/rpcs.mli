@@ -34,7 +34,11 @@ end
 
 module Take_turn : sig
   module Query : sig
-    type t = { move : Move.t } [@@deriving sexp_of, bin_io]
+    type t =
+      { player : Player.t
+      ; move : Move.t
+      }
+    [@@deriving sexp_of, bin_io]
   end
 
   module Response : sig
