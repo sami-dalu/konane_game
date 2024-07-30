@@ -83,3 +83,8 @@ let handle_move_query (server : t) _client (query : Rpcs.Take_turn.Query.t) =
        else game.last_move_from_piece_to_move <- Some move);
     return (Rpcs.Take_turn.Response.Success { game })
 ;;
+
+let handle_wait_query (server : t) _client (query : Rpcs.Wait_turn.Query.t) =
+  let g = Hashtbl.find_exn server.game_player_piece_tbl query in
+  return g
+;;
