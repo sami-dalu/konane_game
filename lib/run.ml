@@ -47,6 +47,7 @@ let handle_keys (game : Game.t ref) ~game_over host port player =
       | End_turn ->
         (* flip the piece on the server side and set
            last_move_from_piece_to_move to None *)
+        print_endline "got end turn";
         let end_turn_query = { Rpcs.End_turn.Query.player } in
         let%bind end_turn_response =
           Rpc.Connection.with_client
