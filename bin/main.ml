@@ -47,6 +47,7 @@ let start_game =
     ~summary:"connect to server and begin game"
     (let%map_open.Command () = return ()
      and port = flag "-port" (required int) ~doc:"INT server port"
+     and host = flag "-hostname" (required string) ~doc:"string of hostname"
      and name = flag "-name" (required string) ~doc:"name of player" in
      let query =
        { Demo1.Rpcs.Start_game.Query.name
@@ -57,7 +58,7 @@ let start_game =
        let%bind start_game_response =
          Rpc.Connection.with_client
            (Tcp.Where_to_connect.of_host_and_port
-              { Host_and_port.port; Host_and_port.host = "localhost" })
+              { Host_and_port.port; Host_and_port.host })
            (fun conn ->
              Rpc.Rpc.dispatch_exn Demo1.Rpcs.Start_game.rpc conn query)
        in
@@ -67,7 +68,7 @@ let start_game =
           print_s (Demo1.Rpcs.Start_game.Response.sexp_of_t response);
           (match response with
            | Game_started { your_player = who_am_i } ->
-             Demo1.Run.run "localhost" port who_am_i
+             Demo1.Run.run host port who_am_i
            | _ -> print_endline "waiting"));
        Deferred.never ())
 ;;
