@@ -35,8 +35,9 @@ let handle_keys (game : Game.t ref) ~game_over host port player =
       (match make_move_response with
        | Error _ -> print_string "error start"
        | Ok response ->
-         let new_game = response.game in
-         game := new_game);
+         (match response with
+          | Success { game = new_game } -> game := new_game
+          | Failure -> ()));
       Deferred.return ()
       (* Game.make_move_exn ~game move; (* Game_graphics.render game; *)
          (match move.ending_pos with | None -> game.piece_to_move <-
