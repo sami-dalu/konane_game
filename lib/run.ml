@@ -63,7 +63,7 @@ let handle_keys (game : Game.t ref) ~game_over host port player =
         Deferred.return ())
     else (
       (* send query to server to get game state and update the game_ref *)
-      let wait_turn_query = { Rpcs.Wait_turn.Query.player } in
+      let wait_turn_query = player in
       let%bind wait_turn_response =
         Rpc.Connection.with_client
           (Tcp.Where_to_connect.of_host_and_port
@@ -73,10 +73,7 @@ let handle_keys (game : Game.t ref) ~game_over host port player =
       in
       (match wait_turn_response with
        | Error _ -> print_string "error wait"
-       | Ok response ->
-         (match response with
-          | Success { game = new_game } -> game := new_game
-          | Failure -> ()));
+       | Ok response -> game := response);
       Deferred.return ()))
 ;;
 
