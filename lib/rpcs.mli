@@ -42,7 +42,10 @@ module Take_turn : sig
   end
 
   module Response : sig
-    type t = { game : Game.t } [@@deriving sexp_of, bin_io]
+    type t =
+      | Success of { game : Game.t }
+      | Failure
+    [@@deriving sexp_of, bin_io]
   end
 
   val rpc : (Query.t, Response.t) Rpc.Rpc.t

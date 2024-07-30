@@ -50,7 +50,10 @@ module Take_turn = struct
   end
 
   module Response = struct
-    type t = { game : Game.t } [@@deriving sexp_of, bin_io]
+    type t =
+      | Success of { game : Game.t }
+      | Failure
+    [@@deriving sexp_of, bin_io]
   end
 
   let rpc =
