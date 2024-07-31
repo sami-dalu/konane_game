@@ -259,8 +259,43 @@ let mouse_in_place_to_move ~mouse_x ~mouse_y (move_list : Move.t list) =
     | _ -> None)
 ;;
 
-(* let draw_restart_button () = let open Constants in Graphics.set_color
-   Colors.light_red; *)
+let draw_restart_button () =
+  let open Constants in
+  Graphics.set_color Colors.light_red;
+  Graphics.fill_rect
+    20
+    (play_area_height + (block_size / 4))
+    block_size
+    (block_size / 2);
+  Graphics.set_color Colors.black;
+  Graphics.draw_rect
+    20
+    (play_area_height + (block_size / 4))
+    block_size
+    (block_size / 2);
+  Graphics.set_color Colors.black;
+  Graphics.moveto 25 (play_area_height + (block_size * 3 / 8));
+  Graphics.draw_string "RESTART GAME"
+;;
+
+let undraw_restart_button (_game : Game.t) =
+  let open Constants in
+  Graphics.set_color Colors.game_in_progress;
+  Graphics.fill_rect
+    20
+    (play_area_height + (block_size / 4))
+    block_size
+    (block_size / 2)
+;;
+
+let mouse_in_restart_button () =
+  let open Constants in
+  let mouse_x, mouse_y = Graphics.mouse_pos () in
+  mouse_x > 20
+  && mouse_x < 20 + block_size
+  && mouse_y < play_area_height + (block_size / 4) + (block_size / 2)
+  && mouse_y > play_area_height + (block_size / 4)
+;;
 
 let draw_end_turn_button () =
   let open Constants in
@@ -321,10 +356,12 @@ let render (game : Game.t) player =
   (match game.game_state with
    | Game_over { winner } ->
      Core.print_endline "HALOOOOOOO";
-     display_win_message winner player
+     display_win_message winner player;
+     draw_restart_button ()
    | _ ->
      if Piece.equal game.piece_to_move (Player.get_piece player)
      then (
+       draw_restart_button ();
        match game.last_move_from_piece_to_move with
        | None ->
          draw_highlighted_blocks
@@ -341,7 +378,8 @@ let render (game : Game.t) player =
               Game.possible_captures_from_occupied_pos_exn
                 ?dir_opt:move.dir
                 game
-                pos)));
+                pos))
+     else undraw_restart_button game);
   Graphics.display_mode true;
   Graphics.synchronize ()
 ;;
@@ -383,15 +421,14 @@ let read_key (game : Game.t) : Action.t =
         if not (List.length move_to = 0)
         then Move (List.hd_exn move_to)
         else None
-      | _ ->
-        None
-        (* else if Graphics.key_pressed () then if Char.equal
-           (Graphics.read_key ()) 'r' then Restart else None *))
+      | _ -> None)
     else if mouse_in_end_move_button ()
     then (
       match game.last_move_from_piece_to_move with
       | None -> None
       | Some _ -> End_turn)
+    else if mouse_in_restart_button ()
+    then Restart
     else None
   else None
 ;;

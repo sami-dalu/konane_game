@@ -52,10 +52,7 @@ let handle_keys (game : Game.t ref) ~game_over host port player =
         in
         (match restart_response with
          | Error _ -> print_string "error start"
-         | Ok response ->
-           (match response with
-            | Success { game = new_game } -> game := new_game
-            | Failure -> ()));
+         | Ok response -> game := response);
         Deferred.return ()
       | End_turn ->
         (* flip the piece on the server side and set
@@ -89,7 +86,7 @@ let handle_keys (game : Game.t ref) ~game_over host port player =
       (match wait_turn_response with
        | Error _ -> print_string "error wait"
        | Ok response -> game := response);
-      Deferred.return ())
+      Deferred.return ()))
 ;;
 
 let handle_steps (game : Game.t ref) ~game_over player =
