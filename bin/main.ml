@@ -96,9 +96,7 @@ let rec stubborn_read_int () =
   | `Ok s ->
     let num_opt = Int.of_string_opt s in
     (match num_opt with
-     | Some num ->
-       let _ = print_string "GOT YOUR NUMBER " in
-       return num
+     | Some num -> return num
      | None ->
        let _ = print_string "Invalid number, please try again.\n" in
        stubborn_read_int ())
@@ -107,18 +105,19 @@ let rec stubborn_read_int () =
     stubborn_read_int ()
 ;;
 
-let rec stubborn_read_host_and_port () =
-  print_string "Enter the host name.\n";
+let rec stubborn_read_str () =
   let stdin = Lazy.force Reader.stdin in
   let host =
     match%bind Reader.read_line stdin with
-    | `Ok s -> s
-    | `Eof ->
-      print_string "Invalid number, please try again.\n";
-      stubborn_read_host_and_port ()
+    | `Ok s -> return s
+    | `Eof -> stubborn_read_str ()
   in
-  return host
+  host
 ;;
+
+(* let stubborn_read_host_and_port () = let%bind host = stubborn_read_str ()
+   in let _ = print_string "What's your port?\n" in let%bind port =
+   stubborn_read_int () in return ({ Host_and_port.host; port }, host) ;; *)
 
 (* Out_channel.(flush stdout); In_channel.(input_line_exn stdin) in let _ =
    print_string "\nEnter the port.\n" in let port = stubborn_read_int () in {
@@ -151,7 +150,7 @@ let menu =
                       "Enter the port the server should listen in on:\n"
                   in
                   (* start the server *)
-                  let port = stubborn_read_int () in
+                  let%bind port = stubborn_read_int () in
                   let _ = print_string "awesome, starting server!" in
                   let initial_server_t =
                     { Demo1.Server.player_queue = Queue.create ()
@@ -171,19 +170,18 @@ let menu =
                   Tcp.Server.close_finished server
                 | "Join a game" ->
                   let _ = print_string "Enter your name.\n" in
-                  let name =
-                    Out_channel.(flush stdout);
-                    In_channel.(input_line_exn stdin)
-                  in
+                  let%bind name = stubborn_read_str () in
                   let _ = print_string "Enter your port.\n" in
-                  let port = stubborn_read_int () in
-                  let host_and_port, host = stubborn_read_host_and_port () in
+                  let%bind port = stubborn_read_int () in
+                  let _ = print_string "Enter your host.\n" in
+                  let%bind host = stubborn_read_str () in
                   let query =
                     { Demo1.Rpcs.Start_game.Query.name
                     ; host_and_port =
                         { Host_and_port.host = "localhost"; port }
                     }
                   in
+                  let host_and_port = { Host_and_port.host; port } in
                   let%bind start_game_response =
                     Rpc.Connection.with_client
                       (Tcp.Where_to_connect.of_host_and_port host_and_port)
