@@ -40,3 +40,5 @@ val handle_end_query
   -> 'a
   -> Rpcs.End_turn.Query.t
   -> Rpcs.End_turn.Response.t Deferred.t
+
+val handle_restart_query : t -> 'a -> Player.t -> Game.t Deferred.t

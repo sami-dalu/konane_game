@@ -122,3 +122,21 @@ module End_turn = struct
       ~bin_response:Response.bin_t
   ;;
 end
+
+module Restart_game = struct
+  module Query = struct
+    type t = Player.t [@@deriving sexp_of, bin_io]
+  end
+
+  module Response = struct
+    type t = Game.t [@@deriving sexp_of, bin_io]
+  end
+
+  let rpc =
+    Rpc.Rpc.create
+      ~name:"restart_game"
+      ~version:0
+      ~bin_query:Query.bin_t
+      ~bin_response:Response.bin_t
+  ;;
+end

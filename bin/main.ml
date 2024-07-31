@@ -22,6 +22,9 @@ let implementations_w_server server =
       ; Rpc.Rpc.implement
           Demo1.Rpcs.End_turn.rpc
           (Demo1.Server.handle_end_query server)
+      ; Rpc.Rpc.implement
+          Demo1.Rpcs.Restart_game.rpc
+          (Demo1.Server.handle_restart_query server)
       ]
 ;;
 
