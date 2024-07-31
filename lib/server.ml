@@ -97,3 +97,13 @@ let handle_end_query (server : t) _client (query : Rpcs.End_turn.Query.t) =
   g.last_move_from_piece_to_move <- None;
   return { Rpcs.End_turn.Response.game = g }
 ;;
+
+let handle_restart_query
+  (server : t)
+  _client
+  (query : Rpcs.Restart_game.Query.t)
+  =
+  let g = Hashtbl.find_exn server.game_player_piece_tbl query in
+  Game.restart g;
+  return g
+;;
