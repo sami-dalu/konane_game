@@ -42,7 +42,20 @@ let handle_keys (game : Game.t ref) ~game_over host port player =
             | Failure -> ()));
         Deferred.return ()
       | Restart ->
-        Game.restart !game;
+        let restart_query = player in
+        let%bind restart_response =
+          Rpc.Connection.with_client
+            (Tcp.Where_to_connect.of_host_and_port
+               { Host_and_port.port; Host_and_port.host })
+            (fun conn ->
+              Rpc.Rpc.dispatch_exn Rpcs.Restart_game.rpc conn restart_query)
+        in
+        (match restart_response with
+         | Error _ -> print_string "error start"
+         | Ok response ->
+           (match response with
+            | Success { game = new_game } -> game := new_game
+            | Failure -> ()));
         Deferred.return ()
       | End_turn ->
         (* flip the piece on the server side and set
@@ -76,7 +89,7 @@ let handle_keys (game : Game.t ref) ~game_over host port player =
       (match wait_turn_response with
        | Error _ -> print_string "error wait"
        | Ok response -> game := response);
-      Deferred.return ()))
+      Deferred.return ())
 ;;
 
 let handle_steps (game : Game.t ref) ~game_over player =
