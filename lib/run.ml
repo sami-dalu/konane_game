@@ -17,8 +17,8 @@ let every seconds ~f ~stop =
 ;;
 
 let handle_keys (game : Game.t ref) ~game_over host port player =
-  every ~stop:game_over 0.001 ~f:(fun () ->
-    Game_graphics.render !game;
+  every ~stop:game_over 0.0001 ~f:(fun () ->
+    Game_graphics.render !game player;
     if Piece.equal !game.piece_to_move (Player.get_piece player)
     then (
       match Game_graphics.read_key !game with
@@ -79,13 +79,14 @@ let handle_keys (game : Game.t ref) ~game_over host port player =
       Deferred.return ()))
 ;;
 
-let handle_steps (game : Game.t ref) ~game_over =
+let handle_steps (game : Game.t ref) ~game_over player =
   every ~stop:game_over 0.1 ~f:(fun () ->
     Game.check_for_win !game;
     match !game.game_state with
     | Game_over { winner } ->
       game_over := true;
       print_endline (Piece.to_string winner ^ " WINSSSSSS!!!!!");
+      Game_graphics.render !game player;
       Deferred.return ()
     | _ -> Deferred.return ())
 ;;
@@ -97,10 +98,10 @@ let handle_steps (game : Game.t ref) ~game_over =
 
 let run host port who_am_i =
   let game = Game_graphics.init_exn () in
-  Game_graphics.render game;
+  Game_graphics.render game who_am_i;
   let game_over = ref false in
   let game = ref (Game.new_game ~height:8 ~width:8) in
   handle_keys game ~game_over host port who_am_i;
-  handle_steps game ~game_over
+  handle_steps game ~game_over who_am_i
 ;;
 (* handle_restart game ~game_over *)

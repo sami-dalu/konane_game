@@ -7,9 +7,10 @@ module Colors = struct
   let light_gray = Graphics.rgb 200 200 200
   let _green = Graphics.rgb 000 255 000
   let _blue = Graphics.rgb 000 000 255
-  let red = Graphics.rgb 255 000 000
+  let _red = Graphics.rgb 255 000 000
+  let light_red = Graphics.rgb 255 132 130
   let gold = Graphics.rgb 255 223 0
-  let yellow = Graphics.rgb 255 248 150
+  let _yellow = Graphics.rgb 255 248 150
   let game_in_progress = Graphics.rgb 100 100 200
   let _brown = Graphics.rgb 212 134 0
   let _light_blue = Graphics.rgb 88 182 237
@@ -35,8 +36,8 @@ let init_exn () =
   Graphics.open_graph
     (Printf.sprintf
        " %dx%d"
-       (play_area_height + header_height)
-       play_area_width);
+       play_area_height
+       (play_area_width + header_height));
   let height = play_area_height / block_size in
   let width = play_area_width / block_size in
   let game = Game.new_game ~height ~width in
@@ -62,26 +63,33 @@ let draw_block { Position.row; column } ~color =
     (block_size / 2)
 ;;
 
-let draw_header ~game_state =
+let draw_header ~piece_to_move ~game_state ~player =
   let open Constants in
   let header_color =
     match (game_state : Game.Game_state.t) with
     | First_moves -> Colors.game_in_progress
     | Game_continues -> Colors.game_in_progress
-    | Game_over _ -> Colors.gold
+    | Game_over { winner } ->
+      if Piece.equal winner (Player.get_piece player)
+      then Colors._darker_green
+      else Colors.light_red
   in
   Graphics.set_color header_color;
   Graphics.fill_rect 0 play_area_height play_area_width header_height;
   let header_text =
     match game_state with
     | Game.Game_state.First_moves | Game.Game_state.Game_continues ->
-      "GAME ON!"
+      if Piece.equal (Player.get_piece player) piece_to_move
+      then "         MAKE YOUR MOVE"
+      else "   WAITING FOR OPPONENT MOVE"
     | Game.Game_state.Game_over { winner } ->
-      (match winner with Piece.X -> "X WINS" | Piece.O -> "O WINS")
+      (match Piece.equal winner (Player.get_piece player) with
+       | true -> "           YOU WIN"
+       | false -> "          YOU LOSE")
   in
   Graphics.set_color Colors.black;
   Graphics.set_text_size 20;
-  Graphics.moveto 0 (play_area_height + 25);
+  Graphics.moveto ((play_area_width / 2) - 100) (play_area_height + 25);
   Graphics.draw_string (Printf.sprintf " %s" header_text)
 ;;
 
@@ -164,16 +172,20 @@ let highlight_ending_positions (move_list : Move.t list) =
     | _ -> ())
 ;;
 
-let display_win_message winner =
+let display_win_message winner player =
   let open Constants in
-  Graphics.set_color Colors.yellow;
+  if Piece.equal winner (Player.get_piece player)
+  then Graphics.set_color Colors._darker_green
+  else Graphics.set_color Colors.light_red;
   Graphics.fill_ellipse
     (play_area_width / 2)
     (play_area_height / 2)
     (block_size * 2)
     block_size;
-  Graphics.set_color Colors.gold;
-  Graphics.fill_ellipse
+  if Piece.equal winner (Player.get_piece player)
+  then Graphics.set_color Colors._green
+  else Graphics.set_color Colors._red;
+  Graphics.draw_ellipse
     (play_area_width / 2)
     (play_area_height / 2)
     (block_size * 2)
@@ -247,37 +259,50 @@ let mouse_in_place_to_move ~mouse_x ~mouse_y (move_list : Move.t list) =
     | _ -> None)
 ;;
 
+(* let draw_restart_button () = let open Constants in Graphics.set_color
+   Colors.light_red; *)
+
 let draw_end_turn_button () =
   let open Constants in
-  Graphics.set_color Colors._green;
-  Graphics.fill_rect play_area_width 0 block_size (block_size / 2);
+  Graphics.set_color Colors._darker_green;
+  Graphics.fill_rect
+    (play_area_width - (block_size * 3 / 2))
+    (play_area_height + (block_size / 4))
+    block_size
+    (block_size / 2);
   Graphics.set_color Colors.black;
-  Graphics.moveto (play_area_width + (block_size / 4)) (block_size / 8);
+  Graphics.draw_rect
+    (play_area_width - (block_size * 3 / 2))
+    (play_area_height + (block_size / 4))
+    block_size
+    (block_size / 2);
+  Graphics.set_color Colors.black;
+  Graphics.moveto
+    (play_area_width - (block_size * 3 / 2) + (block_size * 3 / 16))
+    (play_area_height + (block_size * 3 / 8));
   Graphics.draw_string "END TURN"
 ;;
 
-let undraw_end_turn_button (game : Game.t) =
+let undraw_end_turn_button (_game : Game.t) =
   let open Constants in
-  Graphics.set_color Colors.white;
-  Graphics.fill_rect play_area_width 0 block_size (block_size / 2);
-  Graphics.set_color Colors.red;
-  Graphics.moveto (play_area_width + (block_size / 8)) (block_size / 8);
-  Graphics.draw_string
-    (match game.piece_to_move with
-     | Piece.X -> "Black Move"
-     | Piece.O -> "White Move")
+  Graphics.set_color Colors.game_in_progress;
+  Graphics.fill_rect
+    (play_area_width - (block_size * 3 / 2))
+    (play_area_height + (block_size / 4))
+    block_size
+    (block_size / 2)
 ;;
 
 let mouse_in_end_move_button () =
   let open Constants in
   let mouse_x, mouse_y = Graphics.mouse_pos () in
-  mouse_x > play_area_width
-  && mouse_x < play_area_width + block_size
-  && mouse_y < block_size / 2
-  && mouse_y > 0
+  mouse_x > play_area_width - (block_size * 3 / 2)
+  && mouse_x < play_area_width - (block_size * 3 / 2) + block_size
+  && mouse_y < play_area_height + (block_size / 4) + (block_size / 2)
+  && mouse_y > play_area_height + (block_size / 4)
 ;;
 
-let render (game : Game.t) =
+let render (game : Game.t) player =
   (* We want double-buffering. See
      https://v2.ocaml.org/releases/4.03/htmlman/libref/Graphics.html for more
      info!
@@ -290,29 +315,33 @@ let render (game : Game.t) =
   let board = game.board in
   let board_width = game.board_width in
   let board_height = game.board_height in
-  draw_header ~game_state;
+  draw_header ~piece_to_move:game.piece_to_move ~game_state ~player;
   draw_play_area ~board_height ~board_width;
   draw_pieces board;
   (match game.game_state with
-   | Game_over { winner } -> display_win_message winner
+   | Game_over { winner } ->
+     Core.print_endline "HALOOOOOOO";
+     display_win_message winner player
    | _ ->
-     (match game.last_move_from_piece_to_move with
-      | None ->
-        draw_highlighted_blocks
-          (Game.available_captures_for_player
-             game
-             ~my_piece:game.piece_to_move);
-        undraw_end_turn_button game
-      | Some move ->
-        draw_end_turn_button ();
-        draw_highlighted_blocks
-          (match move.ending_pos with
-           | None -> []
-           | Some pos ->
-             Game.possible_captures_from_occupied_pos_exn
-               ?dir_opt:move.dir
-               game
-               pos)));
+     if Piece.equal game.piece_to_move (Player.get_piece player)
+     then (
+       match game.last_move_from_piece_to_move with
+       | None ->
+         draw_highlighted_blocks
+           (Game.available_captures_for_player
+              game
+              ~my_piece:game.piece_to_move);
+         undraw_end_turn_button game
+       | Some move ->
+         draw_end_turn_button ();
+         draw_highlighted_blocks
+           (match move.ending_pos with
+            | None -> []
+            | Some pos ->
+              Game.possible_captures_from_occupied_pos_exn
+                ?dir_opt:move.dir
+                game
+                pos)));
   Graphics.display_mode true;
   Graphics.synchronize ()
 ;;
