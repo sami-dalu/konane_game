@@ -103,17 +103,12 @@ let handle_keys (client_state : Client.t) ~game_over host port =
       else Deferred.return ())
 ;;
 
-let handle_steps (client_state : Client.t) ~game_over =
-  every ~stop:game_over 0.1 ~f:(fun () ->
-    Game.check_for_win client_state.game;
-    match client_state.game.game_state with
-    | Game_over { winner } ->
-      game_over := true;
-      print_endline (Piece.to_string winner ^ " WINSSSSSS!!!!!");
-      Game_graphics.render client_state;
-      Deferred.return ()
-    | _ -> Deferred.return ())
-;;
+(* let handle_steps (client_state : Client.t) ~game_over = every
+   ~stop:game_over 0.1 ~f:(fun () -> Game.check_for_win client_state.game;
+   match client_state.game.game_state with | Game_over { winner } ->
+   game_over := true; print_endline (Piece.to_string winner ^ "
+   WINSSSSSS!!!!!"); Game_graphics.render client_state; Deferred.return () |
+   _ -> Deferred.return ()) ;; *)
 
 (* let handle_restart (game : Game.t) ~game_over = every ~stop:(ref (not
    !game_over)) 0.01 ~f:(fun () -> match Game_graphics.read_key game with |
@@ -132,7 +127,8 @@ let run host port who_am_i =
   Game_graphics.render client_state;
   let game_over = ref false in
   (* let game = ref (Game.new_game ~height:8 ~width:8) in *)
-  handle_keys client_state ~game_over host port;
-  handle_steps client_state ~game_over
+  handle_keys client_state ~game_over host port
 ;;
+(* handle_steps client_state ~game_over *)
+
 (* handle_restart game ~game_over *)

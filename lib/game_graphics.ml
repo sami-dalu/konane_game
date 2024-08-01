@@ -33,6 +33,7 @@ let init_exn () =
   if !only_one
   then failwith "Can only call init_exn once"
   else only_one := true;
+  Graphics.set_window_title "Welcome to Konane!";
   Graphics.open_graph
     (Printf.sprintf
        " %dx%d"
@@ -72,7 +73,7 @@ let draw_header ~piece_to_move ~game_state ~player =
     | Game_over { winner } ->
       if Piece.equal winner (Player.get_piece player)
       then Colors._darker_green
-      else Colors.light_red
+      else Colors._red
   in
   Graphics.set_color header_color;
   Graphics.fill_rect 0 play_area_height play_area_width header_height;
@@ -176,7 +177,7 @@ let display_win_message winner player =
   let open Constants in
   if Piece.equal winner (Player.get_piece player)
   then Graphics.set_color Colors._darker_green
-  else Graphics.set_color Colors.light_red;
+  else Graphics.set_color Colors._red;
   Graphics.fill_ellipse
     (play_area_width / 2)
     (play_area_height / 2)
@@ -184,7 +185,7 @@ let display_win_message winner player =
     block_size;
   if Piece.equal winner (Player.get_piece player)
   then Graphics.set_color Colors._green
-  else Graphics.set_color Colors._red;
+  else Graphics.set_color Colors.light_red;
   Graphics.draw_ellipse
     (play_area_width / 2)
     (play_area_height / 2)
@@ -274,7 +275,7 @@ let draw_restart_button () =
     block_size
     (block_size / 2);
   Graphics.set_color Colors.black;
-  Graphics.moveto 25 (play_area_height + (block_size * 3 / 8));
+  Graphics.moveto 23 (play_area_height + (block_size * 3 / 8));
   Graphics.draw_string "RESTART GAME"
 ;;
 
@@ -358,9 +359,7 @@ let render (client_state : Client.t) =
   draw_pieces board;
   draw_restart_button ();
   (match client_state.game.game_state with
-   | Game_over { winner } ->
-     Core.print_endline "HALOOOOOOO";
-     display_win_message winner client_state.player
+   | Game_over { winner } -> display_win_message winner client_state.player
    | _ ->
      if Piece.equal
           client_state.game.piece_to_move
@@ -416,7 +415,9 @@ let read_key (client_state : Client.t) : Action.t =
        || not (List.length client_state.moves_to_highlight = 0)
     then (
       match client_state.game.game_state with
-      | Game.Game_state.First_moves -> Move (List.hd_exn move_list_to_take)
+      | Game.Game_state.First_moves ->
+        Graphics.sound 20 1000;
+        Move (List.hd_exn move_list_to_take)
       | Game.Game_state.Game_continues ->
         (* undraw_highlighted_blocks move_list_to_take ~init_color: (match
            game.piece_to_move with | Piece.X -> Colors.black | Piece.O ->
@@ -433,7 +434,9 @@ let read_key (client_state : Client.t) : Action.t =
           in
           client_state.moves_to_highlight <- [];
           if not (List.length move_to = 0)
-          then Move (List.hd_exn move_to)
+          then (
+            Graphics.sound 20 1000;
+            Move (List.hd_exn move_to))
           else None)
         else (
           Core.print_endline "initializing move";
@@ -446,7 +449,9 @@ let read_key (client_state : Client.t) : Action.t =
       | None -> None
       | Some _ -> End_turn)
     else if mouse_in_restart_button ()
-    then Restart
+    then (
+      Graphics.sound 300 1000;
+      Restart)
     else None
   else None
 ;;
