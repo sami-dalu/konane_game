@@ -278,7 +278,7 @@ let draw_restart_button () =
   Graphics.draw_string "RESTART GAME"
 ;;
 
-let undraw_restart_button (_game : Game.t) =
+let _undraw_restart_button (_game : Game.t) =
   let open Constants in
   Graphics.set_color Colors.game_in_progress;
   Graphics.fill_rect
@@ -337,7 +337,7 @@ let mouse_in_end_move_button () =
   && mouse_y > play_area_height + (block_size / 4)
 ;;
 
-let render (game : Game.t) player =
+let render (client_state : Client.t) =
   (* We want double-buffering. See
      https://v2.ocaml.org/releases/4.03/htmlman/libref/Graphics.html for more
      info!
@@ -346,29 +346,42 @@ let render (game : Game.t) player =
      [display_mode] to true and then synchronize. This guarantees that there
      won't be flickering! *)
   Graphics.display_mode false;
-  let game_state = game.game_state in
-  let board = game.board in
-  let board_width = game.board_width in
-  let board_height = game.board_height in
-  draw_header ~piece_to_move:game.piece_to_move ~game_state ~player;
+  let game_state = client_state.game.game_state in
+  let board = client_state.game.board in
+  let board_width = client_state.game.board_width in
+  let board_height = client_state.game.board_height in
+  draw_header
+    ~piece_to_move:client_state.game.piece_to_move
+    ~game_state
+    ~player:client_state.player;
   draw_play_area ~board_height ~board_width;
   draw_pieces board;
-  (match game.game_state with
+  draw_restart_button ();
+  (match client_state.game.game_state with
    | Game_over { winner } ->
      Core.print_endline "HALOOOOOOO";
-     display_win_message winner player;
-     draw_restart_button ()
+     display_win_message winner client_state.player
    | _ ->
-     if Piece.equal game.piece_to_move (Player.get_piece player)
+     if Piece.equal
+          client_state.game.piece_to_move
+          (Player.get_piece client_state.player)
      then (
-       draw_restart_button ();
-       match game.last_move_from_piece_to_move with
+       if not (List.length client_state.moves_to_highlight = 0)
+       then (
+         undraw_highlighted_blocks
+           client_state.moves_to_highlight
+           ~init_color:
+             (match client_state.game.piece_to_move with
+              | Piece.X -> Colors.black
+              | Piece.O -> Colors.white);
+         highlight_ending_positions client_state.moves_to_highlight);
+       match client_state.game.last_move_from_piece_to_move with
        | None ->
          draw_highlighted_blocks
            (Game.available_captures_for_player
-              game
-              ~my_piece:game.piece_to_move);
-         undraw_end_turn_button game
+              client_state.game
+              ~my_piece:client_state.game.piece_to_move);
+         undraw_end_turn_button client_state.game
        | Some move ->
          draw_end_turn_button ();
          draw_highlighted_blocks
@@ -377,9 +390,8 @@ let render (game : Game.t) player =
             | Some pos ->
               Game.possible_captures_from_occupied_pos_exn
                 ?dir_opt:move.dir
-                game
-                pos))
-     else undraw_restart_button game);
+                client_state.game
+                pos)));
   Graphics.display_mode true;
   Graphics.synchronize ()
 ;;
@@ -396,35 +408,42 @@ module Action = struct
     | None
 end
 
-let read_key (game : Game.t) : Action.t =
-  let move_list_to_take = mouse_in_piece_to_move_spot game in
+let read_key (client_state : Client.t) : Action.t =
+  let move_list_to_take = mouse_in_piece_to_move_spot client_state.game in
   if Graphics.button_down ()
   then
-    if not (List.length move_list_to_take = 0)
+    if (not (List.length move_list_to_take = 0))
+       || not (List.length client_state.moves_to_highlight = 0)
     then (
-      match game.game_state with
+      match client_state.game.game_state with
       | Game.Game_state.First_moves -> Move (List.hd_exn move_list_to_take)
       | Game.Game_state.Game_continues ->
-        undraw_highlighted_blocks
-          move_list_to_take
-          ~init_color:
-            (match game.piece_to_move with
-             | Piece.X -> Colors.black
-             | Piece.O -> Colors.white);
-        highlight_ending_positions move_list_to_take;
-        let status = Graphics.wait_next_event [ Button_down ] in
-        let mouse_x = status.mouse_x in
-        let mouse_y = status.mouse_y in
-        let move_to =
-          mouse_in_place_to_move ~mouse_x ~mouse_y move_list_to_take
-        in
-        if not (List.length move_to = 0)
-        then Move (List.hd_exn move_to)
-        else None
+        (* undraw_highlighted_blocks move_list_to_take ~init_color: (match
+           game.piece_to_move with | Piece.X -> Colors.black | Piece.O ->
+           Colors.white); highlight_ending_positions move_list_to_take; *)
+        if not (List.length client_state.moves_to_highlight = 0)
+        then (
+          Core.print_endline "confirming move";
+          let mouse_x, mouse_y = Graphics.mouse_pos () in
+          let move_to =
+            mouse_in_place_to_move
+              ~mouse_x
+              ~mouse_y
+              client_state.moves_to_highlight
+          in
+          if not (List.length move_to = 0)
+          then (
+            client_state.moves_to_highlight <- [];
+            Move (List.hd_exn move_to))
+          else None)
+        else (
+          Core.print_endline "initializing move";
+          client_state.moves_to_highlight <- move_list_to_take;
+          None)
       | _ -> None)
     else if mouse_in_end_move_button ()
     then (
-      match game.last_move_from_piece_to_move with
+      match client_state.game.last_move_from_piece_to_move with
       | None -> None
       | Some _ -> End_turn)
     else if mouse_in_restart_button ()

@@ -17,9 +17,9 @@ end
 val init_exn : unit -> Game.t
 
 (** [render] renders the entire playing area along with snakes and apples. *)
-val render : Game.t -> Player.t -> unit
+val render : Client.t -> unit
 
 (** [read_key] returns a keyboard input, if it's available. *)
-val read_key : Game.t -> Action.t
+val read_key : Client.t -> Action.t
 
 val display_win_message : Piece.t -> Player.t -> unit
