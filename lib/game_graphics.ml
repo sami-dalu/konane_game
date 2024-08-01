@@ -41,7 +41,7 @@ let init_exn () =
        (play_area_width + header_height));
   (* let height = play_area_height / block_size in let width =
      play_area_width / block_size in *)
-  let game = Game.new_game ~height:8 ~width:8 in
+  let game = Game.new_game ~height:8 ~width:8 () in
   (* let one_move_game = Move.Exercises.make_move_exn ~game
      {Move.Exercises.Move.starting_pos = {Position.row = 0; column = 0};
      Move.Exercises.Move.ending_pos = None} in one_move_game *)
