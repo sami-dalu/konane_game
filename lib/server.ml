@@ -31,31 +31,33 @@ type t =
 let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
   : Rpcs.Start_game.Response.t Deferred.t
   =
-  if Queue.is_empty server.player_queue
-  then (
-    let first_player = Player.init ~name:query.name ~piece:Piece.X in
-    let _ = Queue.enqueue server.player_queue first_player in
-    return
-      (Rpcs.Start_game.Response.Game_not_started
-         { your_player = first_player }))
-  else (
-    (* there's someone in the queue already *)
-    let existing_player = Queue.dequeue_exn server.player_queue in
-    let g = Game.new_game ~height:8 ~width:8 in
-    let _ =
-      Hashtbl.add_exn
-        server.game_player_piece_tbl
-        ~key:existing_player
-        ~data:g
-    in
-    let new_p = Player.init ~name:query.name ~piece:Piece.O in
-    let _ =
-      Hashtbl.add_exn server.game_player_piece_tbl ~key:new_p ~data:g
-    in
-    let response =
-      Rpcs.Start_game.Response.Game_started { your_player = new_p }
-    in
-    return response)
+  match query.bot_difficulty with
+  | None ->
+    if Queue.is_empty server.player_queue
+    then (
+      let first_player = Player.init ~name:query.name ~piece:Piece.X in
+      let _ = Queue.enqueue server.player_queue first_player in
+      return
+        (Rpcs.Start_game.Response.Game_not_started
+           { your_player = first_player }))
+    else (
+      (* there's someone in the queue already *)
+      let existing_player = Queue.dequeue_exn server.player_queue in
+      let g = Game.new_game ~height:8 ~width:8 in
+      let _ =
+        Hashtbl.add_exn
+          server.game_player_piece_tbl
+          ~key:existing_player
+          ~data:g
+      in
+      let new_p = Player.init ~name:query.name ~piece:Piece.O in
+      let _ =
+        Hashtbl.add_exn server.game_player_piece_tbl ~key:new_p ~data:g
+      in
+      let response =
+        Rpcs.Start_game.Response.Game_started { your_player = new_p }
+      in
+      return response)
 ;;
 
 let handle_move_query (server : t) _client (query : Rpcs.Take_turn.Query.t) =

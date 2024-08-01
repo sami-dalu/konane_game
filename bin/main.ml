@@ -133,7 +133,8 @@ let menu =
     (let%map_open.Command () = return () in
      fun () ->
        let%bind main_menu_result =
-         Fzf.pick_one (Pick_from.inputs [ "Player v. Player" ])
+         Fzf.pick_one
+           (Pick_from.inputs [ "Player v. Player"; "Player v. Bot" ])
        in
        match main_menu_result with
        | Ok (Some s) ->
@@ -208,6 +209,24 @@ let menu =
                 | _ ->
                   print_string "invalid option";
                   Deferred.unit))
+          | "Player v. Bot" ->
+            let _ = print_string "Enter your name.\n" in
+            let%bind _name = stubborn_read_str () in
+            let initial_server_t =
+              { Demo1.Server.player_queue = Queue.create ()
+              ; game_player_piece_tbl = Demo1.Player.Table.create ()
+              }
+            in
+            let%bind server =
+              Rpc.Connection.serve
+                ~implementations:(implementations_w_server initial_server_t)
+                ~initial_connection_state:
+                  (fun
+                    _client_identity _client_addr -> ())
+                ~where_to_listen:(Tcp.Where_to_listen.of_port 14624)
+                ()
+            in
+            Tcp.Server.close_finished server
           | _ -> Deferred.unit)
        | _ -> Deferred.unit)
 ;;

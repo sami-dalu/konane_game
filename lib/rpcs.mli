@@ -18,6 +18,7 @@ module Start_game : sig
     type t =
       { name : string
       ; host_and_port : Host_and_port.t
+      ; bot_difficulty : Player.Difficulty.t option
       }
     [@@deriving sexp_of, bin_io]
   end
