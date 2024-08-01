@@ -39,9 +39,9 @@ let init_exn () =
        " %dx%d"
        play_area_height
        (play_area_width + header_height));
-  let height = play_area_height / block_size in
-  let width = play_area_width / block_size in
-  let game = Game.new_game ~height ~width in
+  (* let height = play_area_height / block_size in let width =
+     play_area_width / block_size in *)
+  let game = Game.new_game ~height:8 ~width:8 in
   (* let one_move_game = Move.Exercises.make_move_exn ~game
      {Move.Exercises.Move.starting_pos = {Position.row = 0; column = 0};
      Move.Exercises.Move.ending_pos = None} in one_move_game *)
@@ -347,6 +347,8 @@ let render (client_state : Client.t) =
      [display_mode] to true and then synchronize. This guarantees that there
      won't be flickering! *)
   Graphics.display_mode false;
+  (* let current_window_width = Graphics.size_x () in let
+     current_window_height = Graphics.size_y () in *)
   let game_state = client_state.game.game_state in
   let board = client_state.game.board in
   let board_width = client_state.game.board_width in
