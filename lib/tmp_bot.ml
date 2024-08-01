@@ -57,6 +57,7 @@ let rec make_move_no_mutate ~(game : Game.t) (moves_made : Move.t list) =
     ; game_state = new_game_state
     ; piece_to_move = game.piece_to_move (* no flip yet *)
     ; last_move_from_piece_to_move = None
+    ; bot_difficulty = game.bot_difficulty
     }
   in
   match move_to_make_now.dir, move_to_make_now.ending_pos with

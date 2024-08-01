@@ -51,37 +51,21 @@ let _start_server =
        Tcp.Server.close_finished server)
 ;;
 
-let _start_game =
-  Command.async
-    ~summary:"connect to server and begin game"
-    (let%map_open.Command () = return ()
-     and port = flag "-port" (required int) ~doc:"INT server port"
-     and host = flag "-hostname" (required string) ~doc:"string of hostname"
-     and name = flag "-name" (required string) ~doc:"name of player" in
-     let query =
-       { Demo1.Rpcs.Start_game.Query.name
-       ; host_and_port = { Host_and_port.host = "localhost"; port }
-       }
-     in
-     fun () ->
-       let%bind start_game_response =
-         Rpc.Connection.with_client
-           (Tcp.Where_to_connect.of_host_and_port
-              { Host_and_port.port; Host_and_port.host })
-           (fun conn ->
-             Rpc.Rpc.dispatch_exn Demo1.Rpcs.Start_game.rpc conn query)
-       in
-       (match start_game_response with
-        | Error _ -> print_string "error lol"
-        | Ok response ->
-          print_s (Demo1.Rpcs.Start_game.Response.sexp_of_t response);
-          (match response with
-           | Game_started { your_player = who_am_i } ->
-             Demo1.Run.run host port who_am_i
-           | Game_not_started { your_player = who_am_i } ->
-             Demo1.Run.run host port who_am_i));
-       Deferred.never ())
-;;
+(* let _start_game = Command.async ~summary:"connect to server and begin
+   game" (let%map_open.Command () = return () and port = flag "-port"
+   (required int) ~doc:"INT server port" and host = flag "-hostname"
+   (required string) ~doc:"string of hostname" and name = flag "-name"
+   (required string) ~doc:"name of player" in let query = {
+   Demo1.Rpcs.Start_game.Query.name ; host_and_port = { Host_and_port.host =
+   "localhost"; port } } in fun () -> let%bind start_game_response =
+   Rpc.Connection.with_client (Tcp.Where_to_connect.of_host_and_port {
+   Host_and_port.port; Host_and_port.host }) (fun conn ->
+   Rpc.Rpc.dispatch_exn Demo1.Rpcs.Start_game.rpc conn query) in (match
+   start_game_response with | Error _ -> print_string "error lol" | Ok
+   response -> print_s (Demo1.Rpcs.Start_game.Response.sexp_of_t response);
+   (match response with | Game_started { your_player = who_am_i } ->
+   Demo1.Run.run host port who_am_i | Game_not_started { your_player =
+   who_am_i } -> Demo1.Run.run host port who_am_i)); Deferred.never ()) ;; *)
 
 (* let command = Command.group ~summary:"Konane Game" [ "start-server",
    start_server; "start-game", start_game ] ;; *)
@@ -116,6 +100,35 @@ let rec stubborn_read_str () =
     | `Eof -> stubborn_read_str ()
   in
   host
+;;
+
+let rec stubborn_read_difficulty () =
+  print_string "Choose a bot difficulty.\n";
+  let%bind bot_difficulty_result =
+    Fzf.pick_one (Pick_from.inputs [ "Easy"; "Medium"; "Hard" ])
+  in
+  match bot_difficulty_result with
+  | Ok (Some s) ->
+    (match s with
+     | "Easy" -> return Demo1.Player.Difficulty.Easy
+     | "Medium" -> return Demo1.Player.Difficulty.Medium
+     | "Hard" -> return Demo1.Player.Difficulty.Hard
+     | _ -> stubborn_read_difficulty ())
+  | _ -> stubborn_read_difficulty ()
+;;
+
+let rec stubborn_read_piece () =
+  print_string "Choose your piece.\n";
+  let%bind bot_piece_result =
+    Fzf.pick_one (Pick_from.inputs [ "Black"; "White" ])
+  in
+  match bot_piece_result with
+  | Ok (Some s) ->
+    (match s with
+     | "Black" -> return Demo1.Piece.X
+     | "White" -> return Demo1.Piece.O
+     | _ -> stubborn_read_piece ())
+  | _ -> stubborn_read_piece ()
 ;;
 
 (* let stubborn_read_host_and_port () = let%bind host = stubborn_read_str ()
@@ -183,6 +196,7 @@ let menu =
                     { Demo1.Rpcs.Start_game.Query.name
                     ; host_and_port =
                         { Host_and_port.host = "localhost"; port }
+                    ; bot_difficulty_and_piece = None
                     }
                   in
                   let host_and_port = { Host_and_port.host; port } in
@@ -211,7 +225,10 @@ let menu =
                   Deferred.unit))
           | "Player v. Bot" ->
             let _ = print_string "Enter your name.\n" in
-            let%bind _name = stubborn_read_str () in
+            let%bind name = stubborn_read_str () in
+            let _ = print_string "Choose a bot difficulty.\n" in
+            let%bind difficulty = stubborn_read_difficulty () in
+            let%bind piece = stubborn_read_piece () in
             let initial_server_t =
               { Demo1.Server.player_queue = Queue.create ()
               ; game_player_piece_tbl = Demo1.Player.Table.create ()
@@ -226,13 +243,40 @@ let menu =
                 ~where_to_listen:(Tcp.Where_to_listen.of_port 14624)
                 ()
             in
-            Tcp.Server.close_finished server
+            let _ = Tcp.Server.close_finished server in
+            let query =
+              { Demo1.Rpcs.Start_game.Query.name
+              ; host_and_port =
+                  { Host_and_port.host = "localhost"; port = 14624 }
+              ; bot_difficulty_and_piece =
+                  Some (difficulty, Demo1.Piece.flip piece)
+              }
+            in
+            let host_and_port =
+              { Host_and_port.host = "localhost"; port = 14624 }
+            in
+            let%bind start_game_response =
+              Rpc.Connection.with_client
+                (Tcp.Where_to_connect.of_host_and_port host_and_port)
+                (fun conn ->
+                   Rpc.Rpc.dispatch_exn Demo1.Rpcs.Start_game.rpc conn query)
+            in
+            (match start_game_response with
+             | Error _ -> print_string "error lol"
+             | Ok response ->
+               print_s (Demo1.Rpcs.Start_game.Response.sexp_of_t response);
+               (match response with
+                | Game_started { your_player = who_am_i } ->
+                  Demo1.Run.run "localhost" 14624 who_am_i
+                | Game_not_started { your_player = who_am_i } ->
+                  Demo1.Run.run "localhost" 14624 who_am_i));
+            Deferred.never ()
           | _ -> Deferred.unit)
        | _ -> Deferred.unit)
 ;;
 
 let () = Command_unix.run menu
-(* let results = Fzf.Blocking.pick_one (Pick_from.inputs [ "a"; "b"; "c" ])
+(* let results = Fzf.Blocking.pick_one (Pick_from.inputs [ "a"; "b"; "cn" ])
    in print_s [%message (results : string option)]; let initial_game =
    Demo1.Game.new_game ~height:8 ~width:8 in *)
 (* Demo1.Game.print initial_game; *)

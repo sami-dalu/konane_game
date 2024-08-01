@@ -17,6 +17,7 @@ type t =
   ; mutable game_state : Game_state.t
   ; mutable piece_to_move : Piece.t
   ; mutable last_move_from_piece_to_move : Move.t option
+  ; bot_difficulty : Player.Difficulty.t option
   }
 [@@deriving sexp, bin_io]
 
@@ -44,13 +45,14 @@ let in_board_range { Position.row = r; column = c } (game : t) =
   r >= 0 && c >= 0 && r < game.board_height && c < game.board_width
 ;;
 
-let new_game ~height ~width =
+let new_game ?(bot_diff : Player.Difficulty.t option) ~height ~width () =
   { board_height = height
   ; board_width = width
   ; board = new_board ~height ~width
   ; game_state = Game_state.First_moves
   ; piece_to_move = Piece.X
   ; last_move_from_piece_to_move = None
+  ; bot_difficulty = bot_diff
   }
 ;;
 
@@ -290,7 +292,7 @@ let available_captures_for_player (game : t) ~(my_piece : Piece.t)
 ;;
 
 let%expect_test "print_initial_game" =
-  let new_game = new_game ~height:8 ~width:8 in
+  let new_game = new_game ~height:8 ~width:8 () in
   print new_game;
   [%expect
     {|
@@ -313,7 +315,7 @@ let%expect_test "print_initial_game" =
 ;;
 
 let%expect_test "get_moves_in_initial_game" =
-  let new_game = new_game ~height:8 ~width:8 in
+  let new_game = new_game ~height:8 ~width:8 () in
   let initial_game = new_game in
   let moves = available_captures_for_player initial_game ~my_piece:Piece.X in
   print_s [%sexp (moves : Move.t list)];
@@ -390,7 +392,7 @@ let evaluate t =
 ;;
 
 let%expect_test "black_remove_top_left" =
-  let initial_game = new_game ~height:8 ~width:8 in
+  let initial_game = new_game ~height:8 ~width:8 () in
   let _ =
     make_move_exn
       ~game:initial_game

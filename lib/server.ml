@@ -31,11 +31,12 @@ type t =
 let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
   : Rpcs.Start_game.Response.t Deferred.t
   =
-  match query.bot_difficulty with
+  let bot_info = query.bot_difficulty_and_piece in
+  match bot_info with
   | None ->
     if Queue.is_empty server.player_queue
     then (
-      let first_player = Player.init ~name:query.name ~piece:Piece.X in
+      let first_player = Player.init_human ~name:query.name ~piece:Piece.X in
       let _ = Queue.enqueue server.player_queue first_player in
       return
         (Rpcs.Start_game.Response.Game_not_started
@@ -43,14 +44,14 @@ let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
     else (
       (* there's someone in the queue already *)
       let existing_player = Queue.dequeue_exn server.player_queue in
-      let g = Game.new_game ~height:8 ~width:8 in
+      let g = Game.new_game ~height:8 ~width:8 () in
       let _ =
         Hashtbl.add_exn
           server.game_player_piece_tbl
           ~key:existing_player
           ~data:g
       in
-      let new_p = Player.init ~name:query.name ~piece:Piece.O in
+      let new_p = Player.init_human ~name:query.name ~piece:Piece.O in
       let _ =
         Hashtbl.add_exn server.game_player_piece_tbl ~key:new_p ~data:g
       in
@@ -58,6 +59,18 @@ let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
         Rpcs.Start_game.Response.Game_started { your_player = new_p }
       in
       return response)
+  | Some (difficulty, bot_piece) ->
+    let g = Game.new_game ~height:8 ~width:8 () in
+    let bot_player = Player.init_bot ~piece:bot_piece ~difficulty in
+    Hashtbl.add_exn server.game_player_piece_tbl ~key:bot_player ~data:g;
+    let new_p =
+      Player.init_human ~name:query.name ~piece:(Piece.flip bot_piece)
+    in
+    Hashtbl.add_exn server.game_player_piece_tbl ~key:new_p ~data:g;
+    let response =
+      Rpcs.Start_game.Response.Game_started { your_player = new_p }
+    in
+    return response
 ;;
 
 let handle_move_query (server : t) _client (query : Rpcs.Take_turn.Query.t) =

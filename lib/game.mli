@@ -15,12 +15,20 @@ type t =
   ; mutable game_state : Game_state.t
   ; mutable piece_to_move : Piece.t
   ; mutable last_move_from_piece_to_move : Move.t option
+  ; bot_difficulty : Player.Difficulty.t option
   }
 [@@deriving sexp, bin_io]
 
 val make_move_exn : game:t -> Move.t -> unit
 val new_board : height:int -> width:int -> Piece.t Position.Map.t
-val new_game : height:int -> width:int -> t
+
+val new_game
+  :  ?bot_diff:Player.Difficulty.t
+  -> height:int
+  -> width:int
+  -> unit
+  -> t
+
 val print : t -> unit
 val restart : t -> unit
 

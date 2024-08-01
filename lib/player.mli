@@ -6,7 +6,14 @@ module Difficulty : sig
     | Easy
     | Medium
     | Hard
-  [@@deriving bin_io, sexp_of]
+  [@@deriving bin_io, sexp, sexp_of]
+end
+
+module Player_kind : sig
+  type t =
+    | Human of { name : string }
+    | Bot of { difficulty : Difficulty.t }
+  [@@deriving sexp, equal, bin_io, compare, hash]
 end
 
 type t [@@deriving sexp, equal, bin_io, compare, hash]
