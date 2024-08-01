@@ -431,10 +431,9 @@ let read_key (client_state : Client.t) : Action.t =
               ~mouse_y
               client_state.moves_to_highlight
           in
+          client_state.moves_to_highlight <- [];
           if not (List.length move_to = 0)
-          then (
-            client_state.moves_to_highlight <- [];
-            Move (List.hd_exn move_to))
+          then Move (List.hd_exn move_to)
           else None)
         else (
           Core.print_endline "initializing move";
