@@ -14,7 +14,7 @@ module Action : sig
 end
 
 (** [init_exn] fails if called twice. *)
-val init_exn : unit -> Game.t
+val init_exn : board_height:int -> board_width:int -> Game.t
 
 (** [render] renders the entire playing area along with snakes and apples. *)
 val render : Client.t -> unit
@@ -22,4 +22,9 @@ val render : Client.t -> unit
 (** [read_key] returns a keyboard input, if it's available. *)
 val read_key : Client.t -> Action.t
 
-val display_win_message : Piece.t -> Player.t -> unit
+val display_win_message
+  :  Piece.t
+  -> Player.t
+  -> board_height:int
+  -> board_width:int
+  -> unit
