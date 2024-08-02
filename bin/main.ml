@@ -77,19 +77,24 @@ let _start_server =
    string option)]; Demo1.Run.run (); Core.never_returns (Async.Scheduler.go
    ())) *)
 
-let rec stubborn_read_int () =
+let rec stubborn_read_int (reading_port : bool) () =
   let stdin = Lazy.force Reader.stdin in
   match%bind Reader.read_line stdin with
   | `Ok s ->
-    let num_opt = Int.of_string_opt s in
-    (match num_opt with
-     | Some num -> return num
-     | None ->
-       let _ = print_string "Invalid number, please try again.\n" in
-       stubborn_read_int ())
+    if String.equal s "" && not reading_port
+    then return 8
+    else if String.equal s ""
+    then return 10001
+    else (
+      let num_opt = Int.of_string_opt s in
+      match num_opt with
+      | Some num -> return num
+      | None ->
+        let _ = print_string "Invalid number, please try again.\n" in
+        stubborn_read_int reading_port ())
   | `Eof ->
     let _ = print_string "Invalid number, please try again.\n" in
-    stubborn_read_int ()
+    stubborn_read_int reading_port ()
 ;;
 
 let rec stubborn_read_str () =
@@ -167,7 +172,7 @@ let menu =
                       "Enter the port the server should listen in on:\n"
                   in
                   (* start the server *)
-                  let%bind port = stubborn_read_int () in
+                  let%bind port = stubborn_read_int true () in
                   let _ = print_string "awesome, starting server!" in
                   let initial_server_t =
                     { Demo1.Server.player_queue = Queue.create ()
@@ -189,14 +194,29 @@ let menu =
                   let _ = print_string "Enter your name.\n" in
                   let%bind name = stubborn_read_str () in
                   let _ = print_string "Enter your port.\n" in
-                  let%bind port = stubborn_read_int () in
+                  let%bind port = stubborn_read_int true () in
                   let _ = print_string "Enter your host.\n" in
                   let%bind host = stubborn_read_str () in
+                  print_string
+                    "Enter your desired game height (press enter to default \
+                     to 8)\n\
+                     .";
+                  let%bind height = stubborn_read_int false () in
+                  print_string
+                    "Enter your desired game width (press enter to default \
+                     to 8)\n\
+                     .";
+                  let%bind width = stubborn_read_int false () in
                   let query =
                     { Demo1.Rpcs.Start_game.Query.name
                     ; host_and_port =
                         { Host_and_port.host = "localhost"; port }
                     ; bot_difficulty_and_piece = None
+                    ; game_config =
+                        { Demo1.Game_config.height
+                        ; width
+                        ; mode = Demo1.Game_config.Game_mode.Normal
+                        }
                     }
                   in
                   let host_and_port = { Host_and_port.host; port } in
@@ -234,6 +254,12 @@ let menu =
               ; game_player_piece_tbl = Demo1.Player.Table.create ()
               }
             in
+            print_string
+              "Enter your desired game height (press enter to default to 8).\n";
+            let%bind height = stubborn_read_int false () in
+            print_string
+              "Enter your desired game width (press enter to default to 8).\n";
+            let%bind width = stubborn_read_int false () in
             let%bind server =
               Rpc.Connection.serve
                 ~implementations:(implementations_w_server initial_server_t)
@@ -250,6 +276,11 @@ let menu =
                   { Host_and_port.host = "localhost"; port = 14624 }
               ; bot_difficulty_and_piece =
                   Some (difficulty, Demo1.Piece.flip piece)
+              ; game_config =
+                  { Demo1.Game_config.height
+                  ; width
+                  ; mode = Demo1.Game_config.Game_mode.Normal
+                  }
               }
             in
             let host_and_port =
