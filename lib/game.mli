@@ -16,6 +16,8 @@ type t =
   ; mutable piece_to_move : Piece.t
   ; mutable last_move_from_piece_to_move : Move.t option
   ; bot_difficulty : Player.Difficulty.t option
+  ; mutable player1 : Player.t option
+  ; mutable player2 : Player.t option
   }
 [@@deriving sexp, bin_io]
 
