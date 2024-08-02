@@ -12,3 +12,6 @@ type t =
 [@@deriving sexp_of, bin_io]
 
 val default_8_by_8 : unit -> t
+
+include Comparable.S_binable with type t := t
+include Hashable.S_binable with type t := t

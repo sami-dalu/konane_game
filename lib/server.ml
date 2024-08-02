@@ -21,7 +21,7 @@ open! Async
 (* let start_test_impl _client (query : Rpcs.Start_game.Query.t) = let ;; *)
 
 type t =
-  { player_queue : Player.t Queue.t
+  { config_queue_tbl : (Game_config.t, Player.t Queue.t) Hashtbl.t
   ; game_player_piece_tbl : (Player.t, Game.t) Hashtbl.t
   }
 
@@ -41,16 +41,24 @@ let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
   let bot_info = query.bot_difficulty_and_piece in
   match bot_info with
   | None ->
-    if Queue.is_empty server.player_queue
+    let queue_opt = Hashtbl.find server.config_queue_tbl query.game_config in
+    if Option.is_none queue_opt
     then (
+      let queue = Queue.create () in
+      Hashtbl.add_exn
+        server.config_queue_tbl
+        ~key:query.game_config
+        ~data:queue;
       let first_player = Player.init_human ~name:query.name ~piece:Piece.X in
-      let _ = Queue.enqueue server.player_queue first_player in
+      Queue.enqueue queue first_player;
       return
         (Rpcs.Start_game.Response.Game_not_started
            { your_player = first_player }))
     else (
       (* there's someone in the queue already *)
-      let existing_player = Queue.dequeue_exn server.player_queue in
+      let existing_queue = Option.value_exn queue_opt in
+      let existing_player = Queue.dequeue_exn existing_queue in
+      Hashtbl.remove server.config_queue_tbl query.game_config;
       let g =
         Game.new_game
           ~height:query.game_config.height
