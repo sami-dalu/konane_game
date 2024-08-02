@@ -20,6 +20,7 @@ type t =
   ; bot_difficulty : Player.Difficulty.t option
   ; mutable player1 : Player.t option
   ; mutable player2 : Player.t option
+  ; mutable last_move_played : Move.t option
   }
 [@@deriving sexp, bin_io]
 
@@ -57,6 +58,7 @@ let new_game ?(bot_diff : Player.Difficulty.t option) ~height ~width () =
   ; bot_difficulty = bot_diff
   ; player1 = None
   ; player2 = None
+  ; last_move_played = None
   }
 ;;
 
