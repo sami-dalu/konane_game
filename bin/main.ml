@@ -108,9 +108,11 @@ let rec stubborn_read_str () =
 ;;
 
 let rec stubborn_read_difficulty () =
-  print_string "Choose a bot difficulty.\n";
   let%bind bot_difficulty_result =
-    Fzf.pick_one (Pick_from.inputs [ "Easy"; "Medium"; "Hard" ])
+    Fzf.pick_one
+      ~header:"Choose a bot difficulty."
+      ~prompt_at_top:()
+      (Pick_from.inputs [ "Easy"; "Medium"; "Hard" ])
   in
   match bot_difficulty_result with
   | Ok (Some s) ->
@@ -123,9 +125,11 @@ let rec stubborn_read_difficulty () =
 ;;
 
 let rec stubborn_read_piece () =
-  print_string "Choose your piece.\n";
   let%bind bot_piece_result =
-    Fzf.pick_one (Pick_from.inputs [ "Black"; "White" ])
+    Fzf.pick_one
+      ~header:"Choose a piece to play."
+      ~prompt_at_top:()
+      (Pick_from.inputs [ "Black"; "White" ])
   in
   match bot_piece_result with
   | Ok (Some s) ->
@@ -253,7 +257,7 @@ let menu =
           | "Player v. Bot" ->
             let _ = print_string "Enter your name.\n" in
             let%bind name = stubborn_read_str () in
-            let _ = print_string "Choose a bot difficulty.\n" in
+            print_string "Choose a bot difficulty.\n";
             let%bind difficulty = stubborn_read_difficulty () in
             let%bind piece = stubborn_read_piece () in
             let initial_server_t =
