@@ -169,7 +169,8 @@ let menu =
                 | "Start a server" ->
                   let _ =
                     print_string
-                      "Enter the port the server should listen in on:\n"
+                      "Enter the port the server should listen in on \
+                       (default to 8) \n"
                   in
                   (* start the server *)
                   let%bind port = stubborn_read_int true () in
@@ -193,7 +194,10 @@ let menu =
                 | "Join a game" ->
                   let _ = print_string "Enter your name.\n" in
                   let%bind name = stubborn_read_str () in
-                  let _ = print_string "Enter your port.\n" in
+                  let _ =
+                    print_string
+                      "Enter your port (hit enter for default of 10001).\n"
+                  in
                   let%bind port = stubborn_read_int true () in
                   let _ = print_string "Enter your host.\n" in
                   let%bind host = stubborn_read_str () in
