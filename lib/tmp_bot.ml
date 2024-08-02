@@ -92,6 +92,19 @@ let get_next_game_states (game : Game.t) =
 ;;
 
 (* FLIP THE PIECE NOW *)
+let number_of_pieces_on_edge (game : Game.t) ~piece_to_eval =
+  let height = game.board_height in
+  let width = game.board_width in
+  Map.fold game.board ~init:0 ~f:(fun ~key:pos ~data:piece acc ->
+    if Piece.equal piece_to_eval piece
+    then (
+      let row = pos.row in
+      let col = pos.column in
+      if row = 0 || col = 0 || row = height - 1 || col = width - 1
+      then acc + 1
+      else acc)
+    else acc)
+;;
 
 let score game ~me ~depth maximizing_player ~evaluated_game =
   match evaluated_game with
@@ -100,6 +113,11 @@ let score game ~me ~depth maximizing_player ~evaluated_game =
     then Int.max_value - 6 + depth
     else Int.min_value + 6 - depth
   | _ ->
+    let num_of_my_edge_pieces =
+      number_of_pieces_on_edge game ~piece_to_eval:me
+    in
+    (* let num_of_enemy_edge_pieces = number_of_pieces_on_edge game
+       ~piece_to_eval:(Piece.flip me) in *)
     let available_moves_at_current_state =
       Game.available_captures_for_player game ~my_piece:me
     in
@@ -113,17 +131,19 @@ let score game ~me ~depth maximizing_player ~evaluated_game =
     if maximizing_player
     then
       Int.max_value
-      - 30
+      - 40
       + number_of_available_moves
       - (2 * number_of_enemy_moves)
+      + (2 * num_of_my_edge_pieces)
       (* - number_of_enemy_moves *)
       - 6
       + depth
     else
       Int.min_value
-      + 30
+      + 40
       - number_of_available_moves
       + (2 * number_of_enemy_moves)
+      - (2 * num_of_my_edge_pieces)
       (* + number_of_enemy_moves *)
       + 6
       - depth

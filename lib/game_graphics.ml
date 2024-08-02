@@ -484,7 +484,7 @@ let render (client_state : Client.t) =
   (match player1, player2 with
    | Some p1, Some p2 ->
      Graphics.set_window_title
-       (Player.get_name p1 ^ "versus" ^ Player.get_name p2)
+       (Player.get_name p1 ^ " versus " ^ Player.get_name p2)
    | _, _ -> ());
   draw_header
     ~piece_to_move:client_state.game.piece_to_move
