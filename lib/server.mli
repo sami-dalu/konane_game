@@ -10,7 +10,7 @@ open! Async
    Deferred.t *)
 
 type t =
-  { player_queue : Player.t Queue.t
+  { config_queue_tbl : (Game_config.t, Player.t Queue.t) Hashtbl.t
   ; game_player_piece_tbl : (Player.t, Game.t) Hashtbl.t
   }
 
