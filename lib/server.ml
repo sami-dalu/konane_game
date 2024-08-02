@@ -25,12 +25,19 @@ type t =
   ; game_player_piece_tbl : (Player.t, Game.t) Hashtbl.t
   }
 
+let make_moves_exn (game : Game.t) (move_list : Move.t list) =
+  List.iter move_list ~f:(fun move -> Game.make_move_exn ~game move);
+  let _ = game.piece_to_move <- Piece.flip game.piece_to_move in
+  game.last_move_from_piece_to_move <- None
+;;
+
 (* let _handle_test_query _client (query : Rpcs.Test.Query.t) :
    Rpcs.Test.Response.t Deferred.t = return (query + 1) ;; *)
 
 let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
   : Rpcs.Start_game.Response.t Deferred.t
   =
+  print_string "handling a start query";
   let bot_info = query.bot_difficulty_and_piece in
   match bot_info with
   | None ->
@@ -60,7 +67,7 @@ let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
       in
       return response)
   | Some (difficulty, bot_piece) ->
-    let g = Game.new_game ~height:8 ~width:8 () in
+    let g = Game.new_game ~bot_diff:difficulty ~height:8 ~width:8 () in
     let bot_player = Player.init_bot ~piece:bot_piece ~difficulty in
     Hashtbl.add_exn server.game_player_piece_tbl ~key:bot_player ~data:g;
     let new_p =
@@ -102,7 +109,25 @@ let handle_move_query (server : t) _client (query : Rpcs.Take_turn.Query.t) =
 
 let handle_wait_query (server : t) _client (query : Rpcs.Wait_turn.Query.t) =
   let g = Hashtbl.find_exn server.game_player_piece_tbl query in
-  return g
+  print_s [%message "before moves are made " (g : Game.t)];
+  match g.bot_difficulty with
+  | None -> return g
+  | Some difficulty ->
+    if not (Piece.equal g.piece_to_move (Player.get_piece query))
+    then (
+      let depth =
+        match difficulty with
+        | Player.Difficulty.Easy -> 1
+        | Medium -> 2
+        | Hard -> 3
+      in
+      let moves =
+        Tmp_bot.use_minimax_to_find_best_moves g ~depth ~me:g.piece_to_move
+      in
+      let%bind () = Clock.after (Time_float.Span.of_sec 5.) in
+      make_moves_exn g moves;
+      return g)
+    else return g
 ;;
 
 let handle_end_query (server : t) _client (query : Rpcs.End_turn.Query.t) =

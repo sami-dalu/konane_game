@@ -55,7 +55,9 @@ let handle_keys (client_state : Client.t) ~game_over host port =
          | Error _ -> print_string "error start"
          | Ok response ->
            (match response with
-            | Success { game = new_game } -> client_state.game <- new_game
+            | Success { game = new_game } ->
+              client_state.game <- new_game;
+              Game_graphics.render client_state
             | Failure -> ()));
         Deferred.return ())
       else Deferred.return ()
