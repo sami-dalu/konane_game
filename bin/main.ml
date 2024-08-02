@@ -36,7 +36,7 @@ let _start_server =
      fun () ->
        let _ = print_int port in
        let initial_server_t =
-         { Demo1.Server.player_queue = Queue.create ()
+         { Demo1.Server.config_queue_tbl = Demo1.Game_config.Table.create ()
          ; game_player_piece_tbl = Demo1.Player.Table.create ()
          }
        in
@@ -176,7 +176,8 @@ let menu =
                   let%bind port = stubborn_read_int true () in
                   let _ = print_string "awesome, starting server!" in
                   let initial_server_t =
-                    { Demo1.Server.player_queue = Queue.create ()
+                    { Demo1.Server.config_queue_tbl =
+                        Demo1.Game_config.Table.create ()
                     ; game_player_piece_tbl = Demo1.Player.Table.create ()
                     }
                   in
@@ -256,7 +257,8 @@ let menu =
             let%bind difficulty = stubborn_read_difficulty () in
             let%bind piece = stubborn_read_piece () in
             let initial_server_t =
-              { Demo1.Server.player_queue = Queue.create ()
+              { Demo1.Server.config_queue_tbl =
+                  Demo1.Game_config.Table.create ()
               ; game_player_piece_tbl = Demo1.Player.Table.create ()
               }
             in
