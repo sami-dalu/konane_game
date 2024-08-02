@@ -117,9 +117,9 @@ let handle_keys (client_state : Client.t) ~game_over host port =
    Restart -> Game.restart game; game_over := false; print_endline "test" | _
    -> ()) ;; *)
 
-let run host port who_am_i =
+let run host port who_am_i (game_config : Game_config.t) =
   let client_state =
-    { Client.game = Game_graphics.init_exn ~board_height:8 ~board_width:8
+    { Client.game = Game_graphics.init_exn game_config
     ; player = who_am_i
     ; moves_to_highlight = []
     }

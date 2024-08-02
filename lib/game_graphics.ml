@@ -30,7 +30,7 @@ end
 
 let only_one : bool ref = ref false
 
-let init_exn ~board_height ~board_width =
+let init_exn (game_config : Game_config.t) =
   let open Constants in
   (* Should raise if called twice *)
   if !only_one
@@ -40,11 +40,13 @@ let init_exn ~board_height ~board_width =
   Graphics.open_graph
     (Printf.sprintf
        " %dx%d"
-       (block_size * board_width)
-       ((block_size * board_height) + header_height));
+       (block_size * game_config.width)
+       ((block_size * game_config.height) + header_height));
   (* let height = play_area_height / block_size in let width =
      play_area_width / block_size in *)
-  let game = Game.new_game ~height:board_height ~width:board_width () in
+  let game =
+    Game.new_game ~height:game_config.height ~width:game_config.width ()
+  in
   (* let one_move_game = Move.Exercises.make_move_exn ~game
      {Move.Exercises.Move.starting_pos = {Position.row = 0; column = 0};
      Move.Exercises.Move.ending_pos = None} in one_move_game *)

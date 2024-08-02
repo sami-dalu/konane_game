@@ -14,7 +14,7 @@ module Action : sig
 end
 
 (** [init_exn] fails if called twice. *)
-val init_exn : board_height:int -> board_width:int -> Game.t
+val init_exn : Game_config.t -> Game.t
 
 (** [render] renders the entire playing area along with snakes and apples. *)
 val render : Client.t -> unit
