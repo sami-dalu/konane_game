@@ -45,5 +45,11 @@ let init_bot ~piece ~difficulty =
 let get_piece t = t.piece
 
 let get_name t =
-  match t.player_kind with Human { name } -> name | Bot _ -> "BOT"
+  match t.player_kind with
+  | Human { name } -> name
+  | Bot { difficulty = diff } ->
+    (match diff with
+     | Difficulty.Easy -> "EASY BOT"
+     | Medium -> "MEDIUM BOT"
+     | _ -> "HARD BOT")
 ;;
