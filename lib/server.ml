@@ -52,6 +52,7 @@ let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
       (* there's someone in the queue already *)
       let existing_player = Queue.dequeue_exn server.player_queue in
       let g = Game.new_game ~height:8 ~width:8 () in
+      g.player1 <- Some existing_player;
       let _ =
         Hashtbl.add_exn
           server.game_player_piece_tbl
@@ -59,6 +60,7 @@ let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
           ~data:g
       in
       let new_p = Player.init_human ~name:query.name ~piece:Piece.O in
+      g.player2 <- Some new_p;
       let _ =
         Hashtbl.add_exn server.game_player_piece_tbl ~key:new_p ~data:g
       in
@@ -73,6 +75,13 @@ let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
     let new_p =
       Player.init_human ~name:query.name ~piece:(Piece.flip bot_piece)
     in
+    (match bot_piece with
+     | X ->
+       g.player1 <- Some bot_player;
+       g.player2 <- Some new_p
+     | O ->
+       g.player1 <- Some new_p;
+       g.player2 <- Some bot_player);
     Hashtbl.add_exn server.game_player_piece_tbl ~key:new_p ~data:g;
     let response =
       Rpcs.Start_game.Response.Game_started { your_player = new_p }

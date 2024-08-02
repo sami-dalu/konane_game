@@ -119,7 +119,7 @@ let handle_keys (client_state : Client.t) ~game_over host port =
 
 let run host port who_am_i =
   let client_state =
-    { Client.game = Game_graphics.init_exn ~board_height:10 ~board_width:10
+    { Client.game = Game_graphics.init_exn ~board_height:8 ~board_width:8
     ; player = who_am_i
     ; moves_to_highlight = []
     }
