@@ -27,4 +27,6 @@ val display_win_message
   -> Player.t
   -> board_height:int
   -> board_width:int
+  -> player1:Player.t option
+  -> player2:Player.t option
   -> unit

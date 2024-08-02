@@ -43,3 +43,7 @@ let init_bot ~piece ~difficulty =
 ;;
 
 let get_piece t = t.piece
+
+let get_name t =
+  match t.player_kind with Human { name } -> name | Bot _ -> "BOT"
+;;

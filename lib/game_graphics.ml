@@ -189,7 +189,14 @@ let highlight_ending_positions (move_list : Move.t list) ~board_height =
     | _ -> ())
 ;;
 
-let display_win_message winner player ~board_height ~board_width =
+let display_win_message
+  winner
+  player
+  ~board_height
+  ~board_width
+  ~player1
+  ~player2
+  =
   let open Constants in
   if Piece.equal winner (Player.get_piece player)
   then Graphics.set_color Colors._darker_green
@@ -213,7 +220,15 @@ let display_win_message winner player ~board_height ~board_width =
   Graphics.set_color Colors.black;
   Graphics.set_text_size 36;
   Graphics.draw_string
-    (match winner with Piece.X -> "BLACK WINS!" | Piece.O -> "WHITE WINS!")
+    (match winner with
+     | Piece.X ->
+       (match player1 with
+        | Some p -> Player.get_name p ^ " WINS!"
+        | _ -> "ERROR")
+     | Piece.O ->
+       (match player2 with
+        | Some p -> Player.get_name p ^ " WINS!"
+        | _ -> "ERROR"))
 ;;
 
 let mouse_in_piece_to_move_spot (game : Game.t) =
@@ -399,6 +414,8 @@ let render (client_state : Client.t) =
   let board = client_state.game.board in
   let board_width = client_state.game.board_width in
   let board_height = client_state.game.board_height in
+  let player1 = client_state.game.player1 in
+  let player2 = client_state.game.player2 in
   draw_header
     ~piece_to_move:client_state.game.piece_to_move
     ~game_state
@@ -415,6 +432,8 @@ let render (client_state : Client.t) =
        client_state.player
        ~board_height
        ~board_width
+       ~player1
+       ~player2
    | _ ->
      if Piece.equal
           client_state.game.piece_to_move
