@@ -66,7 +66,8 @@ let restart game =
   game.board <- new_board ~height:game.board_height ~width:game.board_width;
   game.game_state <- Game_state.First_moves;
   game.last_move_from_piece_to_move <- None;
-  game.piece_to_move <- Piece.X
+  game.piece_to_move <- Piece.X;
+  game.last_move_played <- None
 ;;
 
 let print t =

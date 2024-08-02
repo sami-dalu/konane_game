@@ -146,7 +146,8 @@ let handle_wait_query (server : t) _client (query : Rpcs.Wait_turn.Query.t) =
         Tmp_bot.use_minimax_to_find_best_moves g ~depth ~me:g.piece_to_move
       in
       let%bind () = Clock.after (Time_float.Span.of_sec 2.5) in
-      make_moves_exn g moves;
+      make_moves_exn g (List.rev moves);
+      g.last_move_played <- Some (List.hd_exn moves);
       return g)
     else return g
 ;;
