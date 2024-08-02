@@ -148,6 +148,7 @@ let handle_wait_query (server : t) _client (query : Rpcs.Wait_turn.Query.t) =
       let%bind () = Clock.after (Time_float.Span.of_sec 2.5) in
       make_moves_exn g (List.rev moves);
       g.last_move_played <- Some (List.hd_exn moves);
+      Game.check_for_win g;
       return g)
     else return g
 ;;
