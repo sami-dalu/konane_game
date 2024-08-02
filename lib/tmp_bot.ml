@@ -106,21 +106,24 @@ let score game ~me ~depth maximizing_player ~evaluated_game =
     let number_of_available_moves =
       List.length available_moves_at_current_state
     in
-    (* let available_moves_for_enemy = Game.available_captures_for_player
-       game ~my_piece:(Piece.flip me) in let number_of_enemy_moves =
-       List.length available_moves_for_enemy in *)
+    let available_moves_for_enemy =
+      Game.available_captures_for_player game ~my_piece:(Piece.flip me)
+    in
+    let number_of_enemy_moves = List.length available_moves_for_enemy in
     if maximizing_player
     then
       Int.max_value
-      - 20
+      - 30
       + number_of_available_moves
+      - (2 * number_of_enemy_moves)
       (* - number_of_enemy_moves *)
       - 6
       + depth
     else
       Int.min_value
-      + 20
+      + 30
       - number_of_available_moves
+      + (2 * number_of_enemy_moves)
       (* + number_of_enemy_moves *)
       + 6
       - depth

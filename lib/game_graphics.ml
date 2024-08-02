@@ -8,13 +8,15 @@ module Colors = struct
   let _green = Graphics.rgb 000 255 000
   let _blue = Graphics.rgb 000 000 255
   let _red = Graphics.rgb 255 000 000
-  let light_red = Graphics.rgb 255 132 130
+  let light_red = Graphics.rgb 255 74 77
   let gold = Graphics.rgb 255 223 0
   let _yellow = Graphics.rgb 255 248 150
   let game_in_progress = Graphics.rgb 100 100 200
   let _brown = Graphics.rgb 212 134 0
   let _light_blue = Graphics.rgb 88 182 237
   let _darker_green = Graphics.rgb 53 166 53
+  let light_pink = Graphics.rgb 255 201 202
+  let darker_pink = Graphics.rgb 252 146 148
 end
 
 module Constants = struct
@@ -79,7 +81,7 @@ let draw_header ~piece_to_move ~game_state ~player ~board_height ~board_width
     | Game_over { winner } ->
       if Piece.equal winner (Player.get_piece player)
       then Colors._darker_green
-      else Colors._red
+      else Colors.light_red
   in
   Graphics.set_color header_color;
   Graphics.fill_rect
@@ -200,7 +202,7 @@ let display_win_message
   let open Constants in
   if Piece.equal winner (Player.get_piece player)
   then Graphics.set_color Colors._darker_green
-  else Graphics.set_color Colors._red;
+  else Graphics.set_color Colors.light_red;
   Graphics.fill_ellipse
     (board_width * block_size / 2)
     (board_height * block_size / 2)
@@ -208,7 +210,7 @@ let display_win_message
     block_size;
   if Piece.equal winner (Player.get_piece player)
   then Graphics.set_color Colors._green
-  else Graphics.set_color Colors.light_red;
+  else Graphics.set_color Colors._red;
   Graphics.draw_ellipse
     (board_width * block_size / 2)
     (board_height * block_size / 2)
@@ -399,6 +401,69 @@ let mouse_in_end_move_button ~board_height ~board_width =
   && mouse_y > (board_height * block_size) + (block_size / 4)
 ;;
 
+let draw_opp_last_move (last_move : Move.t option) ~board_height =
+  let open Constants in
+  match last_move with
+  | Some move ->
+    let starting_pos = move.starting_pos in
+    let srow = starting_pos.row in
+    let scol = starting_pos.column in
+    let srow = convert srow ~board_height * block_size in
+    let scol = scol * block_size in
+    Graphics.set_color Colors.light_pink;
+    Graphics.fill_circle
+      (scol + (block_size / 2))
+      (srow + (block_size / 2))
+      (block_size / 4);
+    (match move.ending_pos with
+     | Some pos ->
+       let row = pos.row in
+       let col = pos.column in
+       let col = col * block_size in
+       let row = convert row ~board_height * block_size in
+       Graphics.set_color Colors.darker_pink;
+       Graphics.fill_circle
+         (col + (block_size / 2))
+         (row + (block_size / 2))
+         (block_size / 4)
+     | _ -> ())
+  | None -> ()
+;;
+
+let undraw_opp_last_move
+  (last_move : Move.t option)
+  ~board_height
+  ~init_color_board
+  ~init_color_piece
+  =
+  let open Constants in
+  match last_move with
+  | Some move ->
+    let starting_pos = move.starting_pos in
+    let srow = starting_pos.row in
+    let scol = starting_pos.column in
+    let srow = convert srow ~board_height * block_size in
+    let scol = scol * block_size in
+    Graphics.set_color init_color_board;
+    Graphics.fill_circle
+      (scol + (block_size / 2))
+      (srow + (block_size / 2))
+      (block_size / 4);
+    (match move.ending_pos with
+     | Some pos ->
+       let row = pos.row in
+       let col = pos.column in
+       let col = col * block_size in
+       let row = convert row ~board_height * block_size in
+       Graphics.set_color init_color_piece;
+       Graphics.fill_circle
+         (col + (block_size / 2))
+         (row + (block_size / 2))
+         (block_size / 4)
+     | _ -> ())
+  | None -> ()
+;;
+
 let render (client_state : Client.t) =
   (* We want double-buffering. See
      https://v2.ocaml.org/releases/4.03/htmlman/libref/Graphics.html for more
@@ -446,6 +511,17 @@ let render (client_state : Client.t) =
      then (
        if not (List.length client_state.moves_to_highlight = 0)
        then (
+         undraw_opp_last_move
+           client_state.game.last_move_played
+           ~board_height
+           ~init_color_board:
+             (match client_state.game.piece_to_move with
+              | Piece.X -> Colors.dark_gray
+              | Piece.O -> Colors.light_gray)
+           ~init_color_piece:
+             (match client_state.game.piece_to_move with
+              | Piece.X -> Colors.white
+              | Piece.O -> Colors.black);
          undraw_highlighted_blocks
            client_state.moves_to_highlight
            ~init_color:
@@ -455,7 +531,9 @@ let render (client_state : Client.t) =
            ~board_height;
          highlight_ending_positions
            client_state.moves_to_highlight
-           ~board_height);
+           ~board_height)
+       else
+         draw_opp_last_move client_state.game.last_move_played ~board_height;
        match client_state.game.last_move_from_piece_to_move with
        | None ->
          draw_highlighted_blocks
