@@ -170,7 +170,7 @@ let menu =
                   let _ =
                     print_string
                       "Enter the port the server should listen in on \
-                       (default to 8) \n"
+                       (default to 10001) \n"
                   in
                   (* start the server *)
                   let%bind port = stubborn_read_int true () in
