@@ -207,16 +207,18 @@ let menu =
                      to 8)\n\
                      .";
                   let%bind width = stubborn_read_int false () in
+                  let game_config =
+                    { Demo1.Game_config.height
+                    ; width
+                    ; mode = Demo1.Game_config.Game_mode.Normal
+                    }
+                  in
                   let query =
                     { Demo1.Rpcs.Start_game.Query.name
                     ; host_and_port =
                         { Host_and_port.host = "localhost"; port }
                     ; bot_difficulty_and_piece = None
-                    ; game_config =
-                        { Demo1.Game_config.height
-                        ; width
-                        ; mode = Demo1.Game_config.Game_mode.Normal
-                        }
+                    ; game_config
                     }
                   in
                   let host_and_port = { Host_and_port.host; port } in
@@ -236,9 +238,9 @@ let menu =
                        (Demo1.Rpcs.Start_game.Response.sexp_of_t response);
                      (match response with
                       | Game_started { your_player = who_am_i } ->
-                        Demo1.Run.run host port who_am_i
+                        Demo1.Run.run host port who_am_i game_config
                       | Game_not_started { your_player = who_am_i } ->
-                        Demo1.Run.run host port who_am_i));
+                        Demo1.Run.run host port who_am_i game_config));
                   Deferred.never ()
                 | _ ->
                   print_string "invalid option";
@@ -260,6 +262,12 @@ let menu =
             print_string
               "Enter your desired game width (press enter to default to 8).\n";
             let%bind width = stubborn_read_int false () in
+            let game_config =
+              { Demo1.Game_config.height
+              ; width
+              ; mode = Demo1.Game_config.Game_mode.Normal
+              }
+            in
             let%bind server =
               Rpc.Connection.serve
                 ~implementations:(implementations_w_server initial_server_t)
@@ -298,9 +306,9 @@ let menu =
                print_s (Demo1.Rpcs.Start_game.Response.sexp_of_t response);
                (match response with
                 | Game_started { your_player = who_am_i } ->
-                  Demo1.Run.run "localhost" 14624 who_am_i
+                  Demo1.Run.run "localhost" 14624 who_am_i game_config
                 | Game_not_started { your_player = who_am_i } ->
-                  Demo1.Run.run "localhost" 14624 who_am_i));
+                  Demo1.Run.run "localhost" 14624 who_am_i game_config));
             Deferred.never ()
           | _ -> Deferred.unit)
        | _ -> Deferred.unit)
