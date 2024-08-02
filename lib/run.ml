@@ -28,7 +28,7 @@ let handle_keys (client_state : Client.t) ~game_over host port =
           Rpc.Rpc.dispatch_exn Rpcs.Wait_turn.rpc conn wait_turn_query)
     in
     (match wait_turn_response with
-     | Error _ -> print_string "error wait"
+     | Error _ -> ()
      | Ok response -> client_state.game <- response);
     Game_graphics.render client_state;
     match Game_graphics.read_key client_state with
