@@ -51,7 +51,12 @@ let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
     else (
       (* there's someone in the queue already *)
       let existing_player = Queue.dequeue_exn server.player_queue in
-      let g = Game.new_game ~height:8 ~width:8 () in
+      let g =
+        Game.new_game
+          ~height:query.game_config.height
+          ~width:query.game_config.width
+          ()
+      in
       g.player1 <- Some existing_player;
       let _ =
         Hashtbl.add_exn
@@ -69,7 +74,13 @@ let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
       in
       return response)
   | Some (difficulty, bot_piece) ->
-    let g = Game.new_game ~bot_diff:difficulty ~height:8 ~width:8 () in
+    let g =
+      Game.new_game
+        ~bot_diff:difficulty
+        ~height:query.game_config.height
+        ~width:query.game_config.width
+        ()
+    in
     let bot_player = Player.init_bot ~piece:bot_piece ~difficulty in
     Hashtbl.add_exn server.game_player_piece_tbl ~key:bot_player ~data:g;
     let new_p =
@@ -134,7 +145,7 @@ let handle_wait_query (server : t) _client (query : Rpcs.Wait_turn.Query.t) =
       let moves =
         Tmp_bot.use_minimax_to_find_best_moves g ~depth ~me:g.piece_to_move
       in
-      let%bind () = Clock.after (Time_float.Span.of_sec 5.) in
+      let%bind () = Clock.after (Time_float.Span.of_sec 2.5) in
       make_moves_exn g moves;
       return g)
     else return g
