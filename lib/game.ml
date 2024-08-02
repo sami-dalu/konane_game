@@ -227,18 +227,14 @@ let available_captures_for_player (game : t) ~(my_piece : Piece.t)
   | First_moves ->
     let top_left = { Position.row = 0; column = 0 } in
     let bottom_right =
-      { Position.row = game.board_height - 1
-      ; column = game.board_height - 1
-      }
+      { Position.row = game.board_height - 1; column = game.board_width - 1 }
     in
     let board_middle_bottom =
-      { Position.row = game.board_height / 2
-      ; column = game.board_height / 2
-      }
+      { Position.row = game.board_height / 2; column = game.board_width / 2 }
     in
     let board_middle_top =
       { Position.row = (game.board_height / 2) - 1
-      ; column = (game.board_height / 2) - 1
+      ; column = (game.board_width / 2) - 1
       }
     in
     let first_positions_for_black =
