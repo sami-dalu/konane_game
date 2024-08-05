@@ -1,6 +1,6 @@
 (lang dune 3.14)
 
-(name gamelib)
+(name konanelib)
 
 (generate_opam_files true)
 
@@ -16,7 +16,7 @@
 (documentation https://url/to/documentation)
 
 (package
- (name gamelib)
+ (name konanelib)
  (synopsis "A short synopsis")
  (description "A longer description")
  (depends ocaml dune)

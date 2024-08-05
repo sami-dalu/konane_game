@@ -17,7 +17,6 @@ module Start_game : sig
   module Query : sig
     type t =
       { name : string
-      ; host_and_port : Host_and_port.t
       ; bot_difficulty_and_piece : (Player.Difficulty.t * Piece.t) option
       ; game_config : Game_config.t
       }

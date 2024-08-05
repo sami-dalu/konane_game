@@ -11,20 +11,20 @@ let implementations_w_server server =
     ~on_unknown_rpc:`Close_connection
     ~implementations:
       [ Rpc.Rpc.implement
-          Gamelib.Rpcs.Start_game.rpc
-          (Gamelib.Server.handle_start_query server)
+          Konanelib.Rpcs.Start_game.rpc
+          (Konanelib.Server.handle_start_query server)
       ; Rpc.Rpc.implement
-          Gamelib.Rpcs.Take_turn.rpc
-          (Gamelib.Server.handle_move_query server)
+          Konanelib.Rpcs.Take_turn.rpc
+          (Konanelib.Server.handle_move_query server)
       ; Rpc.Rpc.implement
-          Gamelib.Rpcs.Wait_turn.rpc
-          (Gamelib.Server.handle_wait_query server)
+          Konanelib.Rpcs.Wait_turn.rpc
+          (Konanelib.Server.handle_wait_query server)
       ; Rpc.Rpc.implement
-          Gamelib.Rpcs.End_turn.rpc
-          (Gamelib.Server.handle_end_query server)
+          Konanelib.Rpcs.End_turn.rpc
+          (Konanelib.Server.handle_end_query server)
       ; Rpc.Rpc.implement
-          Gamelib.Rpcs.Restart_game.rpc
-          (Gamelib.Server.handle_restart_query server)
+          Konanelib.Rpcs.Restart_game.rpc
+          (Konanelib.Server.handle_restart_query server)
       ]
 ;;
 
@@ -36,9 +36,9 @@ let _start_server =
      fun () ->
        let _ = print_int port in
        let initial_server_t =
-         { Gamelib.Server.config_queue_tbl =
-             Gamelib.Game_config.Table.create ()
-         ; game_player_piece_tbl = Gamelib.Player.Table.create ()
+         { Konanelib.Server.config_queue_tbl =
+             Konanelib.Game_config.Table.create ()
+         ; game_player_piece_tbl = Konanelib.Player.Table.create ()
          }
        in
        let%bind server =
@@ -57,17 +57,17 @@ let _start_server =
    (required int) ~doc:"INT server port" and host = flag "-hostname"
    (required string) ~doc:"string of hostname" and name = flag "-name"
    (required string) ~doc:"name of player" in let query = {
-   Gamelib.Rpcs.Start_game.Query.name ; host_and_port = { Host_and_port.host
-   = "localhost"; port } } in fun () -> let%bind start_game_response =
-   Rpc.Connection.with_client (Tcp.Where_to_connect.of_host_and_port {
-   Host_and_port.port; Host_and_port.host }) (fun conn ->
-   Rpc.Rpc.dispatch_exn Gamelib.Rpcs.Start_game.rpc conn query) in (match
-   start_game_response with | Error _ -> print_string "error lol" | Ok
-   response -> print_s (Gamelib.Rpcs.Start_game.Response.sexp_of_t response);
-   (match response with | Game_started { your_player = who_am_i } ->
-   Gamelib.Run.run host port who_am_i | Game_not_started { your_player =
-   who_am_i } -> Gamelib.Run.run host port who_am_i)); Deferred.never ())
-   ;; *)
+   Konanelib.Rpcs.Start_game.Query.name ; host_and_port = {
+   Host_and_port.host = "localhost"; port } } in fun () -> let%bind
+   start_game_response = Rpc.Connection.with_client
+   (Tcp.Where_to_connect.of_host_and_port { Host_and_port.port;
+   Host_and_port.host }) (fun conn -> Rpc.Rpc.dispatch_exn
+   Konanelib.Rpcs.Start_game.rpc conn query) in (match start_game_response
+   with | Error _ -> print_string "error lol" | Ok response -> print_s
+   (Konanelib.Rpcs.Start_game.Response.sexp_of_t response); (match response
+   with | Game_started { your_player = who_am_i } -> Konanelib.Run.run host
+   port who_am_i | Game_not_started { your_player = who_am_i } ->
+   Konanelib.Run.run host port who_am_i)); Deferred.never ()) ;; *)
 
 (* let command = Command.group ~summary:"Konane Game" [ "start-server",
    start_server; "start-game", start_game ] ;; *)
@@ -76,7 +76,7 @@ let _start_server =
 (* Command.async ~summary:"start menu" (Core.print_endline "Welcome to
    Jonane!"; let results = Fzf.Blocking.pick_one ~prompt_at_top:()
    (Pick_from.inputs [ "Player v. Player" ]) in print_s [%message (results :
-   string option)]; Gamelib.Run.run (); Core.never_returns
+   string option)]; Konanelib.Run.run (); Core.never_returns
    (Async.Scheduler.go ())) *)
 
 let rec stubborn_read_int (reading_port : bool) () =
@@ -92,10 +92,10 @@ let rec stubborn_read_int (reading_port : bool) () =
       match num_opt with
       | Some num -> return num
       | None ->
-        let _ = print_string "Invalid number, please try again.\n" in
+        print_string "Invalid number, please try again.\n";
         stubborn_read_int reading_port ())
   | `Eof ->
-    let _ = print_string "Invalid number, please try again.\n" in
+    print_string "Invalid number, please try again.\n";
     stubborn_read_int reading_port ()
 ;;
 
@@ -119,9 +119,9 @@ let rec stubborn_read_difficulty () =
   match bot_difficulty_result with
   | Ok (Some s) ->
     (match s with
-     | "Easy" -> return Gamelib.Player.Difficulty.Easy
-     | "Medium" -> return Gamelib.Player.Difficulty.Medium
-     | "Hard" -> return Gamelib.Player.Difficulty.Hard
+     | "Easy" -> return Konanelib.Player.Difficulty.Easy
+     | "Medium" -> return Konanelib.Player.Difficulty.Medium
+     | "Hard" -> return Konanelib.Player.Difficulty.Hard
      | _ -> stubborn_read_difficulty ())
   | _ -> stubborn_read_difficulty ()
 ;;
@@ -136,8 +136,8 @@ let rec stubborn_read_piece () =
   match bot_piece_result with
   | Ok (Some s) ->
     (match s with
-     | "Black" -> return Gamelib.Piece.X
-     | "White" -> return Gamelib.Piece.O
+     | "Black" -> return Konanelib.Piece.X
+     | "White" -> return Konanelib.Piece.O
      | _ -> stubborn_read_piece ())
   | _ -> stubborn_read_piece ()
 ;;
@@ -173,18 +173,17 @@ let menu =
              | Ok (Some str) ->
                (match str with
                 | "Start a server" ->
-                  let _ =
-                    print_string
-                      "Enter the port the server should listen in on \
-                       (default to 10001) \n"
-                  in
+                  print_string
+                    "Enter the port the server should listen in on (default \
+                     to 10001) \n";
                   (* start the server *)
                   let%bind port = stubborn_read_int true () in
-                  let _ = print_string "awesome, starting server!" in
+                  print_string "Starting the server!";
                   let initial_server_t =
-                    { Gamelib.Server.config_queue_tbl =
-                        Gamelib.Game_config.Table.create ()
-                    ; game_player_piece_tbl = Gamelib.Player.Table.create ()
+                    { Konanelib.Server.config_queue_tbl =
+                        Konanelib.Game_config.Table.create ()
+                    ; game_player_piece_tbl =
+                        Konanelib.Player.Table.create ()
                     }
                   in
                   let%bind server =
@@ -199,35 +198,29 @@ let menu =
                   in
                   Tcp.Server.close_finished server
                 | "Join a game" ->
-                  let _ = print_string "Enter your name.\n" in
+                  print_string "Enter your name.\n";
                   let%bind name = stubborn_read_str () in
-                  let _ =
-                    print_string
-                      "Enter your port (hit enter for default of 10001).\n"
-                  in
+                  print_string
+                    "Enter your port (hit enter for default of 10001).\n";
                   let%bind port = stubborn_read_int true () in
-                  let _ = print_string "Enter your host.\n" in
+                  print_string "Enter your host.\n";
                   let%bind host = stubborn_read_str () in
                   print_string
                     "Enter your desired game height (press enter to default \
-                     to 8)\n\
-                     .";
+                     to 8): ";
                   let%bind height = stubborn_read_int false () in
                   print_string
                     "Enter your desired game width (press enter to default \
-                     to 8)\n\
-                     .";
+                     to 8): ";
                   let%bind width = stubborn_read_int false () in
                   let game_config =
-                    { Gamelib.Game_config.height
+                    { Konanelib.Game_config.height
                     ; width
-                    ; mode = Gamelib.Game_config.Game_mode.Normal
+                    ; mode = Konanelib.Game_config.Game_mode.Normal
                     }
                   in
                   let query =
-                    { Gamelib.Rpcs.Start_game.Query.name
-                    ; host_and_port =
-                        { Host_and_port.host = "localhost"; port }
+                    { Konanelib.Rpcs.Start_game.Query.name
                     ; bot_difficulty_and_piece = None
                     ; game_config
                     }
@@ -238,34 +231,35 @@ let menu =
                       (Tcp.Where_to_connect.of_host_and_port host_and_port)
                       (fun conn ->
                          Rpc.Rpc.dispatch_exn
-                           Gamelib.Rpcs.Start_game.rpc
+                           Konanelib.Rpcs.Start_game.rpc
                            conn
                            query)
                   in
                   (match start_game_response with
-                   | Error _ -> print_string "error lol"
+                   | Error _ -> print_string "Error starting game"
                    | Ok response ->
                      print_s
-                       (Gamelib.Rpcs.Start_game.Response.sexp_of_t response);
+                       (Konanelib.Rpcs.Start_game.Response.sexp_of_t
+                          response);
                      (match response with
                       | Game_started { your_player = who_am_i } ->
-                        Gamelib.Run.run host port who_am_i game_config
+                        Konanelib.Run.run host port who_am_i game_config
                       | Game_not_started { your_player = who_am_i } ->
-                        Gamelib.Run.run host port who_am_i game_config));
+                        Konanelib.Run.run host port who_am_i game_config));
                   Deferred.never ()
                 | _ ->
                   print_string "invalid option";
                   Deferred.unit))
           | "Player v. Bot" ->
-            let _ = print_string "Enter your name.\n" in
+            print_string "Enter your name.\n";
             let%bind name = stubborn_read_str () in
             print_string "Choose a bot difficulty.\n";
             let%bind difficulty = stubborn_read_difficulty () in
             let%bind piece = stubborn_read_piece () in
             let initial_server_t =
-              { Gamelib.Server.config_queue_tbl =
-                  Gamelib.Game_config.Table.create ()
-              ; game_player_piece_tbl = Gamelib.Player.Table.create ()
+              { Konanelib.Server.config_queue_tbl =
+                  Konanelib.Game_config.Table.create ()
+              ; game_player_piece_tbl = Konanelib.Player.Table.create ()
               }
             in
             print_string
@@ -275,9 +269,9 @@ let menu =
               "Enter your desired game width (press enter to default to 8).\n";
             let%bind width = stubborn_read_int false () in
             let game_config =
-              { Gamelib.Game_config.height
+              { Konanelib.Game_config.height
               ; width
-              ; mode = Gamelib.Game_config.Game_mode.Normal
+              ; mode = Konanelib.Game_config.Game_mode.Normal
               }
             in
             let%bind server =
@@ -291,15 +285,13 @@ let menu =
             in
             let _ = Tcp.Server.close_finished server in
             let query =
-              { Gamelib.Rpcs.Start_game.Query.name
-              ; host_and_port =
-                  { Host_and_port.host = "localhost"; port = 14624 }
+              { Konanelib.Rpcs.Start_game.Query.name
               ; bot_difficulty_and_piece =
-                  Some (difficulty, Gamelib.Piece.flip piece)
+                  Some (difficulty, Konanelib.Piece.flip piece)
               ; game_config =
-                  { Gamelib.Game_config.height
+                  { Konanelib.Game_config.height
                   ; width
-                  ; mode = Gamelib.Game_config.Game_mode.Normal
+                  ; mode = Konanelib.Game_config.Game_mode.Normal
                   }
               }
             in
@@ -311,19 +303,20 @@ let menu =
                 (Tcp.Where_to_connect.of_host_and_port host_and_port)
                 (fun conn ->
                    Rpc.Rpc.dispatch_exn
-                     Gamelib.Rpcs.Start_game.rpc
+                     Konanelib.Rpcs.Start_game.rpc
                      conn
                      query)
             in
             (match start_game_response with
-             | Error _ -> print_string "error lol"
+             | Error _ -> print_string "Error starting game"
              | Ok response ->
-               print_s (Gamelib.Rpcs.Start_game.Response.sexp_of_t response);
+               print_s
+                 (Konanelib.Rpcs.Start_game.Response.sexp_of_t response);
                (match response with
                 | Game_started { your_player = who_am_i } ->
-                  Gamelib.Run.run "localhost" 14624 who_am_i game_config
+                  Konanelib.Run.run "localhost" 14624 who_am_i game_config
                 | Game_not_started { your_player = who_am_i } ->
-                  Gamelib.Run.run "localhost" 14624 who_am_i game_config));
+                  Konanelib.Run.run "localhost" 14624 who_am_i game_config));
             Deferred.never ()
           | _ -> Deferred.unit)
        | _ -> Deferred.unit)
@@ -332,22 +325,24 @@ let menu =
 let () = Command_unix.run menu
 (* let results = Fzf.Blocking.pick_one (Pick_from.inputs [ "a"; "b"; "cn" ])
    in print_s [%message (results : string option)]; let initial_game =
-   Gamelib.Game.new_game ~height:8 ~width:8 in *)
-(* Gamelib.Game.print initial_game; *)
+   Konanelib.Game.new_game ~height:8 ~width:8 in *)
+(* Konanelib.Game.print initial_game; *)
 
-(* Gamelib.Game.make_move_exn ~game:(initial_game) {Gamelib.Move.starting_pos
-   = {Gamelib.Position.row = 0; column = 0}; Gamelib.Move.ending_pos = None};
-   Gamelib.Game.make_move_exn ~game:(initial_game) {Gamelib.Move.starting_pos
-   = {Gamelib.Position.row = 0; column = 1}; Gamelib.Move.ending_pos = None};
-   Gamelib.Game.make_move_exn ~game:(initial_game) {Gamelib.Move.starting_pos
-   = {Gamelib.Position.row = 2; column = 0}; Gamelib.Move.ending_pos = Some
-   {Gamelib.Position.row = 0; column = 0}}; Gamelib.Game.make_move_exn
-   ~game:(initial_game) {Gamelib.Move.starting_pos = {Gamelib.Position.row =
-   0; column = 3}; Gamelib.Move.ending_pos = Some {Gamelib.Position.row = 0;
-   column = 1}}; Gamelib.Game.make_move_exn ~game:(initial_game)
-   {Gamelib.Move.starting_pos = {Gamelib.Position.row = 4; column = 0};
-   Gamelib.Move.ending_pos = Some {Gamelib.Position.row = 2; column = 0}};
-   let av_moves = Gamelib.Game.available_captures_for_player initial_game
-   ~my_piece:(Gamelib.Piece.O) in Core.print_s [%sexp (av_moves :
-   Gamelib.Move.t list )]; *)
-(* Gamelib.Run.run (); Core.never_returns (Async.Scheduler.go ()) *)
+(* Konanelib.Game.make_move_exn ~game:(initial_game)
+   {Konanelib.Move.starting_pos = {Konanelib.Position.row = 0; column = 0};
+   Konanelib.Move.ending_pos = None}; Konanelib.Game.make_move_exn
+   ~game:(initial_game) {Konanelib.Move.starting_pos =
+   {Konanelib.Position.row = 0; column = 1}; Konanelib.Move.ending_pos =
+   None}; Konanelib.Game.make_move_exn ~game:(initial_game)
+   {Konanelib.Move.starting_pos = {Konanelib.Position.row = 2; column = 0};
+   Konanelib.Move.ending_pos = Some {Konanelib.Position.row = 0; column =
+   0}}; Konanelib.Game.make_move_exn ~game:(initial_game)
+   {Konanelib.Move.starting_pos = {Konanelib.Position.row = 0; column = 3};
+   Konanelib.Move.ending_pos = Some {Konanelib.Position.row = 0; column =
+   1}}; Konanelib.Game.make_move_exn ~game:(initial_game)
+   {Konanelib.Move.starting_pos = {Konanelib.Position.row = 4; column = 0};
+   Konanelib.Move.ending_pos = Some {Konanelib.Position.row = 2; column =
+   0}}; let av_moves = Konanelib.Game.available_captures_for_player
+   initial_game ~my_piece:(Konanelib.Piece.O) in Core.print_s [%sexp
+   (av_moves : Konanelib.Move.t list )]; *)
+(* Konanelib.Run.run (); Core.never_returns (Async.Scheduler.go ()) *)
