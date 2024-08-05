@@ -366,10 +366,10 @@ let%expect_test "get_moves_in_initial_game" =
   print_s [%sexp (moves : Move.t list)];
   [%expect
     {|
-          (((starting_pos ((row 0) (column 0))) (ending_pos ()))
-           ((starting_pos ((row 7) (column 7))) (ending_pos ()))
-           ((starting_pos ((row 4) (column 4))) (ending_pos ()))
-           ((starting_pos ((row 3) (column 3))) (ending_pos ())))
+          (((starting_pos ((row 0) (column 0))) (ending_pos ()) (dir ()))
+           ((starting_pos ((row 7) (column 7))) (ending_pos ()) (dir ()))
+           ((starting_pos ((row 3) (column 3))) (ending_pos ()) (dir ()))
+           ((starting_pos ((row 4) (column 4))) (ending_pos ()) (dir ())))
           |}]
 ;;
 
@@ -438,15 +438,12 @@ let evaluate t =
 
 let%expect_test "black_remove_top_left" =
   let initial_game = new_game ~height:8 ~width:8 () in
-  let _ =
-    make_move_exn
-      ~game:initial_game
-      { Move.starting_pos = { Position.row = 0; column = 0 }
-      ; Move.ending_pos = None
-      ; dir = None
-      }
-  in
-  print initial_game;
+  make_move_exn
+    ~game:initial_game
+    { Move.starting_pos = { Position.row = 0; column = 0 }
+    ; Move.ending_pos = None
+    ; dir = None
+    };
   [%expect
     {|
       | O | X | O | X | O | X | O
@@ -502,7 +499,65 @@ let wither_piece t =
     crazy.turns_since_event <- 0
 ;;
 
-(* let rotate_game t =
+let rotate_game_cw t =
+  let _new_height = t.board_width in
+  let _new_width = t.board_height in
+  let new_game_board = ref Position.Map.empty in
+  Map.iteri
+    t.board
+    ~f:(fun ~key:{ Position.row = r; column = c } ~data:piece ->
+      new_game_board
+      := Map.set
+           !new_game_board
+           ~key:{ Position.row = c; column = t.board_height - 1 - r }
+           ~data:piece);
+  t.board <- !new_game_board
+;;
 
-   let teleport_pieces game = () let monster_pieces game = () let
+(* let teleport_pieces game = () let monster_pieces game = () let
    activate_duplicates game = () *)
+
+let%expect_test "black_remove_top_left" =
+  let initial_game = new_game ~height:8 ~width:8 () in
+  make_move_exn
+    ~game:initial_game
+    { Move.starting_pos = { Position.row = 0; column = 0 }
+    ; Move.ending_pos = None
+    ; dir = None
+    };
+  rotate_game_cw initial_game;
+  print initial_game;
+  [%expect
+    {|
+      | O | X | O | X | O | X | O
+    -----------------------------
+    O | X | O | X | O | X | O | X
+    -----------------------------
+    X | O | X | O | X | O | X | O
+    -----------------------------
+    O | X | O | X | O | X | O | X
+    -----------------------------
+    X | O | X | O | X | O | X | O
+    -----------------------------
+    O | X | O | X | O | X | O | X
+    -----------------------------
+    X | O | X | O | X | O | X | O
+    -----------------------------
+    O | X | O | X | O | X | O | X
+    O | X | O | X | O | X | O |
+    -----------------------------
+    X | O | X | O | X | O | X | O
+    -----------------------------
+    O | X | O | X | O | X | O | X
+    -----------------------------
+    X | O | X | O | X | O | X | O
+    -----------------------------
+    O | X | O | X | O | X | O | X
+    -----------------------------
+    X | O | X | O | X | O | X | O
+    -----------------------------
+    O | X | O | X | O | X | O | X
+    -----------------------------
+    X | O | X | O | X | O | X | O
+    |}]
+;;
