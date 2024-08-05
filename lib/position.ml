@@ -5,7 +5,7 @@ module T = struct
     { row : int
     ; column : int
     }
-  [@@deriving sexp, equal, bin_io, compare]
+  [@@deriving sexp, equal, bin_io, compare, hash]
 end
 
 include T

@@ -5,9 +5,6 @@ module Game_mode = struct
     | Normal
     | Crazy
   [@@deriving sexp, bin_io, compare, hash]
-
-  let flip_all_pieces game = ()
-  let place_obstacles game = ()
 end
 
 module T = struct

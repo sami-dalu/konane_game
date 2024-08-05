@@ -9,7 +9,7 @@ type t =
   { row : int
   ; column : int
   }
-[@@deriving sexp, equal, bin_io, compare]
+[@@deriving sexp, equal, bin_io, compare, hash]
 
 (** [all_offsets] is a list of functions to compute all 8 neighbors of a
     cell (i.e. left, up-left, up, up-right, right, right-down, down,

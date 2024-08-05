@@ -19,6 +19,7 @@ type t =
   ; mutable player1 : Player.t option
   ; mutable player2 : Player.t option
   ; mutable last_move_played : Move.t option
+  ; mutable crazy_info : Crazy_info.t option
   }
 [@@deriving sexp, bin_io]
 
