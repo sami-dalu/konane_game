@@ -229,19 +229,47 @@ let available_captures_for_player (game : t) ~(my_piece : Piece.t)
   match game.game_state with
   | First_moves ->
     let top_left = { Position.row = 0; column = 0 } in
+    let top_right = { Position.row = 0; column = game.board_width - 1 } in
+    let bottom_left = { Position.row = game.board_height - 1; column = 0 } in
     let bottom_right =
       { Position.row = game.board_height - 1; column = game.board_width - 1 }
     in
-    let board_middle_bottom =
+    let board_middle_bottom_right =
       { Position.row = game.board_height / 2; column = game.board_width / 2 }
     in
-    let board_middle_top =
+    let board_middle_top_right =
+      { Position.row = (game.board_height / 2) - 1
+      ; column = game.board_width / 2
+      }
+    in
+    let board_middle_bottom_left =
+      { Position.row = game.board_height / 2
+      ; column = (game.board_width / 2) - 1
+      }
+    in
+    let board_middle_top_left =
       { Position.row = (game.board_height / 2) - 1
       ; column = (game.board_width / 2) - 1
       }
     in
+    let first_positions =
+      [ top_right
+      ; bottom_left
+      ; top_left
+      ; bottom_right
+      ; board_middle_bottom_left
+      ; board_middle_top_left
+      ; board_middle_bottom_right
+      ; board_middle_top_right
+      ]
+    in
     let first_positions_for_black =
-      [ top_left; bottom_right; board_middle_bottom; board_middle_top ]
+      List.filter first_positions ~f:(fun pos ->
+        Piece.equal
+          X
+          (Map.find_exn
+             (new_board ~height:game.board_height ~width:game.board_width)
+             pos))
     in
     if Piece.equal my_piece Piece.X
     then
