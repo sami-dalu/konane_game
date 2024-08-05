@@ -11,20 +11,20 @@ let implementations_w_server server =
     ~on_unknown_rpc:`Close_connection
     ~implementations:
       [ Rpc.Rpc.implement
-          Demo1.Rpcs.Start_game.rpc
-          (Demo1.Server.handle_start_query server)
+          Gamelib.Rpcs.Start_game.rpc
+          (Gamelib.Server.handle_start_query server)
       ; Rpc.Rpc.implement
-          Demo1.Rpcs.Take_turn.rpc
-          (Demo1.Server.handle_move_query server)
+          Gamelib.Rpcs.Take_turn.rpc
+          (Gamelib.Server.handle_move_query server)
       ; Rpc.Rpc.implement
-          Demo1.Rpcs.Wait_turn.rpc
-          (Demo1.Server.handle_wait_query server)
+          Gamelib.Rpcs.Wait_turn.rpc
+          (Gamelib.Server.handle_wait_query server)
       ; Rpc.Rpc.implement
-          Demo1.Rpcs.End_turn.rpc
-          (Demo1.Server.handle_end_query server)
+          Gamelib.Rpcs.End_turn.rpc
+          (Gamelib.Server.handle_end_query server)
       ; Rpc.Rpc.implement
-          Demo1.Rpcs.Restart_game.rpc
-          (Demo1.Server.handle_restart_query server)
+          Gamelib.Rpcs.Restart_game.rpc
+          (Gamelib.Server.handle_restart_query server)
       ]
 ;;
 
@@ -36,8 +36,9 @@ let _start_server =
      fun () ->
        let _ = print_int port in
        let initial_server_t =
-         { Demo1.Server.config_queue_tbl = Demo1.Game_config.Table.create ()
-         ; game_player_piece_tbl = Demo1.Player.Table.create ()
+         { Gamelib.Server.config_queue_tbl =
+             Gamelib.Game_config.Table.create ()
+         ; game_player_piece_tbl = Gamelib.Player.Table.create ()
          }
        in
        let%bind server =
@@ -56,16 +57,17 @@ let _start_server =
    (required int) ~doc:"INT server port" and host = flag "-hostname"
    (required string) ~doc:"string of hostname" and name = flag "-name"
    (required string) ~doc:"name of player" in let query = {
-   Demo1.Rpcs.Start_game.Query.name ; host_and_port = { Host_and_port.host =
-   "localhost"; port } } in fun () -> let%bind start_game_response =
+   Gamelib.Rpcs.Start_game.Query.name ; host_and_port = { Host_and_port.host
+   = "localhost"; port } } in fun () -> let%bind start_game_response =
    Rpc.Connection.with_client (Tcp.Where_to_connect.of_host_and_port {
    Host_and_port.port; Host_and_port.host }) (fun conn ->
-   Rpc.Rpc.dispatch_exn Demo1.Rpcs.Start_game.rpc conn query) in (match
+   Rpc.Rpc.dispatch_exn Gamelib.Rpcs.Start_game.rpc conn query) in (match
    start_game_response with | Error _ -> print_string "error lol" | Ok
-   response -> print_s (Demo1.Rpcs.Start_game.Response.sexp_of_t response);
+   response -> print_s (Gamelib.Rpcs.Start_game.Response.sexp_of_t response);
    (match response with | Game_started { your_player = who_am_i } ->
-   Demo1.Run.run host port who_am_i | Game_not_started { your_player =
-   who_am_i } -> Demo1.Run.run host port who_am_i)); Deferred.never ()) ;; *)
+   Gamelib.Run.run host port who_am_i | Game_not_started { your_player =
+   who_am_i } -> Gamelib.Run.run host port who_am_i)); Deferred.never ())
+   ;; *)
 
 (* let command = Command.group ~summary:"Konane Game" [ "start-server",
    start_server; "start-game", start_game ] ;; *)
@@ -74,8 +76,8 @@ let _start_server =
 (* Command.async ~summary:"start menu" (Core.print_endline "Welcome to
    Jonane!"; let results = Fzf.Blocking.pick_one ~prompt_at_top:()
    (Pick_from.inputs [ "Player v. Player" ]) in print_s [%message (results :
-   string option)]; Demo1.Run.run (); Core.never_returns (Async.Scheduler.go
-   ())) *)
+   string option)]; Gamelib.Run.run (); Core.never_returns
+   (Async.Scheduler.go ())) *)
 
 let rec stubborn_read_int (reading_port : bool) () =
   let stdin = Lazy.force Reader.stdin in
@@ -117,9 +119,9 @@ let rec stubborn_read_difficulty () =
   match bot_difficulty_result with
   | Ok (Some s) ->
     (match s with
-     | "Easy" -> return Demo1.Player.Difficulty.Easy
-     | "Medium" -> return Demo1.Player.Difficulty.Medium
-     | "Hard" -> return Demo1.Player.Difficulty.Hard
+     | "Easy" -> return Gamelib.Player.Difficulty.Easy
+     | "Medium" -> return Gamelib.Player.Difficulty.Medium
+     | "Hard" -> return Gamelib.Player.Difficulty.Hard
      | _ -> stubborn_read_difficulty ())
   | _ -> stubborn_read_difficulty ()
 ;;
@@ -134,8 +136,8 @@ let rec stubborn_read_piece () =
   match bot_piece_result with
   | Ok (Some s) ->
     (match s with
-     | "Black" -> return Demo1.Piece.X
-     | "White" -> return Demo1.Piece.O
+     | "Black" -> return Gamelib.Piece.X
+     | "White" -> return Gamelib.Piece.O
      | _ -> stubborn_read_piece ())
   | _ -> stubborn_read_piece ()
 ;;
@@ -180,9 +182,9 @@ let menu =
                   let%bind port = stubborn_read_int true () in
                   let _ = print_string "awesome, starting server!" in
                   let initial_server_t =
-                    { Demo1.Server.config_queue_tbl =
-                        Demo1.Game_config.Table.create ()
-                    ; game_player_piece_tbl = Demo1.Player.Table.create ()
+                    { Gamelib.Server.config_queue_tbl =
+                        Gamelib.Game_config.Table.create ()
+                    ; game_player_piece_tbl = Gamelib.Player.Table.create ()
                     }
                   in
                   let%bind server =
@@ -217,13 +219,13 @@ let menu =
                      .";
                   let%bind width = stubborn_read_int false () in
                   let game_config =
-                    { Demo1.Game_config.height
+                    { Gamelib.Game_config.height
                     ; width
-                    ; mode = Demo1.Game_config.Game_mode.Normal
+                    ; mode = Gamelib.Game_config.Game_mode.Normal
                     }
                   in
                   let query =
-                    { Demo1.Rpcs.Start_game.Query.name
+                    { Gamelib.Rpcs.Start_game.Query.name
                     ; host_and_port =
                         { Host_and_port.host = "localhost"; port }
                     ; bot_difficulty_and_piece = None
@@ -236,7 +238,7 @@ let menu =
                       (Tcp.Where_to_connect.of_host_and_port host_and_port)
                       (fun conn ->
                          Rpc.Rpc.dispatch_exn
-                           Demo1.Rpcs.Start_game.rpc
+                           Gamelib.Rpcs.Start_game.rpc
                            conn
                            query)
                   in
@@ -244,12 +246,12 @@ let menu =
                    | Error _ -> print_string "error lol"
                    | Ok response ->
                      print_s
-                       (Demo1.Rpcs.Start_game.Response.sexp_of_t response);
+                       (Gamelib.Rpcs.Start_game.Response.sexp_of_t response);
                      (match response with
                       | Game_started { your_player = who_am_i } ->
-                        Demo1.Run.run host port who_am_i game_config
+                        Gamelib.Run.run host port who_am_i game_config
                       | Game_not_started { your_player = who_am_i } ->
-                        Demo1.Run.run host port who_am_i game_config));
+                        Gamelib.Run.run host port who_am_i game_config));
                   Deferred.never ()
                 | _ ->
                   print_string "invalid option";
@@ -261,9 +263,9 @@ let menu =
             let%bind difficulty = stubborn_read_difficulty () in
             let%bind piece = stubborn_read_piece () in
             let initial_server_t =
-              { Demo1.Server.config_queue_tbl =
-                  Demo1.Game_config.Table.create ()
-              ; game_player_piece_tbl = Demo1.Player.Table.create ()
+              { Gamelib.Server.config_queue_tbl =
+                  Gamelib.Game_config.Table.create ()
+              ; game_player_piece_tbl = Gamelib.Player.Table.create ()
               }
             in
             print_string
@@ -273,9 +275,9 @@ let menu =
               "Enter your desired game width (press enter to default to 8).\n";
             let%bind width = stubborn_read_int false () in
             let game_config =
-              { Demo1.Game_config.height
+              { Gamelib.Game_config.height
               ; width
-              ; mode = Demo1.Game_config.Game_mode.Normal
+              ; mode = Gamelib.Game_config.Game_mode.Normal
               }
             in
             let%bind server =
@@ -289,15 +291,15 @@ let menu =
             in
             let _ = Tcp.Server.close_finished server in
             let query =
-              { Demo1.Rpcs.Start_game.Query.name
+              { Gamelib.Rpcs.Start_game.Query.name
               ; host_and_port =
                   { Host_and_port.host = "localhost"; port = 14624 }
               ; bot_difficulty_and_piece =
-                  Some (difficulty, Demo1.Piece.flip piece)
+                  Some (difficulty, Gamelib.Piece.flip piece)
               ; game_config =
-                  { Demo1.Game_config.height
+                  { Gamelib.Game_config.height
                   ; width
-                  ; mode = Demo1.Game_config.Game_mode.Normal
+                  ; mode = Gamelib.Game_config.Game_mode.Normal
                   }
               }
             in
@@ -308,17 +310,20 @@ let menu =
               Rpc.Connection.with_client
                 (Tcp.Where_to_connect.of_host_and_port host_and_port)
                 (fun conn ->
-                   Rpc.Rpc.dispatch_exn Demo1.Rpcs.Start_game.rpc conn query)
+                   Rpc.Rpc.dispatch_exn
+                     Gamelib.Rpcs.Start_game.rpc
+                     conn
+                     query)
             in
             (match start_game_response with
              | Error _ -> print_string "error lol"
              | Ok response ->
-               print_s (Demo1.Rpcs.Start_game.Response.sexp_of_t response);
+               print_s (Gamelib.Rpcs.Start_game.Response.sexp_of_t response);
                (match response with
                 | Game_started { your_player = who_am_i } ->
-                  Demo1.Run.run "localhost" 14624 who_am_i game_config
+                  Gamelib.Run.run "localhost" 14624 who_am_i game_config
                 | Game_not_started { your_player = who_am_i } ->
-                  Demo1.Run.run "localhost" 14624 who_am_i game_config));
+                  Gamelib.Run.run "localhost" 14624 who_am_i game_config));
             Deferred.never ()
           | _ -> Deferred.unit)
        | _ -> Deferred.unit)
@@ -327,22 +332,22 @@ let menu =
 let () = Command_unix.run menu
 (* let results = Fzf.Blocking.pick_one (Pick_from.inputs [ "a"; "b"; "cn" ])
    in print_s [%message (results : string option)]; let initial_game =
-   Demo1.Game.new_game ~height:8 ~width:8 in *)
-(* Demo1.Game.print initial_game; *)
+   Gamelib.Game.new_game ~height:8 ~width:8 in *)
+(* Gamelib.Game.print initial_game; *)
 
-(* Demo1.Game.make_move_exn ~game:(initial_game) {Demo1.Move.starting_pos =
-   {Demo1.Position.row = 0; column = 0}; Demo1.Move.ending_pos = None};
-   Demo1.Game.make_move_exn ~game:(initial_game) {Demo1.Move.starting_pos =
-   {Demo1.Position.row = 0; column = 1}; Demo1.Move.ending_pos = None};
-   Demo1.Game.make_move_exn ~game:(initial_game) {Demo1.Move.starting_pos =
-   {Demo1.Position.row = 2; column = 0}; Demo1.Move.ending_pos = Some
-   {Demo1.Position.row = 0; column = 0}}; Demo1.Game.make_move_exn
-   ~game:(initial_game) {Demo1.Move.starting_pos = {Demo1.Position.row = 0;
-   column = 3}; Demo1.Move.ending_pos = Some {Demo1.Position.row = 0; column
-   = 1}}; Demo1.Game.make_move_exn ~game:(initial_game)
-   {Demo1.Move.starting_pos = {Demo1.Position.row = 4; column = 0};
-   Demo1.Move.ending_pos = Some {Demo1.Position.row = 2; column = 0}}; let
-   av_moves = Demo1.Game.available_captures_for_player initial_game
-   ~my_piece:(Demo1.Piece.O) in Core.print_s [%sexp (av_moves : Demo1.Move.t
-   list )]; *)
-(* Demo1.Run.run (); Core.never_returns (Async.Scheduler.go ()) *)
+(* Gamelib.Game.make_move_exn ~game:(initial_game) {Gamelib.Move.starting_pos
+   = {Gamelib.Position.row = 0; column = 0}; Gamelib.Move.ending_pos = None};
+   Gamelib.Game.make_move_exn ~game:(initial_game) {Gamelib.Move.starting_pos
+   = {Gamelib.Position.row = 0; column = 1}; Gamelib.Move.ending_pos = None};
+   Gamelib.Game.make_move_exn ~game:(initial_game) {Gamelib.Move.starting_pos
+   = {Gamelib.Position.row = 2; column = 0}; Gamelib.Move.ending_pos = Some
+   {Gamelib.Position.row = 0; column = 0}}; Gamelib.Game.make_move_exn
+   ~game:(initial_game) {Gamelib.Move.starting_pos = {Gamelib.Position.row =
+   0; column = 3}; Gamelib.Move.ending_pos = Some {Gamelib.Position.row = 0;
+   column = 1}}; Gamelib.Game.make_move_exn ~game:(initial_game)
+   {Gamelib.Move.starting_pos = {Gamelib.Position.row = 4; column = 0};
+   Gamelib.Move.ending_pos = Some {Gamelib.Position.row = 2; column = 0}};
+   let av_moves = Gamelib.Game.available_captures_for_player initial_game
+   ~my_piece:(Gamelib.Piece.O) in Core.print_s [%sexp (av_moves :
+   Gamelib.Move.t list )]; *)
+(* Gamelib.Run.run (); Core.never_returns (Async.Scheduler.go ()) *)

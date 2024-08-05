@@ -1,6 +1,6 @@
 (executable
- (public_name demo1)
+ (public_name gamelib)
  (name main)
- (libraries demo1 core async fzf core_unix.command_unix)
+ (libraries gamelib core async fzf core_unix.command_unix)
  (preprocess
   (pps ppx_jane)))
