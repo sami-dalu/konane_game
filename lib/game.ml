@@ -466,3 +466,43 @@ let%expect_test "black_remove_top_left" =
     O | X | O | X | O | X | O | X
     |}]
 ;;
+
+let flip_all_pieces t =
+  t.board <- Map.map t.board ~f:(fun piece -> Piece.flip piece);
+  match t.crazy_info with
+  | None -> ()
+  | Some crazy -> crazy.turns_since_event <- 0
+;;
+
+let place_obstacle t =
+  let board_list =
+    Map.to_alist
+      (Map.filter t.board ~f:(fun piece -> not (Piece.equal Obstacle piece)))
+  in
+  let pos, _init_piece = List.random_element_exn board_list in
+  t.board <- Map.set t.board ~key:pos ~data:Obstacle;
+  match t.crazy_info with
+  | None -> ()
+  | Some crazy ->
+    crazy.obstacle_location_list <- crazy.obstacle_location_list @ [ pos, 5 ];
+    crazy.turns_since_event <- 0
+;;
+
+let wither_piece t =
+  let board_list =
+    Map.to_alist
+      (Map.filter t.board ~f:(fun piece ->
+         Piece.equal X piece || Piece.equal O piece))
+  in
+  let pos, _p = List.random_element_exn board_list in
+  match t.crazy_info with
+  | None -> ()
+  | Some crazy ->
+    crazy.withered_pieces_list <- crazy.withered_pieces_list @ [ pos, 3 ];
+    crazy.turns_since_event <- 0
+;;
+
+(* let rotate_game t =
+
+   let teleport_pieces game = () let monster_pieces game = () let
+   activate_duplicates game = () *)
