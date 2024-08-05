@@ -1,5 +1,13 @@
 open! Core
 
+module Event = struct
+  type t =
+    | Eruption
+    | Monster_loose
+    | Plague
+  [@@deriving sexp, bin_io, compare]
+end
+
 type t =
   { mutable turns_since_event : int
   ; mutable obstacle_location_list : (Position.t * int) list

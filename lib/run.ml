@@ -107,32 +107,25 @@ let handle_keys (client_state : Client.t) ~game_over host port =
       else Deferred.return ())
 ;;
 
-(* let handle_steps (client_state : Client.t) ~game_over = every
-   ~stop:game_over 0.1 ~f:(fun () -> Game.check_for_win client_state.game;
-   match client_state.game.game_state with | Game_over { winner } ->
-   game_over := true; print_endline (Piece.to_string winner ^ "
-   WINSSSSSS!!!!!"); Game_graphics.render client_state; Deferred.return () |
-   _ -> Deferred.return ()) ;; *)
-
-(* let handle_restart (game : Game.t) ~game_over = every ~stop:(ref (not
-   !game_over)) 0.01 ~f:(fun () -> match Game_graphics.read_key game with |
-   Restart -> Game.restart game; game_over := false; print_endline "test" | _
-   -> ()) ;; *)
+let notify_event (client_state : Client.t) ~game_over ~show_message =
+  every ~stop:game_over 0.001 ~f:(fun () ->
+    if !show_message then show_message := false;
+    let%bind () = Clock.after (Time_float.Span.of_sec 3.) in
+    client_state.last_event <- None;
+    Deferred.return ())
+;;
 
 let run host port who_am_i (game_config : Game_config.t) =
   let client_state =
     { Client.game = Game_graphics.init_exn game_config
     ; player = who_am_i
     ; moves_to_highlight = []
+    ; last_event = None
     }
   in
-  (* let game = Game_graphics.init_exn () in let confirming_move = ref false
-     in let moves_to_highlight = ref [] in *)
   Game_graphics.render client_state;
   let game_over = ref false in
-  (* let game = ref (Game.new_game ~height:8 ~width:8) in *)
-  handle_keys client_state ~game_over host port
+  let show_message = ref false in
+  handle_keys client_state ~game_over host port;
+  notify_event client_state ~game_over ~show_message
 ;;
-(* handle_steps client_state ~game_over *)
-
-(* handle_restart game ~game_over *)

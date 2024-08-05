@@ -17,6 +17,8 @@ module Colors = struct
   let _darker_green = Graphics.rgb 53 166 53
   let light_pink = Graphics.rgb 255 201 202
   let darker_pink = Graphics.rgb 252 146 148
+  let wither_color = Graphics.rgb 103 153 108
+  let purple = Graphics.rgb 244 120 255
 end
 
 module Constants = struct
@@ -25,6 +27,7 @@ module Constants = struct
   (* let play_area_height = 600. *. scaling_factor |>
      Float.iround_down_exn *)
   let header_height = 75. *. scaling_factor |> Float.iround_down_exn
+  let info_box_width = 150. *. scaling_factor |> Float.iround_down_exn
 
   (* let play_area_width = 600. *. scaling_factor |> Float.iround_down_exn *)
   let block_size = 75. *. scaling_factor |> Float.iround_down_exn
@@ -43,7 +46,7 @@ let init_exn (game_config : Game_config.t) =
   Graphics.open_graph
     (Printf.sprintf
        " %dx%d"
-       (block_size * game_config.width)
+       ((block_size * game_config.width) + info_box_width)
        ((block_size * game_config.height) + header_height));
   (* let height = play_area_height / block_size in let width =
      play_area_width / block_size in *)
@@ -483,6 +486,58 @@ let undraw_opp_last_move
   | None -> ()
 ;;
 
+let draw_withering_pieces ~board_height ~(crazy : Crazy_info.t) =
+  let open Constants in
+  let withered_pieces_list = crazy.withered_pieces_list in
+  List.iter withered_pieces_list ~f:(fun (pos, _timer) ->
+    let row = pos.row in
+    let col = pos.column in
+    let col = col * block_size in
+    let row = convert row ~board_height * block_size in
+    Graphics.set_color Colors.wither_color;
+    Graphics.fill_circle
+      (col + (block_size / 2))
+      (row + (block_size / 2))
+      (3 * block_size / 4))
+;;
+
+let draw_info_slide ~board_height ~board_width _crazy_info =
+  let open Constants in
+  Graphics.moveto (board_width * block_size) (board_height * block_size);
+  Graphics.draw_string
+    "Click on blue and yellow circles to move. Click the red Restart button \
+     to reset the game. Click the green End Turn button to cancel a double \
+     move early. Pink circles show the last move of your opponent."
+;;
+
+let display_event_message event ~board_height ~board_width =
+  let open Constants in
+  Graphics.set_color Colors.purple;
+  Graphics.fill_ellipse
+    (board_width * block_size / 2)
+    (board_height * block_size / 2)
+    (block_size * 2)
+    block_size;
+  Graphics.set_color Colors.purple;
+  Graphics.draw_ellipse
+    (board_width * block_size / 2)
+    (board_height * block_size / 2)
+    (block_size * 2)
+    block_size;
+  Graphics.moveto
+    ((board_width * block_size / 2) - (2 * 16))
+    ((board_height * block_size / 2) - 8);
+  Graphics.set_color Colors.black;
+  Graphics.set_text_size 36;
+  Graphics.draw_string
+    (match event with
+     | Crazy_info.Event.Eruption ->
+       "A volcanic eruption has caused magma to cover spaces!"
+     | Crazy_info.Event.Monster_loose -> "A monster is loose! Fight or Flee!"
+     | Crazy_info.Event.Plague ->
+       "A plague has begun! Affected pieces will die shortly!")
+;;
+
 let render (client_state : Client.t) =
   (* We want double-buffering. See
      https://v2.ocaml.org/releases/4.03/htmlman/libref/Graphics.html for more
@@ -519,6 +574,10 @@ let render (client_state : Client.t) =
     ~board_width;
   draw_play_area ~board_height ~board_width;
   draw_pieces board ~board_height;
+  draw_info_slide ~board_height ~board_width client_state.game.crazy_info;
+  (match client_state.game.crazy_info with
+   | None -> ()
+   | Some crazy -> draw_withering_pieces ~board_height ~crazy);
   draw_restart_button ~board_height;
   (match client_state.game.game_state with
    | Game_over { winner } ->
@@ -581,6 +640,9 @@ let render (client_state : Client.t) =
                 client_state.game
                 pos)
            ~board_height));
+  (match client_state.last_event with
+   | None -> ()
+   | Some event -> display_event_message event ~board_height ~board_width);
   Graphics.display_mode true;
   Graphics.synchronize ()
 ;;
