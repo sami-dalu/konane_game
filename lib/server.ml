@@ -146,8 +146,8 @@ let handle_wait_query (server : t) _client (query : Rpcs.Wait_turn.Query.t) =
     then (
       let depth =
         match difficulty with
-        | Player.Difficulty.Easy -> 1
-        | Medium -> 2
+        | Player.Difficulty.Easy -> 0
+        | Medium -> 1
         | Hard -> 3
       in
       let moves =

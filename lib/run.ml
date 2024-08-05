@@ -75,6 +75,7 @@ let handle_keys (client_state : Client.t) ~game_over host port =
        | Ok response ->
          client_state.moves_to_highlight <- [];
          client_state.game <- response);
+      Game_graphics.render client_state;
       Deferred.return ()
     | End_turn ->
       (* flip the piece on the server side and set
@@ -101,6 +102,7 @@ let handle_keys (client_state : Client.t) ~game_over host port =
            print_s (Piece.sexp_of_t new_game.piece_to_move);
            client_state.moves_to_highlight <- [];
            client_state.game <- new_game);
+        Game_graphics.render client_state;
         Deferred.return ())
       else Deferred.return ())
 ;;
