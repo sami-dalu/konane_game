@@ -1,6 +1,6 @@
 (library
  (inline_tests)
- (name demo1)
+ (name gamelib)
  (libraries core async graphics)
  (preprocess
   (pps ppx_jane ppx_inline_test)))

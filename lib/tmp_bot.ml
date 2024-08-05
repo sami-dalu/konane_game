@@ -207,13 +207,13 @@ let use_minimax_to_find_best_moves game ~depth ~me =
   best_moves
 ;;
 
-(* let new_game = Demo1.Game.new_game ~height:8 ~width:8 in let game =
+(* let new_game = Gamelib.Game.new_game ~height:8 ~width:8 in let game =
    List.fold (List.init 55 ~f:(fun i -> i)) ~init:new_game ~f:(fun acc _i ->
-   let moves_to_make = Demo1.Tmp_bot.use_minimax_to_find_best_moves ~depth:4
-   ~me:acc.piece_to_move acc in List.iter (List.rev moves_to_make) ~f:(fun
-   move -> Core.print_s (Demo1.Move.sexp_of_t move); Demo1.Game.make_move_exn
-   ~game:acc move); acc.piece_to_move <- Demo1.Piece.flip acc.piece_to_move;
-   acc) in Demo1.Game.print game; *)
+   let moves_to_make = Gamelib.Tmp_bot.use_minimax_to_find_best_moves
+   ~depth:4 ~me:acc.piece_to_move acc in List.iter (List.rev moves_to_make)
+   ~f:(fun move -> Core.print_s (Gamelib.Move.sexp_of_t move);
+   Gamelib.Game.make_move_exn ~game:acc move); acc.piece_to_move <-
+   Gamelib.Piece.flip acc.piece_to_move; acc) in Gamelib.Game.print game; *)
 
 (* let test_bot = Command.async ~summary:"Testing Bot" (let%map_open.Command
    () = return () in fun () -> Core.print_s [%message "starting"]; let list =
