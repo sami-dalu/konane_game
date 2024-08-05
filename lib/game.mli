@@ -45,3 +45,4 @@ val possible_captures_from_occupied_pos_exn
 val available_captures_for_player : t -> my_piece:Piece.t -> Move.t list
 val check_for_win : t -> unit
 val evaluate : t -> Game_state.t
+val rotate_game_cw : t -> unit
