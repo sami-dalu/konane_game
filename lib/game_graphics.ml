@@ -27,7 +27,7 @@ module Constants = struct
   (* let play_area_height = 600. *. scaling_factor |>
      Float.iround_down_exn *)
   let header_height = 75. *. scaling_factor |> Float.iround_down_exn
-  let info_box_width = 150. *. scaling_factor |> Float.iround_down_exn
+  (* let info_box_width = 150. *. scaling_factor |> Float.iround_down_exn *)
 
   (* let play_area_width = 600. *. scaling_factor |> Float.iround_down_exn *)
   let block_size = 75. *. scaling_factor |> Float.iround_down_exn
@@ -46,7 +46,7 @@ let init_exn (game_config : Game_config.t) =
   Graphics.open_graph
     (Printf.sprintf
        " %dx%d"
-       ((block_size * game_config.width) + info_box_width)
+       (block_size * game_config.width)
        ((block_size * game_config.height) + header_height));
   (* let height = play_area_height / block_size in let width =
      play_area_width / block_size in *)
@@ -501,7 +501,7 @@ let draw_withering_pieces ~board_height ~(crazy : Crazy_info.t) =
       (3 * block_size / 4))
 ;;
 
-let draw_info_slide ~board_height ~board_width _crazy_info =
+let _draw_info_slide ~board_height ~board_width _crazy_info =
   let open Constants in
   Graphics.moveto (board_width * block_size) (board_height * block_size);
   Graphics.draw_string
@@ -574,7 +574,8 @@ let render (client_state : Client.t) =
     ~board_width;
   draw_play_area ~board_height ~board_width;
   draw_pieces board ~board_height;
-  draw_info_slide ~board_height ~board_width client_state.game.crazy_info;
+  (* draw_info_slide ~board_height ~board_width
+     client_state.game.crazy_info; *)
   (match client_state.game.crazy_info with
    | None -> ()
    | Some crazy -> draw_withering_pieces ~board_height ~crazy);

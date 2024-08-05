@@ -109,10 +109,13 @@ let handle_keys (client_state : Client.t) ~game_over host port =
 
 let notify_event (client_state : Client.t) ~game_over ~show_message =
   every ~stop:game_over 0.001 ~f:(fun () ->
-    if !show_message then show_message := false;
-    let%bind () = Clock.after (Time_float.Span.of_sec 3.) in
-    client_state.last_event <- None;
-    Deferred.return ())
+    if !show_message
+    then (
+      show_message := false;
+      let%bind () = Clock.after (Time_float.Span.of_sec 3.) in
+      client_state.last_event <- None;
+      Deferred.return ())
+    else Deferred.return ())
 ;;
 
 let run host port who_am_i (game_config : Game_config.t) =
