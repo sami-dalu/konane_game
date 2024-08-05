@@ -1,7 +1,10 @@
 open! Core
 
 module Game_mode : sig
-  type t = Normal [@@deriving sexp_of, bin_io]
+  type t =
+    | Normal
+    | Crazy
+  [@@deriving sexp_of, bin_io]
 end
 
 type t =

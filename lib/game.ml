@@ -108,100 +108,112 @@ let possible_captures_from_occupied_pos_exn
     match piece_below with
     (* None => no piece to capture *)
     | None -> None
-    | Some piece ->
-      if Piece.equal piece opp_piece
-      then (
-        let pos_two_below =
-          { Position.row = below_my.row + 1; column = pos.column }
-        in
-        match Map.find game.board pos_two_below with
-        (* some => you can't jump to there *)
-        | Some _ -> None
-        | None ->
-          if in_board_range pos_two_below game
-          then
-            Some
-              { Move.starting_pos = pos
-              ; ending_pos = Some pos_two_below
-              ; dir = Some Move.Direction.Down
-              }
-          else None)
-      else None
+    | Some p ->
+      (match p with
+       | Obstacle -> None
+       | piece ->
+         if Piece.equal piece opp_piece
+         then (
+           let pos_two_below =
+             { Position.row = below_my.row + 1; column = pos.column }
+           in
+           match Map.find game.board pos_two_below with
+           (* some => you can't jump to there *)
+           | Some _ -> None
+           | None ->
+             if in_board_range pos_two_below game
+             then
+               Some
+                 { Move.starting_pos = pos
+                 ; ending_pos = Some pos_two_below
+                 ; dir = Some Move.Direction.Down
+                 }
+             else None)
+         else None)
   in
   let capture_right =
     let piece_right = Map.find game.board right_my in
     match piece_right with
     (* None => no piece to capture *)
     | None -> None
-    | Some piece ->
-      if Piece.equal piece opp_piece
-      then (
-        let pos_two_right =
-          { Position.row = pos.row; column = right_my.column + 1 }
-        in
-        match Map.find game.board pos_two_right with
-        (* some => you can't jump to there *)
-        | Some _ -> None
-        | None ->
-          if in_board_range pos_two_right game
-          then
-            Some
-              { Move.starting_pos = pos
-              ; ending_pos = Some pos_two_right
-              ; dir = Some Move.Direction.Right
-              }
-          else None)
-      else None
+    | Some p ->
+      (match p with
+       | Obstacle -> None
+       | piece ->
+         if Piece.equal piece opp_piece
+         then (
+           let pos_two_right =
+             { Position.row = pos.row; column = right_my.column + 1 }
+           in
+           match Map.find game.board pos_two_right with
+           (* some => you can't jump to there *)
+           | Some _ -> None
+           | None ->
+             if in_board_range pos_two_right game
+             then
+               Some
+                 { Move.starting_pos = pos
+                 ; ending_pos = Some pos_two_right
+                 ; dir = Some Move.Direction.Right
+                 }
+             else None)
+         else None)
   in
   let capture_left =
     let piece_left = Map.find game.board left_my in
     match piece_left with
     (* None => no piece to capture *)
     | None -> None
-    | Some piece ->
-      if Piece.equal piece opp_piece
-      then (
-        let pos_two_left =
-          { Position.row = pos.row; column = left_my.column - 1 }
-        in
-        match Map.find game.board pos_two_left with
-        (* some => you can't jump to there *)
-        | Some _ -> None
-        | None ->
-          if in_board_range pos_two_left game
-          then
-            Some
-              { Move.starting_pos = pos
-              ; ending_pos = Some pos_two_left
-              ; dir = Some Move.Direction.Left
-              }
-          else None)
-      else None
+    | Some p ->
+      (match p with
+       | Obstacle -> None
+       | piece ->
+         if Piece.equal piece opp_piece
+         then (
+           let pos_two_left =
+             { Position.row = pos.row; column = left_my.column - 1 }
+           in
+           match Map.find game.board pos_two_left with
+           (* some => you can't jump to there *)
+           | Some _ -> None
+           | None ->
+             if in_board_range pos_two_left game
+             then
+               Some
+                 { Move.starting_pos = pos
+                 ; ending_pos = Some pos_two_left
+                 ; dir = Some Move.Direction.Left
+                 }
+             else None)
+         else None)
   in
   let capture_above =
     let piece_above = Map.find game.board above_my in
     match piece_above with
     (* None => no piece to capture *)
     | None -> None
-    | Some piece ->
-      if Piece.equal piece opp_piece
-      then (
-        let pos_two_above =
-          { Position.row = above_my.row - 1; column = pos.column }
-        in
-        match Map.find game.board pos_two_above with
-        (* some => you can't jump to there *)
-        | Some _ -> None
-        | None ->
-          if in_board_range pos_two_above game
-          then
-            Some
-              { Move.starting_pos = pos
-              ; ending_pos = Some pos_two_above
-              ; dir = Some Move.Direction.Up
-              }
-          else None)
-      else None
+    | Some p ->
+      (match p with
+       | Obstacle -> None
+       | piece ->
+         if Piece.equal piece opp_piece
+         then (
+           let pos_two_above =
+             { Position.row = above_my.row - 1; column = pos.column }
+           in
+           match Map.find game.board pos_two_above with
+           (* some => you can't jump to there *)
+           | Some _ -> None
+           | None ->
+             if in_board_range pos_two_above game
+             then
+               Some
+                 { Move.starting_pos = pos
+                 ; ending_pos = Some pos_two_above
+                 ; dir = Some Move.Direction.Up
+                 }
+             else None)
+         else None)
   in
   let potential_moves =
     if Option.is_none dir_opt
