@@ -200,11 +200,11 @@ let menu =
                 | "Join a game" ->
                   print_string "Enter your name.\n";
                   let%bind name = stubborn_read_str () in
+                  print_string "Enter your host.\n";
+                  let%bind host = stubborn_read_str () in
                   print_string
                     "Enter your port (hit enter for default of 10001).\n";
                   let%bind port = stubborn_read_int true () in
-                  print_string "Enter your host.\n";
-                  let%bind host = stubborn_read_str () in
                   print_string
                     "Enter your desired game height (press enter to default \
                      to 8): ";
@@ -263,10 +263,11 @@ let menu =
               }
             in
             print_string
-              "Enter your desired game height (press enter to default to 8).\n";
+              "Enter your desired game height (press enter to default to \
+               8): ";
             let%bind height = stubborn_read_int false () in
             print_string
-              "Enter your desired game width (press enter to default to 8).\n";
+              "Enter your desired game width (press enter to default to 8). ";
             let%bind width = stubborn_read_int false () in
             let game_config =
               { Konanelib.Game_config.height

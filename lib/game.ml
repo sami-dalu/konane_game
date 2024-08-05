@@ -464,14 +464,14 @@ let%expect_test "black_remove_top_left" =
     |}]
 ;;
 
-let _flip_all_pieces t =
+let flip_all_pieces t =
   t.board <- Map.map t.board ~f:(fun piece -> Piece.flip piece);
   match t.crazy_info with
   | None -> ()
   | Some crazy -> crazy.turns_since_event <- 0
 ;;
 
-let _place_obstacle t =
+let place_obstacle t =
   let board_list =
     Map.to_alist
       (Map.filter t.board ~f:(fun piece -> not (Piece.equal Obstacle piece)))
@@ -485,7 +485,7 @@ let _place_obstacle t =
     crazy.turns_since_event <- 0
 ;;
 
-let _wither_piece t =
+let wither_piece t =
   let board_list =
     Map.to_alist
       (Map.filter t.board ~f:(fun piece ->
