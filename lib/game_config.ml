@@ -1,7 +1,13 @@
 open! Core
 
 module Game_mode = struct
-  type t = Normal [@@deriving sexp, bin_io, compare, hash]
+  type t =
+    | Normal
+    | Crazy
+  [@@deriving sexp, bin_io, compare, hash]
+
+  let flip_all_pieces game = ()
+  let place_obstacles game = ()
 end
 
 module T = struct

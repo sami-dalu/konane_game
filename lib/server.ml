@@ -100,7 +100,8 @@ let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
        g.player2 <- Some new_p
      | O ->
        g.player1 <- Some new_p;
-       g.player2 <- Some bot_player);
+       g.player2 <- Some bot_player
+     | _ -> ());
     Hashtbl.add_exn server.game_player_piece_tbl ~key:new_p ~data:g;
     let response =
       Rpcs.Start_game.Response.Game_started { your_player = new_p }

@@ -38,7 +38,8 @@ let init_exn (game_config : Game_config.t) =
   if !only_one
   then failwith "Can only call init_exn once"
   else only_one := true;
-  Graphics.set_window_title "Welcome to Konane!";
+  Graphics.set_window_title
+    "Welcome to Konane! Wating for Opponent to Connect";
   Graphics.open_graph
     (Printf.sprintf
        " %dx%d"
@@ -71,7 +72,13 @@ let draw_block { Position.row; column } ~color ~board_height =
     (block_size / 2)
 ;;
 
-let draw_header ~piece_to_move ~game_state ~player ~board_height ~board_width
+let draw_header
+  ~(game : Game.t)
+  ~piece_to_move
+  ~game_state
+  ~player
+  ~board_height
+  ~board_width
   =
   let open Constants in
   let header_color =
@@ -92,9 +99,12 @@ let draw_header ~piece_to_move ~game_state ~player ~board_height ~board_width
   let header_text =
     match game_state with
     | Game.Game_state.First_moves | Game.Game_state.Game_continues ->
-      if Piece.equal (Player.get_piece player) piece_to_move
-      then "         MAKE YOUR MOVE"
-      else "   WAITING FOR OPPONENT MOVE"
+      (match game.player2 with
+       | None -> "WAITING FOR OPPONENT TO CONNECT"
+       | _ ->
+         if Piece.equal (Player.get_piece player) piece_to_move
+         then "         MAKE YOUR MOVE"
+         else "   WAITING FOR OPPONENT MOVE")
     | Game.Game_state.Game_over { winner } ->
       (match Piece.equal winner (Player.get_piece player) with
        | true -> "           YOU WIN"
@@ -127,6 +137,13 @@ let draw_play_area ~board_height ~board_width =
           (pos.column * block_size)
           (convert pos.row ~board_height * block_size)
           block_size
+          block_size
+      | Obstacle ->
+        Graphics.set_color Colors.light_red;
+        Graphics.fill_rect
+          (pos.column * block_size)
+          (convert pos.row ~board_height * block_size)
+          block_size
           block_size)
 ;;
 
@@ -134,7 +151,8 @@ let draw_pieces board_map ~board_height =
   Map.iteri board_map ~f:(fun ~key:pos ~data:piece ->
     match piece with
     | Piece.X -> draw_block pos ~color:Colors.black ~board_height
-    | Piece.O -> draw_block pos ~color:Colors.white ~board_height)
+    | Piece.O -> draw_block pos ~color:Colors.white ~board_height
+    | Piece.Obstacle -> draw_block pos ~color:Colors._red ~board_height)
 ;;
 
 (* Snake head is a different color *)
@@ -230,7 +248,8 @@ let display_win_message
      | Piece.O ->
        (match player2 with
         | Some p -> Player.get_name p ^ " WINS!"
-        | _ -> "ERROR"))
+        | _ -> "ERROR")
+     | Obstacle -> "lol what")
 ;;
 
 let mouse_in_piece_to_move_spot (game : Game.t) =
@@ -492,6 +511,7 @@ let render (client_state : Client.t) =
          (Player.get_name p2 ^ " versus " ^ Player.get_name p1)
    | _, _ -> ());
   draw_header
+    ~game:client_state.game
     ~piece_to_move:client_state.game.piece_to_move
     ~game_state
     ~player:client_state.player
@@ -522,17 +542,20 @@ let render (client_state : Client.t) =
            ~init_color_board:
              (match client_state.game.piece_to_move with
               | Piece.X -> Colors.dark_gray
-              | Piece.O -> Colors.light_gray)
+              | Piece.O -> Colors.light_gray
+              | Obstacle -> Colors.light_red)
            ~init_color_piece:
              (match client_state.game.piece_to_move with
               | Piece.X -> Colors.white
-              | Piece.O -> Colors.black);
+              | Piece.O -> Colors.black
+              | Obstacle -> Colors._red);
          undraw_highlighted_blocks
            client_state.moves_to_highlight
            ~init_color:
              (match client_state.game.piece_to_move with
               | Piece.X -> Colors.black
-              | Piece.O -> Colors.white)
+              | Piece.O -> Colors.white
+              | Obstacle -> Colors._red)
            ~board_height;
          highlight_ending_positions
            client_state.moves_to_highlight

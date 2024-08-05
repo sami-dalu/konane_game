@@ -1,6 +1,7 @@
 type t =
   | X
   | O
+  | Obstacle
 [@@deriving sexp, equal, bin_io, compare, enumerate, hash]
 
 val of_string : string -> t
