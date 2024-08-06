@@ -533,9 +533,14 @@ let display_event_message event ~board_height ~board_width =
     (match event with
      | Crazy_info.Event.Eruption ->
        "A volcanic eruption has caused magma to cover spaces!"
-     | Crazy_info.Event.Monster_loose -> "A monster is loose! Fight or Flee!"
+     | Crazy_info.Event.Monster -> "A monster is loose! Fight or Flee!"
      | Crazy_info.Event.Plague ->
-       "A plague has begun! Affected pieces will die shortly!")
+       "A sickness has spread! Affected pieces will die shortly!"
+     | Crazy_info.Event.Duplicates ->
+       "Duplication time! Moving pieces will leave a duplicate"
+     | Flip_all -> "Let's shake things up! All pieces have been swapped"
+     | Rotate ->
+       "Now for a change in perspective; The board has been rotated! ")
 ;;
 
 let render (client_state : Client.t) =
