@@ -498,7 +498,7 @@ let draw_withering_pieces ~board_height ~(crazy : Crazy_info.t) =
     Graphics.fill_circle
       (col + (block_size / 2))
       (row + (block_size / 2))
-      (3 * block_size / 4))
+      (block_size / 3))
 ;;
 
 let _draw_info_slide ~board_height ~board_width _crazy_info =
