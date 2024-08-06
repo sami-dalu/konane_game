@@ -407,8 +407,17 @@ let make_move_exn ~game (move : Move.t) =
         | Some crazy ->
           let flag, _count = crazy.duplicating_pieces in
           if flag
-          then intermediate_map
-          else Map.remove intermediate_map move.starting_pos
+          then (
+            crazy.withered_pieces_list
+            <- crazy.withered_pieces_list @ [ end_pos, 3 ];
+            intermediate_map)
+          else (
+            crazy.withered_pieces_list
+            <- List.map crazy.withered_pieces_list ~f:(fun (pos, count) ->
+                 if Position.equal pos move.starting_pos
+                 then end_pos, count
+                 else pos, count);
+            Map.remove intermediate_map move.starting_pos)
       in
       let pos_of_captured_piece = Option.value_exn (captured_pos ()) in
       Map.remove map_with_captured_piece pos_of_captured_piece
