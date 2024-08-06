@@ -130,7 +130,16 @@ let handle_move_query (server : t) _client (query : Rpcs.Take_turn.Query.t) =
        if List.length possible_moves = 0
        then (
          game.piece_to_move <- Piece.flip game.piece_to_move;
-         game.last_move_from_piece_to_move <- None)
+         game.last_move_from_piece_to_move <- None;
+         match game.crazy_info with 
+         | None -> ()
+         | Some info -> 
+          let rand_num = Random.int 10 in
+          if info.turns_since_event >= rand_num then (
+            (* crazy event time!! *)
+          let events = Game_config
+          )
+          )
        else game.last_move_from_piece_to_move <- Some move);
     Game.check_for_win game;
     game.last_move_played <- Some move;
