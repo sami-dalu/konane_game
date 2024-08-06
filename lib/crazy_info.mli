@@ -8,7 +8,7 @@ module Event : sig
     | Duplicates
     | Flip_all
     | Rotate
-  [@@deriving sexp, bin_io, compare]
+  [@@deriving sexp, bin_io, compare, enumerate]
 end
 
 type t =

@@ -118,6 +118,7 @@ let handle_move_query (server : t) _client (query : Rpcs.Take_turn.Query.t) =
     let move = query.move in
     Game.make_move_exn ~game move;
     (* Game_graphics.render game; *)
+    let event_opt_ref = ref None in
     (match move.ending_pos with
      | None -> game.piece_to_move <- Piece.flip game.piece_to_move
      | Some pos ->
@@ -131,19 +132,22 @@ let handle_move_query (server : t) _client (query : Rpcs.Take_turn.Query.t) =
        then (
          game.piece_to_move <- Piece.flip game.piece_to_move;
          game.last_move_from_piece_to_move <- None;
-         match game.crazy_info with 
+         match game.crazy_info with
          | None -> ()
-         | Some info -> 
-          let rand_num = Random.int 10 in
-          if info.turns_since_event >= rand_num then (
-            (* crazy event time!! *)
-          let events = Game_config
-          )
-          )
+         | Some info ->
+           let rand_num = Random.int 10 in
+           if info.turns_since_event >= rand_num
+           then (
+             let events = Crazy_info.Event.all in
+             let event = List.random_element_exn events in
+             event_opt_ref := Some event;
+             ( (* crazy event time!! *)
+               (* let events = Game_config *) )))
        else game.last_move_from_piece_to_move <- Some move);
     Game.check_for_win game;
     game.last_move_played <- Some move;
-    return (Rpcs.Take_turn.Response.Success { game })
+    return
+      (Rpcs.Take_turn.Response.Success { game; event_opt = !event_opt_ref })
 ;;
 
 let handle_wait_query (server : t) _client (query : Rpcs.Wait_turn.Query.t) =

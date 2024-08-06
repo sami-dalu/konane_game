@@ -44,7 +44,10 @@ module Take_turn : sig
 
   module Response : sig
     type t =
-      | Success of { game : Game.t }
+      | Success of
+          { game : Game.t
+          ; event_opt : Crazy_info.Event.t option
+          }
       | Failure
     [@@deriving sexp_of, bin_io]
   end
