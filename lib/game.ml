@@ -491,6 +491,42 @@ let place_obstacle t =
     crazy.turns_since_event <- 0
 ;;
 
+let decrement_and_prune_crazy_stuff t =
+  match t.crazy_info with
+  | None -> ()
+  | Some crazy ->
+    let obstacle_location_list = crazy.obstacle_location_list in
+    let obstacles_to_remove =
+      List.filter_map obstacle_location_list ~f:(fun (pos, counter) ->
+        if counter = 0 then Some pos else None)
+    in
+    t.board
+    <- List.fold obstacles_to_remove ~init:t.board ~f:(fun acc pos ->
+         Map.remove acc pos);
+    crazy.obstacle_location_list
+    <- List.filter_map obstacle_location_list ~f:(fun (pos, counter) ->
+         if counter = 0 then None else Some (pos, counter - 1));
+    let monster_locations_list = crazy.monster_locations_list in
+    crazy.monster_locations_list
+    <- List.filter_map monster_locations_list ~f:(fun (pos, counter) ->
+         if counter = 0 then None else Some (pos, counter - 1));
+    let withered_pieces_list = crazy.withered_pieces_list in
+    let withered_pieces_to_remove =
+      List.filter_map withered_pieces_list ~f:(fun (pos, counter) ->
+        if counter = 0 then Some pos else None)
+    in
+    t.board
+    <- List.fold withered_pieces_to_remove ~init:t.board ~f:(fun acc pos ->
+         Map.remove acc pos);
+    crazy.withered_pieces_list
+    <- List.filter_map withered_pieces_list ~f:(fun (pos, counter) ->
+         if counter = 0 then None else Some (pos, counter - 1));
+    let flag, count = crazy.duplicating_pieces in
+    if count = 0
+    then crazy.duplicating_pieces <- false, 0
+    else crazy.duplicating_pieces <- flag, count - 1
+;;
+
 let wither_piece t =
   let board_list =
     Map.to_alist
@@ -520,8 +556,8 @@ let rotate_game_cw t =
   t.board <- !new_game_board
 ;;
 
-let activate_duplicates game =
-  match game.crazy_info with
+let activate_duplicates t =
+  match t.crazy_info with
   | None -> ()
   | Some crazy -> crazy.duplicating_pieces <- true, 3
 ;;
