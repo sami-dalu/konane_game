@@ -144,8 +144,17 @@ let handle_move_query (server : t) _client (query : Rpcs.Take_turn.Query.t) =
                 let events = Crazy_info.Event.all in
                 let event = List.random_element_exn events in
                 event_opt_ref := Some event;
-                ( (* crazy event time!! *)
-                  (* let events = Game_config *) ))))
+                match event with
+                | Eruption ->
+                  Game.place_obstacle game;
+                  Game.place_obstacle game
+                | Plague ->
+                  Game.wither_piece game;
+                  Game.wither_piece game
+                | Duplicates -> Game.activate_duplicates game
+                | Rotate -> Game.rotate_game_cw game
+                | Flip_all -> Game.flip_all_pieces game
+                | Monster -> ())))
        else game.last_move_from_piece_to_move <- Some move);
     Game.check_for_win game;
     game.last_move_played <- Some move;

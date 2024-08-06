@@ -50,3 +50,4 @@ val flip_all_pieces : t -> unit
 val place_obstacle : t -> unit
 val wither_piece : t -> unit
 val activate_duplicates : t -> unit
+val decrement_and_prune_crazy_stuff : t -> unit
