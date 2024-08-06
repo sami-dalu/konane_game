@@ -162,6 +162,7 @@ let handle_move_query (server : t) _client (query : Rpcs.Take_turn.Query.t) =
               else
                 info.turns_since_event_and_event_opt <- Some (count + 1, evt)))
        else game.last_move_from_piece_to_move <- Some move);
+    Game.decrement_and_prune_crazy_stuff game;
     Game.check_for_win game;
     game.last_move_played <- Some move;
     return

@@ -69,7 +69,10 @@ let restart game =
   game.game_state <- Game_state.First_moves;
   game.last_move_from_piece_to_move <- None;
   game.piece_to_move <- Piece.X;
-  game.last_move_played <- None
+  game.last_move_played <- None;
+  match game.crazy_info with
+  | None -> ()
+  | Some _ -> game.crazy_info <- Some (Crazy_info.default ())
 ;;
 
 let print t =
