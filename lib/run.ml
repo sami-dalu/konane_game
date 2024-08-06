@@ -16,7 +16,7 @@ let every seconds ~f ~stop =
   don't_wait_for (loop ())
 ;;
 
-let handle_keys (client_state : Client.t) ~game_over host port =
+let handle_keys (client_state : Client.t) ~game_over host port ~show_message =
   every ~stop:game_over 0.0001 ~f:(fun () ->
     (* send query to server to get game state and update the game_ref *)
     let wait_turn_query = client_state.player in
@@ -60,8 +60,10 @@ let handle_keys (client_state : Client.t) ~game_over host port =
             | Success { game = new_game; event_opt = _new_event_opt } ->
               client_state.game <- new_game;
               client_state.last_event <- _new_event_opt;
+              show_message := true;
               Game_graphics.render client_state
             | Failure -> ()));
+        let%bind () = Clock.after (Time_float.Span.of_sec 3.) in
         Deferred.return ())
       else Deferred.return ()
     | Restart ->
@@ -115,7 +117,6 @@ let notify_event (client_state : Client.t) ~game_over ~show_message =
     if !show_message
     then (
       show_message := false;
-      let%bind () = Clock.after (Time_float.Span.of_sec 3.) in
       client_state.last_event <- None;
       Deferred.return ())
     else Deferred.return ())
@@ -132,6 +133,6 @@ let run host port who_am_i (game_config : Game_config.t) =
   Game_graphics.render client_state;
   let game_over = ref false in
   let show_message = ref false in
-  handle_keys client_state ~game_over host port;
+  handle_keys client_state ~game_over host port ~show_message;
   notify_event client_state ~game_over ~show_message
 ;;
