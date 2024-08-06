@@ -135,9 +135,11 @@ let handle_move_query (server : t) _client (query : Rpcs.Take_turn.Query.t) =
          match game.crazy_info with
          | None -> ()
          | Some info ->
+           print_s (Crazy_info.sexp_of_t info);
            (match info.turns_since_event_and_event_opt with
-            | None -> ()
-            | Some (count, _evt) ->
+            | None ->
+              info.turns_since_event_and_event_opt <- Some (0, Flip_all)
+            | Some (count, evt) ->
               let rand_num = Random.int 10 in
               if count >= rand_num
               then (
@@ -154,7 +156,9 @@ let handle_move_query (server : t) _client (query : Rpcs.Take_turn.Query.t) =
                 | Duplicates -> Game.activate_duplicates game
                 | Rotate -> Game.rotate_game_cw game
                 | Flip_all -> Game.flip_all_pieces game
-                | Monster -> ())))
+                | Monster -> ())
+              else
+                info.turns_since_event_and_event_opt <- Some (count + 1, evt)))
        else game.last_move_from_piece_to_move <- Some move);
     Game.check_for_win game;
     game.last_move_played <- Some move;
