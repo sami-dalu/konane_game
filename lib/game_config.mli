@@ -4,7 +4,7 @@ module Game_mode : sig
   type t =
     | Normal
     | Crazy
-  [@@deriving sexp_of, bin_io]
+  [@@deriving sexp_of, bin_io, equal]
 end
 
 type t =

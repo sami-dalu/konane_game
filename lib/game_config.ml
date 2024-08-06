@@ -4,7 +4,7 @@ module Game_mode = struct
   type t =
     | Normal
     | Crazy
-  [@@deriving sexp, bin_io, compare, hash]
+  [@@deriving sexp, bin_io, compare, hash, equal]
 end
 
 module T = struct

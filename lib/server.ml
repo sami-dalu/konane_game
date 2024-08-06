@@ -66,12 +66,14 @@ let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
           ()
       in
       g.player1 <- Some existing_player;
-      let _ =
-        Hashtbl.add_exn
-          server.game_player_piece_tbl
-          ~key:existing_player
-          ~data:g
-      in
+      Hashtbl.add_exn
+        server.game_player_piece_tbl
+        ~key:existing_player
+        ~data:g;
+      if Game_config.Game_mode.equal
+           query.game_config.mode
+           Game_config.Game_mode.Crazy
+      then g.crazy_info <- Some (Crazy_info.default ());
       let new_p = Player.init_human ~name:query.name ~piece:Piece.O in
       g.player2 <- Some new_p;
       let _ =
