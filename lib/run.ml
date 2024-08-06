@@ -30,6 +30,8 @@ let handle_keys (client_state : Client.t) ~game_over host port =
     (match wait_turn_response with
      | Error _ -> ()
      | Ok response -> client_state.game <- response);
+    (* if event happened, set client event to it and set show_message to
+       true *)
     Game_graphics.render client_state;
     match Game_graphics.read_key client_state with
     | None -> Deferred.return ()

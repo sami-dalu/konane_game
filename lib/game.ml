@@ -402,7 +402,13 @@ let make_move_exn ~game (move : Move.t) =
         Map.set game.board ~key:end_pos ~data:my_piece
       in
       let map_with_captured_piece =
-        Map.remove intermediate_map move.starting_pos
+        match game.crazy_info with
+        | None -> Map.remove intermediate_map move.starting_pos
+        | Some crazy ->
+          let flag, _count = crazy.duplicating_pieces in
+          if flag
+          then intermediate_map
+          else Map.remove intermediate_map move.starting_pos
       in
       let pos_of_captured_piece = Option.value_exn (captured_pos ()) in
       Map.remove map_with_captured_piece pos_of_captured_piece
@@ -512,6 +518,12 @@ let rotate_game_cw t =
            ~key:{ Position.row = c; column = t.board_height - 1 - r }
            ~data:piece);
   t.board <- !new_game_board
+;;
+
+let activate_duplicates game =
+  match game.crazy_info with
+  | None -> ()
+  | Some crazy -> crazy.duplicating_pieces <- true, 3
 ;;
 
 (* let teleport_pieces game = () let monster_pieces game = () let

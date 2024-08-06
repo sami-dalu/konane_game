@@ -3,8 +3,11 @@ open! Core
 module Event = struct
   type t =
     | Eruption
-    | Monster_loose
+    | Monster
     | Plague
+    | Duplicates
+    | Flip_all
+    | Rotate
   [@@deriving sexp, bin_io, compare]
 end
 
@@ -13,7 +16,7 @@ type t =
   ; mutable obstacle_location_list : (Position.t * int) list
   ; mutable monster_locations_list : (Position.t * int) list
   ; mutable withered_pieces_list : (Position.t * int) list
-  ; mutable duplicating_pieces : bool
+  ; mutable duplicating_pieces : bool * int
   }
 [@@deriving sexp, bin_io, compare]
 
@@ -22,6 +25,6 @@ let default () =
   ; obstacle_location_list = []
   ; monster_locations_list = []
   ; withered_pieces_list = []
-  ; duplicating_pieces = false
+  ; duplicating_pieces = false, 0
   }
 ;;
