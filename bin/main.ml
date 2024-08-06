@@ -142,6 +142,22 @@ let rec stubborn_read_piece () =
   | _ -> stubborn_read_piece ()
 ;;
 
+let rec stubborn_read_game_mode () =
+  let%bind bot_difficulty_result =
+    Fzf.pick_one
+      ~header:"Choose a game mode."
+      ~prompt_at_top:()
+      (Pick_from.inputs [ "Normal"; "Crazy" ])
+  in
+  match bot_difficulty_result with
+  | Ok (Some s) ->
+    (match s with
+     | "Normal" -> return Konanelib.Game_config.Game_mode.Normal
+     | "Crazy" -> return Konanelib.Game_config.Game_mode.Crazy
+     | _ -> stubborn_read_game_mode ())
+  | _ -> stubborn_read_game_mode ()
+;;
+
 (* let stubborn_read_host_and_port () = let%bind host = stubborn_read_str ()
    in let _ = print_string "What's your port?\n" in let%bind port =
    stubborn_read_int () in return ({ Host_and_port.host; port }, host) ;; *)
@@ -208,16 +224,14 @@ let menu =
                   print_string
                     "Enter your desired game height (press enter to default \
                      to 8): ";
+                  let%bind mode = stubborn_read_game_mode () in
                   let%bind height = stubborn_read_int false () in
                   print_string
                     "Enter your desired game width (press enter to default \
                      to 8): ";
                   let%bind width = stubborn_read_int false () in
                   let game_config =
-                    { Konanelib.Game_config.height
-                    ; width
-                    ; mode = Konanelib.Game_config.Game_mode.Normal
-                    }
+                    { Konanelib.Game_config.height; width; mode }
                   in
                   let query =
                     { Konanelib.Rpcs.Start_game.Query.name
@@ -253,6 +267,7 @@ let menu =
           | "Player v. Bot" ->
             print_string "Enter your name.\n";
             let%bind name = stubborn_read_str () in
+            let%bind mode = stubborn_read_game_mode () in
             print_string "Choose a bot difficulty.\n";
             let%bind difficulty = stubborn_read_difficulty () in
             let%bind piece = stubborn_read_piece () in
@@ -270,10 +285,7 @@ let menu =
               "Enter your desired game width (press enter to default to 8). ";
             let%bind width = stubborn_read_int false () in
             let game_config =
-              { Konanelib.Game_config.height
-              ; width
-              ; mode = Konanelib.Game_config.Game_mode.Normal
-              }
+              { Konanelib.Game_config.height; width; mode }
             in
             let%bind server =
               Rpc.Connection.serve
@@ -289,11 +301,7 @@ let menu =
               { Konanelib.Rpcs.Start_game.Query.name
               ; bot_difficulty_and_piece =
                   Some (difficulty, Konanelib.Piece.flip piece)
-              ; game_config =
-                  { Konanelib.Game_config.height
-                  ; width
-                  ; mode = Konanelib.Game_config.Game_mode.Normal
-                  }
+              ; game_config
               }
             in
             let host_and_port =
