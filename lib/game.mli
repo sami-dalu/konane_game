@@ -9,8 +9,8 @@ module Game_state : sig
 end
 
 type t =
-  { board_height : int
-  ; board_width : int
+  { mutable board_height : int
+  ; mutable board_width : int
   ; mutable board : Piece.t Position.Map.t
   ; mutable game_state : Game_state.t
   ; mutable piece_to_move : Piece.t

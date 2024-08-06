@@ -11,8 +11,8 @@ end
 (* module Direction = struct type t = | Up | Down | Left | Right end *)
 
 type t =
-  { board_height : int
-  ; board_width : int
+  { mutable board_height : int
+  ; mutable board_width : int
   ; mutable board : Piece.t Position.Map.t
   ; mutable game_state : Game_state.t
   ; mutable piece_to_move : Piece.t
@@ -474,7 +474,7 @@ let flip_all_pieces t =
   t.board <- Map.map t.board ~f:(fun piece -> Piece.flip piece);
   match t.crazy_info with
   | None -> ()
-  | Some crazy -> crazy.turns_since_event <- 0
+  | Some crazy -> crazy.turns_since_event <- Some (Flip_all, 0)
 ;;
 
 let place_obstacle t =
@@ -488,7 +488,7 @@ let place_obstacle t =
   | None -> ()
   | Some crazy ->
     crazy.obstacle_location_list <- crazy.obstacle_location_list @ [ pos, 5 ];
-    crazy.turns_since_event <- 0
+    crazy.turns_since_event <- Some (Eruption, 0)
 ;;
 
 let decrement_and_prune_crazy_stuff t =
@@ -538,7 +538,7 @@ let wither_piece t =
   | None -> ()
   | Some crazy ->
     crazy.withered_pieces_list <- crazy.withered_pieces_list @ [ pos, 3 ];
-    crazy.turns_since_event <- 0
+    crazy.turns_since_event <- Some (Plague, 0)
 ;;
 
 let rotate_game_cw t =
@@ -553,13 +553,36 @@ let rotate_game_cw t =
            !new_game_board
            ~key:{ Position.row = c; column = t.board_height - 1 - r }
            ~data:piece);
-  t.board <- !new_game_board
+  t.board <- !new_game_board;
+  t.board_height <- _new_height;
+  t.board_width <- _new_width;
+  match t.crazy_info with
+  | None -> ()
+  | Some crazy ->
+    crazy.withered_pieces_list
+    <- List.map
+         crazy.withered_pieces_list
+         ~f:(fun ({ row; column }, counter) ->
+           { Position.row = column; column = _new_width - 1 - row }, counter);
+    crazy.monster_locations_list
+    <- List.map
+         crazy.monster_locations_list
+         ~f:(fun ({ row; column }, counter) ->
+           { Position.row = column; column = _new_width - 1 - row }, counter);
+    crazy.obstacle_location_list
+    <- List.map
+         crazy.obstacle_location_list
+         ~f:(fun ({ row; column }, counter) ->
+           { Position.row = column; column = _new_width - 1 - row }, counter);
+    crazy.turns_since_event <- Some (Rotate, 0)
 ;;
 
 let activate_duplicates t =
   match t.crazy_info with
   | None -> ()
-  | Some crazy -> crazy.duplicating_pieces <- true, 3
+  | Some crazy ->
+    crazy.duplicating_pieces <- true, 3;
+    crazy.turns_since_event <- Some (Duplicates, 0)
 ;;
 
 (* let teleport_pieces game = () let monster_pieces game = () let
