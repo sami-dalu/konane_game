@@ -12,7 +12,7 @@ module Event = struct
 end
 
 type t =
-  { mutable turns_since_event : int
+  { mutable turns_since_event_and_event_opt : (int * Event.t) option
   ; mutable obstacle_location_list : (Position.t * int) list
   ; mutable monster_locations_list : (Position.t * int) list
   ; mutable withered_pieces_list : (Position.t * int) list
@@ -21,7 +21,7 @@ type t =
 [@@deriving sexp, bin_io, compare]
 
 let default () =
-  { turns_since_event = 0
+  { turns_since_event_and_event_opt = None
   ; obstacle_location_list = []
   ; monster_locations_list = []
   ; withered_pieces_list = []

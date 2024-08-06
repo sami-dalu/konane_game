@@ -12,7 +12,7 @@ module Event : sig
 end
 
 type t =
-  { mutable turns_since_event : int
+  { mutable turns_since_event_and_event_opt : (int * Event.t) option
   ; mutable obstacle_location_list : (Position.t * int) list
   ; mutable monster_locations_list : (Position.t * int) list
   ; mutable withered_pieces_list : (Position.t * int) list
