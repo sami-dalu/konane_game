@@ -20,6 +20,7 @@ type t =
   ; mutable player2 : Player.t option
   ; mutable last_move_played : Move.t option
   ; mutable crazy_info : Crazy_info.t option
+  ; mutable inverse_board : bool
   }
 [@@deriving sexp, bin_io]
 

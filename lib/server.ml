@@ -50,8 +50,12 @@ let do_disaster (game : Game.t) =
     Game.wither_piece game;
     Game.wither_piece game
   | Crazy_info.Event.Duplicates -> Game.activate_duplicates game
-  | Crazy_info.Event.Rotate -> Game.rotate_game_cw game
-  | Crazy_info.Event.Flip_all -> Game.flip_all_pieces game
+  | Crazy_info.Event.Rotate ->
+    Game.rotate_game_cw game;
+    game.inverse_board <- not game.inverse_board
+  | Crazy_info.Event.Flip_all ->
+    Game.flip_all_pieces game;
+    game.inverse_board <- not game.inverse_board
   | Crazy_info.Event.Monster -> ()
   | _ -> ()
 ;;
