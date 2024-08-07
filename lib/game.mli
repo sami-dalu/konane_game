@@ -36,6 +36,7 @@ val new_game
 
 val print : t -> unit
 val restart : t -> unit
+val in_board_range : Position.t -> t -> bool
 
 val possible_captures_from_occupied_pos_exn
   :  ?dir_opt:Move.Direction.t

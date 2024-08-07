@@ -61,6 +61,69 @@ let do_disaster (game : Game.t) =
   event
 ;;
 
+let make_monsters_feast_or_move (game : Game.t) =
+  let monster_pos_list =
+    (Option.value_exn game.crazy_info).monster_locations_list
+  in
+  List.iter
+    monster_pos_list
+    ~f:(fun ({ Position.row = r; column = c }, _n) ->
+      let above_my = { Position.row = r - 1; column = c } in
+      let below_my = { Position.row = r + 1; column = c } in
+      let left_my = { Position.row = r; column = c - 1 } in
+      let right_my = { Position.row = r; column = c + 1 } in
+      let valid_positions_to_move_or_eat_list =
+        List.filter [ above_my; below_my; left_my; right_my ] ~f:(fun pos ->
+          Game.in_board_range pos game)
+      in
+      let possible_location_to_eat_at =
+        List.find valid_positions_to_move_or_eat_list ~f:(fun pos ->
+          match Map.find game.board pos with
+          | None -> false
+          | Some piece -> Piece.equal X piece || Piece.equal O piece)
+      in
+      let new_position_of_monster = ref { Position.row = r; column = c } in
+      (match possible_location_to_eat_at with
+       | Some position_of_piece_to_eat ->
+         let map_with_monster_removed =
+           Map.remove game.board { Position.row = r; column = c }
+         in
+         let map_with_piece_ate =
+           Map.set
+             map_with_monster_removed
+             ~key:position_of_piece_to_eat
+             ~data:Piece.Monster
+         in
+         game.board <- map_with_piece_ate;
+         new_position_of_monster := position_of_piece_to_eat
+       | None ->
+         (* monster should move somewhere random *)
+         new_position_of_monster
+         := List.random_element_exn valid_positions_to_move_or_eat_list;
+         let map_with_monster_removed =
+           Map.remove game.board { Position.row = r; column = c }
+         in
+         let map_with_monster_moved =
+           Map.set
+             map_with_monster_removed
+             ~key:!new_position_of_monster
+             ~data:Piece.Monster
+         in
+         game.board <- map_with_monster_moved);
+      let new_monster_pos_list =
+        List.map monster_pos_list ~f:(fun (pos, turns_remaining) ->
+          if Position.equal pos { Position.row = r; column = c }
+          then !new_position_of_monster, turns_remaining
+          else pos, turns_remaining)
+      in
+      let old_crazy_info = Option.value_exn game.crazy_info in
+      game.crazy_info
+      <- Some
+           { old_crazy_info with
+             monster_locations_list = new_monster_pos_list
+           })
+;;
+
 (* let _handle_test_query _client (query : Rpcs.Test.Query.t) :
    Rpcs.Test.Response.t Deferred.t = return (query + 1) ;; *)
 
@@ -184,6 +247,12 @@ let handle_move_query (server : t) _client (query : Rpcs.Take_turn.Query.t) =
              else info.turns_since_event_and_event <- count + 1, evt))
        else game.last_move_from_piece_to_move <- Some move);
     Game.decrement_and_prune_crazy_stuff game;
+    (match !event_opt_ref with
+     | None -> ()
+     | Some ev ->
+       (match ev with
+        | Crazy_info.Event.Monster -> ()
+        | _ -> make_monsters_feast_or_move game));
     Game.check_for_win game;
     game.last_move_played <- Some move;
     return
