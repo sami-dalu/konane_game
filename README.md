@@ -1,6 +1,6 @@
 # Ultimate Konane
-Welcome to Ultimate Konane, a twist on Konane. 
-by Sinjin Cho-Tupua and Sami Dalu (-7900) 
+Welcome to Ultimate Konane, a twist on Konane.\
+By Sinjin Cho-Tupua and Sami Dalu
 
 # About Konane
 Konane is a Hawaiian strategy board game wherein two players, black and white, take turns hopping over (capturing) each other’s pieces on a rectangular grid, similar to checkers. The pieces on the board are initially laid out in alternating colors. Black plays first by removing a black piece in one of the four corners or one of the four central squares. White responds by removing a white piece adjacent to the space left empty by black’s move. Captures are done orthogonally (i.e. horizontally and vertically rather than diagonally) to adjacent pieces. A player can make multiple captures in the same turn as long as the captures are in the same direction with the same piece. A player of Konane loses when they are unable to make any further captures. 
