@@ -9,7 +9,7 @@ Konane is a Hawaiian strategy board game wherein two players, black and white, t
 In a Linux command line, execute the executable from the most recent release using the following command:
 ``dune exec konane.exe``
 
-You will then be greeted with the menu in the command line. When the command line presents you with a list of finite options, you can select your desired option by using either the arrow keys on your keyboard or by typing your option. In either case, confirm your choice using enter. 
+You will then be greeted with the menu in the command line. When the command line presents you with a list of finite options, you can select your desired option by using either the arrow keys on your keyboard or by typing your option. In either case, confirm your choice by pressing the enter key. 
 
 Afterwards, in the command line, you can choose to play against a bot with three difficulties (easy, medium, and hard) or multiplayer.
 
