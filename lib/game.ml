@@ -436,6 +436,9 @@ let make_move_exn ~game (move : Move.t) =
        | Some crazy ->
          crazy.withered_pieces_list
          <- List.filter crazy.withered_pieces_list ~f:(fun (pos, _) ->
+              not (Position.equal pos_of_captured_piece pos));
+         crazy.monster_locations_list
+         <- List.filter crazy.monster_locations_list ~f:(fun (pos, _) ->
               not (Position.equal pos_of_captured_piece pos)));
       Map.remove map_with_captured_piece pos_of_captured_piece
   in
@@ -527,7 +530,7 @@ let spawn_monster t =
        let starting_pos = move.starting_pos in
        t.board <- Map.set t.board ~key:starting_pos ~data:Monster;
        crazy.monster_locations_list
-       <- crazy.monster_locations_list @ [ starting_pos, 4 ];
+       <- crazy.monster_locations_list @ [ starting_pos, 5 ];
        crazy.turns_since_event_and_event <- 0, Monster)
 ;;
 
@@ -547,6 +550,13 @@ let decrement_and_prune_crazy_stuff t =
     <- List.filter_map obstacle_location_list ~f:(fun (pos, counter) ->
          if counter = 0 then None else Some (pos, counter - 1));
     let monster_locations_list = crazy.monster_locations_list in
+    let mons_to_remove =
+      List.filter_map monster_locations_list ~f:(fun (pos, counter) ->
+        if counter = 0 then Some pos else None)
+    in
+    t.board
+    <- List.fold mons_to_remove ~init:t.board ~f:(fun acc pos ->
+         Map.remove acc pos);
     crazy.monster_locations_list
     <- List.filter_map monster_locations_list ~f:(fun (pos, counter) ->
          if counter = 0 then None else Some (pos, counter - 1));
@@ -577,7 +587,7 @@ let wither_piece t =
   match t.crazy_info with
   | None -> ()
   | Some crazy ->
-    crazy.withered_pieces_list <- crazy.withered_pieces_list @ [ pos, 3 ];
+    crazy.withered_pieces_list <- crazy.withered_pieces_list @ [ pos, 4 ];
     crazy.turns_since_event_and_event <- 0, Plague
 ;;
 
@@ -621,7 +631,7 @@ let activate_duplicates t =
   match t.crazy_info with
   | None -> ()
   | Some crazy ->
-    crazy.duplicating_pieces <- true, 3;
+    crazy.duplicating_pieces <- true, 5;
     crazy.turns_since_event_and_event <- 0, Duplicates
 ;;
 
