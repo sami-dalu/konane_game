@@ -128,9 +128,9 @@ let handle_keys (client_state : Client.t) ~game_over host port ~show_message =
       (match response.crazy_info with
        | None -> stuff client_state host port show_message
        | Some crazy ->
-         (match crazy.turns_since_event_and_event_opt with
-          | None -> stuff client_state host port show_message
-          | Some (turns, evt) ->
+         (match crazy.turns_since_event_and_event with
+          | _, Impending_start -> stuff client_state host port show_message
+          | turns, evt ->
             if turns = 0 && !show_message
             then (
               client_state.last_event <- Some evt;

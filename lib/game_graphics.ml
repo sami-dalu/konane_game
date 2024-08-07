@@ -544,7 +544,8 @@ let display_event_message event ~board_height ~board_width =
        "Duplication time! Moving pieces will leave a duplicate"
      | Flip_all -> "Let's shake things up! All pieces have been swapped"
      | Rotate ->
-       "Now for a change in perspective; The board has been rotated! ")
+       "Now for a change in perspective; The board has been rotated! "
+     | Impending_start -> "LETS GET CRAZY!!!")
 ;;
 
 let render (client_state : Client.t) =
