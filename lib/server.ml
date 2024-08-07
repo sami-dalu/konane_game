@@ -56,7 +56,7 @@ let do_disaster (game : Game.t) =
    | Crazy_info.Event.Flip_all ->
      Game.flip_all_pieces game;
      game.inverse_board <- not game.inverse_board
-   | Crazy_info.Event.Monster -> ()
+   | Crazy_info.Event.Monster -> Game.spawn_monster game
    | _ -> ());
   event
 ;;

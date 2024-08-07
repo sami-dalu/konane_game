@@ -120,7 +120,7 @@ let possible_captures_from_occupied_pos_exn
       (match p with
        | Obstacle -> None
        | piece ->
-         if Piece.equal piece opp_piece
+         if Piece.equal piece opp_piece || Piece.equal piece Monster
          then (
            let pos_two_below =
              { Position.row = below_my.row + 1; column = pos.column }
@@ -148,7 +148,7 @@ let possible_captures_from_occupied_pos_exn
       (match p with
        | Obstacle -> None
        | piece ->
-         if Piece.equal piece opp_piece
+         if Piece.equal piece opp_piece || Piece.equal piece Monster
          then (
            let pos_two_right =
              { Position.row = pos.row; column = right_my.column + 1 }
@@ -176,7 +176,7 @@ let possible_captures_from_occupied_pos_exn
       (match p with
        | Obstacle -> None
        | piece ->
-         if Piece.equal piece opp_piece
+         if Piece.equal piece opp_piece || Piece.equal piece Monster
          then (
            let pos_two_left =
              { Position.row = pos.row; column = left_my.column - 1 }
@@ -204,7 +204,7 @@ let possible_captures_from_occupied_pos_exn
       (match p with
        | Obstacle -> None
        | piece ->
-         if Piece.equal piece opp_piece
+         if Piece.equal piece opp_piece || Piece.equal piece Monster
          then (
            let pos_two_above =
              { Position.row = above_my.row - 1; column = pos.column }
@@ -517,7 +517,19 @@ let place_obstacle t =
     crazy.turns_since_event_and_event <- 0, Eruption
 ;;
 
-(* let spawn_monster t = *)
+let spawn_monster t =
+  match t.crazy_info with
+  | None -> ()
+  | Some crazy ->
+    (match t.last_move_played with
+     | None -> ()
+     | Some move ->
+       let starting_pos = move.starting_pos in
+       t.board <- Map.set t.board ~key:starting_pos ~data:Monster;
+       crazy.monster_locations_list
+       <- crazy.monster_locations_list @ [ starting_pos, 4 ];
+       crazy.turns_since_event_and_event <- 0, Monster)
+;;
 
 let decrement_and_prune_crazy_stuff t =
   match t.crazy_info with

@@ -19,6 +19,8 @@ module Colors = struct
   let darker_pink = Graphics.rgb 252 146 148
   let wither_color = Graphics.rgb 103 153 108
   let purple = Graphics.rgb 244 120 255
+  let _dark_purple = Graphics.rgb 116 3 153
+  let _orange = Graphics.rgb 250 157 35
 end
 
 module Constants = struct
@@ -145,7 +147,7 @@ let draw_play_area ~board_height ~board_width ~inverse_board =
           (convert pos.row ~board_height * block_size)
           block_size
           block_size
-      | Obstacle ->
+      | _ ->
         Graphics.set_color Colors.light_red;
         Graphics.fill_rect
           (pos.column * block_size)
@@ -159,7 +161,8 @@ let draw_pieces board_map ~board_height =
     match piece with
     | Piece.X -> draw_block pos ~color:Colors.black ~board_height
     | Piece.O -> draw_block pos ~color:Colors.white ~board_height
-    | Piece.Obstacle -> draw_block pos ~color:Colors._red ~board_height)
+    | Piece.Obstacle -> draw_block pos ~color:Colors._orange ~board_height
+    | Monster -> draw_block pos ~color:Colors._dark_purple ~board_height)
 ;;
 
 (* Snake head is a different color *)
@@ -256,7 +259,7 @@ let display_win_message
        (match player2 with
         | Some p -> Player.get_name p ^ " WINS!"
         | _ -> "ERROR")
-     | Obstacle -> "lol what")
+     | _ -> "lol what")
 ;;
 
 let mouse_in_piece_to_move_spot (game : Game.t) =

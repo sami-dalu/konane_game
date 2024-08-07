@@ -1,7 +1,8 @@
 type t =
   | X
   | O
-  | Obstacle (* | Monster *)
+  | Obstacle
+  | Monster
 [@@deriving sexp, equal, bin_io, compare, enumerate, hash]
 
 val of_string : string -> t
