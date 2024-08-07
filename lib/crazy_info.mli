@@ -8,11 +8,12 @@ module Event : sig
     | Duplicates
     | Flip_all
     | Rotate
-  [@@deriving sexp, bin_io, compare, enumerate]
+    | Impending_start
+  [@@deriving sexp, bin_io, compare, equal]
 end
 
 type t =
-  { mutable turns_since_event_and_event_opt : (int * Event.t) option
+  { mutable turns_since_event_and_event : int * Event.t
   ; mutable obstacle_location_list : (Position.t * int) list
   ; mutable monster_locations_list : (Position.t * int) list
   ; mutable withered_pieces_list : (Position.t * int) list

@@ -497,7 +497,7 @@ let flip_all_pieces t =
   t.board <- Map.map t.board ~f:(fun piece -> Piece.flip piece);
   match t.crazy_info with
   | None -> ()
-  | Some crazy -> crazy.turns_since_event_and_event_opt <- Some (0, Flip_all)
+  | Some crazy -> crazy.turns_since_event_and_event <- 0, Flip_all
 ;;
 
 let place_obstacle t =
@@ -511,7 +511,7 @@ let place_obstacle t =
   | None -> ()
   | Some crazy ->
     crazy.obstacle_location_list <- crazy.obstacle_location_list @ [ pos, 5 ];
-    crazy.turns_since_event_and_event_opt <- Some (0, Eruption)
+    crazy.turns_since_event_and_event <- 0, Eruption
 ;;
 
 let decrement_and_prune_crazy_stuff t =
@@ -561,7 +561,7 @@ let wither_piece t =
   | None -> ()
   | Some crazy ->
     crazy.withered_pieces_list <- crazy.withered_pieces_list @ [ pos, 3 ];
-    crazy.turns_since_event_and_event_opt <- Some (0, Plague)
+    crazy.turns_since_event_and_event <- 0, Plague
 ;;
 
 let rotate_game_cw t =
@@ -597,7 +597,7 @@ let rotate_game_cw t =
          crazy.obstacle_location_list
          ~f:(fun ({ row; column }, counter) ->
            { Position.row = column; column = _new_width - 1 - row }, counter);
-    crazy.turns_since_event_and_event_opt <- Some (0, Rotate)
+    crazy.turns_since_event_and_event <- 0, Rotate
 ;;
 
 let activate_duplicates t =
@@ -605,7 +605,7 @@ let activate_duplicates t =
   | None -> ()
   | Some crazy ->
     crazy.duplicating_pieces <- true, 3;
-    crazy.turns_since_event_and_event_opt <- Some (0, Duplicates)
+    crazy.turns_since_event_and_event <- 0, Duplicates
 ;;
 
 (* let teleport_pieces game = () let monster_pieces game = () let

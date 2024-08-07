@@ -8,11 +8,12 @@ module Event = struct
     | Duplicates
     | Flip_all
     | Rotate
-  [@@deriving sexp, bin_io, compare, enumerate]
+    | Impending_start
+  [@@deriving sexp, bin_io, compare, equal]
 end
 
 type t =
-  { mutable turns_since_event_and_event_opt : (int * Event.t) option
+  { mutable turns_since_event_and_event : int * Event.t
   ; mutable obstacle_location_list : (Position.t * int) list
   ; mutable monster_locations_list : (Position.t * int) list
   ; mutable withered_pieces_list : (Position.t * int) list
@@ -21,7 +22,7 @@ type t =
 [@@deriving sexp, bin_io, compare]
 
 let default () =
-  { turns_since_event_and_event_opt = None
+  { turns_since_event_and_event = 0, Event.Impending_start
   ; obstacle_location_list = []
   ; monster_locations_list = []
   ; withered_pieces_list = []

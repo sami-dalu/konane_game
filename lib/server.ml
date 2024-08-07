@@ -31,6 +31,31 @@ let make_moves_exn (game : Game.t) (move_list : Move.t list) =
   game.last_move_from_piece_to_move <- None
 ;;
 
+let do_disaster (game : Game.t) =
+  let disasters =
+    [ Crazy_info.Event.Eruption
+    ; Crazy_info.Event.Plague
+    ; Crazy_info.Event.Duplicates
+    ; Crazy_info.Event.Rotate
+    ; Crazy_info.Event.Flip_all
+    ; Crazy_info.Event.Monster
+    ]
+  in
+  let event = List.random_element_exn disasters in
+  match event with
+  | Crazy_info.Event.Eruption ->
+    Game.place_obstacle game;
+    Game.place_obstacle game
+  | Crazy_info.Event.Plague ->
+    Game.wither_piece game;
+    Game.wither_piece game
+  | Crazy_info.Event.Duplicates -> Game.activate_duplicates game
+  | Crazy_info.Event.Rotate -> Game.rotate_game_cw game
+  | Crazy_info.Event.Flip_all -> Game.flip_all_pieces game
+  | Crazy_info.Event.Monster -> ()
+  | _ -> ()
+;;
+
 (* let _handle_test_query _client (query : Rpcs.Test.Query.t) :
    Rpcs.Test.Response.t Deferred.t = return (query + 1) ;; *)
 
@@ -138,29 +163,29 @@ let handle_move_query (server : t) _client (query : Rpcs.Take_turn.Query.t) =
          | None -> ()
          | Some info ->
            print_s (Crazy_info.sexp_of_t info);
-           (match info.turns_since_event_and_event_opt with
-            | None ->
-              info.turns_since_event_and_event_opt <- Some (0, Flip_all)
-            | Some (count, evt) ->
-              let rand_num = Random.int 10 in
-              if count >= rand_num
-              then (
-                let events = Crazy_info.Event.all in
-                let event = List.random_element_exn events in
-                event_opt_ref := Some event;
-                match event with
-                | Eruption ->
-                  Game.place_obstacle game;
-                  Game.place_obstacle game
-                | Plague ->
-                  Game.wither_piece game;
-                  Game.wither_piece game
-                | Duplicates -> Game.activate_duplicates game
-                | Rotate -> Game.rotate_game_cw game
-                | Flip_all -> Game.flip_all_pieces game
-                | Monster -> ())
-              else
-                info.turns_since_event_and_event_opt <- Some (count + 1, evt)))
+           let disasters =
+             [ Crazy_info.Event.Duplicates
+             ; Crazy_info.Event.Eruption
+             ; Crazy_info.Event.Flip_all
+             ; Crazy_info.Event.Rotate
+             ; Crazy_info.Event.Monster
+             ; Crazy_info.Event.Plague
+             ]
+           in
+           let count, evt = info.turns_since_event_and_event in
+           if Crazy_info.Event.equal evt Crazy_info.Event.Impending_start
+           then (
+             let new_count = count + 1 in
+             info.turns_since_event_and_event <- new_count, evt;
+             if new_count >= 3
+             then (
+               let event = List.random_element_exn disasters in
+               event_opt_ref := Some event))
+           else (
+             let rand_num = Random.int 10 in
+             if count >= rand_num
+             then do_disaster game
+             else info.turns_since_event_and_event <- count + 1, evt))
        else game.last_move_from_piece_to_move <- Some move);
     Game.decrement_and_prune_crazy_stuff game;
     Game.check_for_win game;
