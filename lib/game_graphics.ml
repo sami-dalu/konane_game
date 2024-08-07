@@ -121,21 +121,25 @@ let draw_header
   Graphics.draw_string (Printf.sprintf " %s" header_text)
 ;;
 
-let draw_play_area ~board_height ~board_width =
+let draw_play_area ~board_height ~board_width ~inverse_board =
   let open Constants in
   Map.iteri
     (Game.new_game ~height:board_height ~width:board_width ()).board
     ~f:(fun ~key:pos ~data:piece ->
       match piece with
       | Piece.X ->
-        Graphics.set_color Colors.light_gray;
+        if inverse_board
+        then Graphics.set_color Colors.dark_gray
+        else Graphics.set_color Colors.light_gray;
         Graphics.fill_rect
           (pos.column * block_size)
           (convert pos.row ~board_height * block_size)
           block_size
           block_size
       | Piece.O ->
-        Graphics.set_color Colors.dark_gray;
+        if inverse_board
+        then Graphics.set_color Colors.light_gray
+        else Graphics.set_color Colors.dark_gray;
         Graphics.fill_rect
           (pos.column * block_size)
           (convert pos.row ~board_height * block_size)
@@ -177,7 +181,7 @@ let draw_highlighted_blocks
       (block_size / 4))
 ;;
 
-let undraw_highlighted_blocks
+let _undraw_highlighted_blocks
   (available_moves_list : Move.t list)
   ~init_color
   ~board_height
@@ -403,7 +407,7 @@ let draw_end_turn_button ~board_height ~board_width =
   Graphics.draw_string "END TURN"
 ;;
 
-let undraw_end_turn_button (_game : Game.t) ~board_height ~board_width =
+let _undraw_end_turn_button (_game : Game.t) ~board_height ~board_width =
   let open Constants in
   Graphics.set_color Colors.game_in_progress;
   Graphics.fill_rect
@@ -452,7 +456,7 @@ let draw_opp_last_move (last_move : Move.t option) ~board_height =
   | None -> ()
 ;;
 
-let undraw_opp_last_move
+let _undraw_opp_last_move
   (last_move : Move.t option)
   ~board_height
   ~init_color_board
@@ -577,7 +581,10 @@ let render (client_state : Client.t) =
     ~player:client_state.player
     ~board_height
     ~board_width;
-  draw_play_area ~board_height ~board_width;
+  draw_play_area
+    ~board_height
+    ~board_width
+    ~inverse_board:client_state.game.inverse_board;
   draw_pieces board ~board_height;
   (* draw_info_slide ~board_height ~board_width
      client_state.game.crazy_info; *)
@@ -600,31 +607,21 @@ let render (client_state : Client.t) =
           (Player.get_piece client_state.player)
      then (
        if not (List.length client_state.moves_to_highlight = 0)
-       then (
-         undraw_opp_last_move
-           client_state.game.last_move_played
-           ~board_height
-           ~init_color_board:
-             (match client_state.game.piece_to_move with
-              | Piece.X -> Colors.dark_gray
-              | Piece.O -> Colors.light_gray
-              | Obstacle -> Colors.light_red)
-           ~init_color_piece:
-             (match client_state.game.piece_to_move with
-              | Piece.X -> Colors.white
-              | Piece.O -> Colors.black
-              | Obstacle -> Colors._red);
-         undraw_highlighted_blocks
-           client_state.moves_to_highlight
-           ~init_color:
-             (match client_state.game.piece_to_move with
-              | Piece.X -> Colors.black
-              | Piece.O -> Colors.white
-              | Obstacle -> Colors._red)
-           ~board_height;
+       then
+         (* undraw_opp_last_move client_state.game.last_move_played
+            ~board_height ~init_color_board: (match
+            client_state.game.piece_to_move with | Piece.X ->
+            Colors.dark_gray | Piece.O -> Colors.light_gray | Obstacle ->
+            Colors.light_red) ~init_color_piece: (match
+            client_state.game.piece_to_move with | Piece.X -> Colors.white |
+            Piece.O -> Colors.black | Obstacle -> Colors._red);
+            undraw_highlighted_blocks client_state.moves_to_highlight
+            ~init_color: (match client_state.game.piece_to_move with |
+            Piece.X -> Colors.black | Piece.O -> Colors.white | Obstacle ->
+            Colors._red) ~board_height; *)
          highlight_ending_positions
            client_state.moves_to_highlight
-           ~board_height)
+           ~board_height
        else
          draw_opp_last_move client_state.game.last_move_played ~board_height;
        match client_state.game.last_move_from_piece_to_move with
@@ -633,8 +630,9 @@ let render (client_state : Client.t) =
            (Game.available_captures_for_player
               client_state.game
               ~my_piece:client_state.game.piece_to_move)
-           ~board_height;
-         undraw_end_turn_button client_state.game ~board_height ~board_width
+           ~board_height
+       (* undraw_end_turn_button client_state.game ~board_height
+          ~board_width *)
        | Some move ->
          draw_end_turn_button ~board_height ~board_width;
          draw_highlighted_blocks

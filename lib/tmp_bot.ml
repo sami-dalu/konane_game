@@ -62,6 +62,7 @@ let rec make_move_no_mutate ~(game : Game.t) (moves_made : Move.t list) =
     ; player2 = game.player2
     ; last_move_played = None
     ; crazy_info = game.crazy_info
+    ; inverse_board = game.inverse_board
     }
   in
   match move_to_make_now.dir, move_to_make_now.ending_pos with

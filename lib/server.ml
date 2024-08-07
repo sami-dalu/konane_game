@@ -156,8 +156,12 @@ let handle_move_query (server : t) _client (query : Rpcs.Take_turn.Query.t) =
                   Game.wither_piece game;
                   Game.wither_piece game
                 | Duplicates -> Game.activate_duplicates game
-                | Rotate -> Game.rotate_game_cw game
-                | Flip_all -> Game.flip_all_pieces game
+                | Rotate ->
+                  Game.rotate_game_cw game;
+                  game.inverse_board <- not game.inverse_board
+                | Flip_all ->
+                  Game.flip_all_pieces game;
+                  game.inverse_board <- not game.inverse_board
                 | Monster -> ())
               else
                 info.turns_since_event_and_event_opt <- Some (count + 1, evt)))

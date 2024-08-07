@@ -22,6 +22,7 @@ type t =
   ; mutable player2 : Player.t option
   ; mutable last_move_played : Move.t option
   ; mutable crazy_info : Crazy_info.t option
+  ; mutable inverse_board : bool
   }
 [@@deriving sexp, bin_io]
 
@@ -61,6 +62,7 @@ let new_game ?(bot_diff : Player.Difficulty.t option) ~height ~width () =
   ; player2 = None
   ; last_move_played = None
   ; crazy_info = None
+  ; inverse_board = false
   }
 ;;
 
@@ -70,6 +72,7 @@ let restart game =
   game.last_move_from_piece_to_move <- None;
   game.piece_to_move <- Piece.X;
   game.last_move_played <- None;
+  game.inverse_board <- false;
   match game.crazy_info with
   | None -> ()
   | Some _ -> game.crazy_info <- Some (Crazy_info.default ())
