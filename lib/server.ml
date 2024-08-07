@@ -168,15 +168,6 @@ let handle_move_query (server : t) _client (query : Rpcs.Take_turn.Query.t) =
          | None -> ()
          | Some info ->
            print_s (Crazy_info.sexp_of_t info);
-           let disasters =
-             [ Crazy_info.Event.Duplicates
-             ; Crazy_info.Event.Eruption
-             ; Crazy_info.Event.Flip_all
-             ; Crazy_info.Event.Rotate
-             ; Crazy_info.Event.Monster
-             ; Crazy_info.Event.Plague
-             ]
-           in
            let count, evt = info.turns_since_event_and_event in
            if Crazy_info.Event.equal evt Crazy_info.Event.Impending_start
            then (
