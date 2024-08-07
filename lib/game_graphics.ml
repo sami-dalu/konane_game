@@ -77,6 +77,19 @@ let draw_block { Position.row; column } ~color ~board_height =
     (block_size / 2)
 ;;
 
+let draw_smaller_block { Position.row; column } ~color ~board_height =
+  let open Constants in
+  let col = column * block_size in
+  let row = convert row ~board_height * block_size in
+  (* Graphics.set_color color2; Graphics.fill_rect (col + 1) (row + 1)
+     (block_size - 1) (block_size - 1); *)
+  Graphics.set_color color;
+  Graphics.fill_circle
+    (col + (block_size / 2))
+    (row + (block_size / 2))
+    (block_size / 3)
+;;
+
 let draw_header
   ~(game : Game.t)
   ~piece_to_move
@@ -161,7 +174,9 @@ let draw_pieces board_map ~board_height =
     match piece with
     | Piece.X -> draw_block pos ~color:Colors.black ~board_height
     | Piece.O -> draw_block pos ~color:Colors.white ~board_height
-    | Piece.Obstacle -> draw_block pos ~color:Colors._orange ~board_height
+    | Piece.Obstacle ->
+      draw_block pos ~color:Colors._red ~board_height;
+      draw_smaller_block pos ~color:Colors._orange ~board_height
     | Monster -> draw_block pos ~color:Colors._dark_purple ~board_height)
 ;;
 
@@ -532,23 +547,56 @@ let display_event_message event ~board_height ~board_width =
     (block_size * 2)
     block_size;
   Graphics.moveto
-    (board_width * block_size / 4)
-    (board_height * block_size / 2);
+    (board_width * block_size * 3 / 8)
+    ((board_height * block_size / 2) + 10);
   Graphics.set_color Colors.black;
   Graphics.set_text_size 36;
-  Graphics.draw_string
-    (match event with
-     | Crazy_info.Event.Eruption ->
-       "A volcanic eruption has caused magma to cover spaces!"
-     | Crazy_info.Event.Monster -> "A monster is loose! Fight or Flee!"
-     | Crazy_info.Event.Plague ->
-       "A sickness has spread! Affected pieces will die shortly!"
-     | Crazy_info.Event.Duplicates ->
-       "Duplication time! Moving pieces will leave a duplicate"
-     | Flip_all -> "Let's shake things up! All pieces have been swapped"
-     | Rotate ->
-       "Now for a change in perspective; The board has been rotated! "
-     | Impending_start -> "LETS GET CRAZY!!!")
+  match event with
+  | Crazy_info.Event.Eruption ->
+    Graphics.draw_string "A volcanic eruption has";
+    Graphics.moveto
+      ((board_width * block_size * 3 / 8) - 19)
+      ((board_height * block_size / 2) - 7);
+    Graphics.draw_string "caused magma to cover spaces!"
+  | Crazy_info.Event.Monster ->
+    Graphics.moveto
+      ((board_width * block_size * 3 / 8) - 25)
+      ((board_height * block_size / 2) - 10);
+    Graphics.draw_string "A monster is loose! Fight or flee!"
+  | Crazy_info.Event.Plague ->
+    Graphics.moveto
+      ((board_width * block_size * 3 / 8) - 5)
+      ((board_height * block_size / 2) + 10);
+    Graphics.draw_string "A sickness has spread!";
+    Graphics.moveto
+      ((board_width * block_size * 3 / 8) - 20)
+      ((board_height * block_size / 2) - 10);
+    Graphics.draw_string "Affected pieces will die shortly!"
+  | Crazy_info.Event.Duplicates ->
+    Graphics.moveto
+      (board_width * block_size * 3 / 8)
+      ((board_height * block_size / 2) + 10);
+    Graphics.draw_string "Duplication time!";
+    Graphics.moveto
+      ((board_width * block_size * 3 / 8) - 25)
+      ((board_height * block_size / 2) - 10);
+    Graphics.draw_string "Moving pieces will leave a duplicate"
+  | Flip_all ->
+    Graphics.draw_string "Let's shake things up!";
+    Graphics.moveto
+      ((board_width * block_size * 3 / 8) - 20)
+      ((board_height * block_size / 2) - 10);
+    Graphics.draw_string "All pieces have been swapped"
+  | Rotate ->
+    Graphics.moveto
+      ((board_width * block_size * 3 / 8) - 20)
+      ((board_height * block_size / 2) + 10);
+    Graphics.draw_string "Now for a change in perspective";
+    Graphics.moveto
+      ((board_width * block_size * 3 / 8) - 5)
+      ((board_height * block_size / 2) - 10);
+    Graphics.draw_string "The board has been rotated!"
+  | Impending_start -> Graphics.draw_string "LETS GET CRAZY!!!"
 ;;
 
 let render (client_state : Client.t) =
