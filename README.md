@@ -32,8 +32,8 @@ After this server is created, each of the two human players can join a game on t
 1) Running the konane executable
 2) Selecting "Player v. Player"
 3) Selecting "Join a game"
-4) Entering the port the server listens in on
-5) Entering the host computer
+4) Entering the host computer
+5) Entering the port the server listens in on
 6) Selecting the desired game mode (Normal or Crazy)
 7) Entering the desired height of the board, and entering the desired width
 8) If both players enter the same board dimensions and game mode, the game will begin!
