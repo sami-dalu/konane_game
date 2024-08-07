@@ -42,22 +42,23 @@ let do_disaster (game : Game.t) =
     ]
   in
   let event = List.random_element_exn disasters in
-  match event with
-  | Crazy_info.Event.Eruption ->
-    Game.place_obstacle game;
-    Game.place_obstacle game
-  | Crazy_info.Event.Plague ->
-    Game.wither_piece game;
-    Game.wither_piece game
-  | Crazy_info.Event.Duplicates -> Game.activate_duplicates game
-  | Crazy_info.Event.Rotate ->
-    Game.rotate_game_cw game;
-    game.inverse_board <- not game.inverse_board
-  | Crazy_info.Event.Flip_all ->
-    Game.flip_all_pieces game;
-    game.inverse_board <- not game.inverse_board
-  | Crazy_info.Event.Monster -> ()
-  | _ -> ()
+  (match event with
+   | Crazy_info.Event.Eruption ->
+     Game.place_obstacle game;
+     Game.place_obstacle game
+   | Crazy_info.Event.Plague ->
+     Game.wither_piece game;
+     Game.wither_piece game
+   | Crazy_info.Event.Duplicates -> Game.activate_duplicates game
+   | Crazy_info.Event.Rotate ->
+     Game.rotate_game_cw game;
+     game.inverse_board <- not game.inverse_board
+   | Crazy_info.Event.Flip_all ->
+     Game.flip_all_pieces game;
+     game.inverse_board <- not game.inverse_board
+   | Crazy_info.Event.Monster -> ()
+   | _ -> ());
+  event
 ;;
 
 (* let _handle_test_query _client (query : Rpcs.Test.Query.t) :
@@ -183,12 +184,12 @@ let handle_move_query (server : t) _client (query : Rpcs.Take_turn.Query.t) =
              info.turns_since_event_and_event <- new_count, evt;
              if new_count >= 3
              then (
-               let event = List.random_element_exn disasters in
+               let event = do_disaster game in
                event_opt_ref := Some event))
            else (
              let rand_num = Random.int 10 in
              if count >= rand_num
-             then do_disaster game
+             then event_opt_ref := Some (do_disaster game)
              else info.turns_since_event_and_event <- count + 1, evt))
        else game.last_move_from_piece_to_move <- Some move);
     Game.decrement_and_prune_crazy_stuff game;
