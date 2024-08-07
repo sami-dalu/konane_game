@@ -556,6 +556,7 @@ let render (client_state : Client.t) =
      So, we set [display_mode] to false, draw to the background buffer, set
      [display_mode] to true and then synchronize. This guarantees that there
      won't be flickering! *)
+  let open Constants in
   Graphics.display_mode false;
   (* let current_window_width = Graphics.size_x () in let
      current_window_height = Graphics.size_y () in *)
@@ -565,6 +566,9 @@ let render (client_state : Client.t) =
   let board_height = client_state.game.board_height in
   let player1 = client_state.game.player1 in
   let player2 = client_state.game.player2 in
+  Graphics.resize_window
+    (board_width * block_size)
+    ((board_height * block_size) + header_height);
   (match player1, player2 with
    | Some p1, Some p2 ->
      if Player.equal client_state.player p1
