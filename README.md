@@ -15,12 +15,34 @@ Afterwards, in the command line, you can choose to play against a bot with three
 
 
 ## Player v. Bot 
-To play against a bot, simply select the "Player v. Bot" option. Enter your name, select your choice of game mode (Normal or Crazy), select a difficulty for the bot, and select the piece you would like to play (Black or White). Finally, enter the height and then width of the board, and your game will start! 
+To play against a bot, simply select the "Player v. Bot" option. Then, 
+1) Enter your name
+2) Select your choice of game mode (Normal or Crazy)
+3) Select a difficulty for the bot
+4) Select the piece you would like to play (Black or White)
+5) Finally, enter the height and then width of the board, and your game will start! 
 
 ## Player v. Player
-For two players to play against one another, they must be on the same server. To start a server, on a host computer, run the command above and select "Player v. Player". Then, select "Start a server" and enter the port that the server should be listening on. 
+For two players to play against one another, they must be on the same server. To start a server, 
+1) On a host computer, run the command above and select "Player v. Player"
+2) Select "Start a server"
+3) Enter the port that the server should be listening on
 
-After this server is created, each of the two human players can join this game by running the konane executable, selecting "Player v. Player", selecting "Join a game", entering the port the server listens in on, entering the host computer, selecting the desired game mode (Normal or Crazy), entering the desired height of the board, and entering the desired width. If both players enter the same board dimensions and game mode, the game will begin!
+After this server is created, each of the two human players can join a game on that server via the following steps:
+1) Running the konane executable
+2) Selecting "Player v. Player"
+3) Selecting "Join a game"
+4) Entering the port the server listens in on
+5) Entering the host computer
+6) Selecting the desired game mode (Normal or Crazy)
+7) Entering the desired height of the board, and entering the desired width.
+8) If both players enter the same board dimensions and game mode, the game will begin!
 
 # Crazy Mode
-There are two modes in Ultimate Konane: Normal and Crazy. The normal mode works exactly was the "About Konane" section describes above. The Crazy mode has a few extra twists, including volcanic eruptions, which will remove random pieces from the board and make squares not accessible, plagues, which will infect certain pieces and doom them to removal after a number of turns,
+There are two modes in Ultimate Konane: Normal and Crazy. The normal mode works exactly as the "About Konane" section describes above. The Crazy mode has a few extra twists, including:
+1) Volcanic eruptions, which will remove random pieces from the board and make squares not accessible
+2) Plagues, which will infect certain pieces and doom them for removal after a few turns
+3) Rotation of the board by 90 degrees clockwise
+4) Flipping the colors of all pieces on the board (i.e black pieces become white and white pieces become black)
+5) Monsters, who can eat adjacent pieces, breaking loose
+6) Duplication serums leaking all across the board, making moving pieces leave a duplicate in their original starting spots.
