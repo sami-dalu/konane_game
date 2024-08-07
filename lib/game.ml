@@ -517,6 +517,8 @@ let place_obstacle t =
     crazy.turns_since_event_and_event <- 0, Eruption
 ;;
 
+(* let spawn_monster t = *)
+
 let decrement_and_prune_crazy_stuff t =
   match t.crazy_info with
   | None -> ()
