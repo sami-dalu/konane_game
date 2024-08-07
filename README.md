@@ -45,4 +45,4 @@ There are two modes in Ultimate Konane: Normal and Crazy. The normal mode works 
 3) Rotation of the board by 90 degrees clockwise
 4) Flipping the colors of all pieces on the board (i.e black pieces become white and white pieces become black)
 5) Monsters, who can eat adjacent pieces, breaking loose
-6) Duplication serums leaking all across the board, making moving pieces leave a duplicate in their original starting spots.
+6) Duplication serum leaking all across the board, making moving pieces leave a duplicate in their original starting spots
