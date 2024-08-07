@@ -525,8 +525,8 @@ let display_event_message event ~board_height ~board_width =
     (block_size * 2)
     block_size;
   Graphics.moveto
-    ((board_width * block_size / 2) - (2 * 16))
-    ((board_height * block_size / 2) - 8);
+    (board_width * block_size / 4)
+    (board_height * block_size / 2);
   Graphics.set_color Colors.black;
   Graphics.set_text_size 36;
   Graphics.draw_string
