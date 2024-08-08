@@ -524,14 +524,17 @@ let spawn_monster t =
   match t.crazy_info with
   | None -> ()
   | Some crazy ->
-    (match t.last_move_played with
-     | None -> ()
-     | Some move ->
-       let starting_pos = move.starting_pos in
-       t.board <- Map.set t.board ~key:starting_pos ~data:Monster;
-       crazy.monster_locations_list
-       <- crazy.monster_locations_list @ [ starting_pos, 5 ];
-       crazy.turns_since_event_and_event <- 0, Monster)
+    let list_of_open_spaces =
+      Map.to_alist
+        (Map.filter_keys
+           (new_board ~height:t.board_height ~width:t.board_width)
+           ~f:(fun pos -> not (Map.mem t.board pos)))
+    in
+    let random_pos, _p = List.random_element_exn list_of_open_spaces in
+    t.board <- Map.set t.board ~key:random_pos ~data:Monster;
+    crazy.monster_locations_list
+    <- crazy.monster_locations_list @ [ random_pos, 5 ];
+    crazy.turns_since_event_and_event <- 0, Monster
 ;;
 
 let decrement_and_prune_crazy_stuff t =
