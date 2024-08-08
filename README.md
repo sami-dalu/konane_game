@@ -49,8 +49,8 @@ There are two modes in Ultimate Konane: Normal and Crazy. The normal mode works 
 6) Duplication serum leaking all across the board, making moving pieces leave a duplicate in their original starting spots
 
 # Playing the game
-When you are in the game and it is your turn to play, you will see a small blue circle over the pieces of yours which you can make a move from. Once you click one of these pieces, if you are making a capture (you will from your second move onwards), after selecting the piece you can make a move from, you will see a small yellow circle on the tiles you can leap to and thereby capture the opponent's adjacent piece. 
-<img width="601" alt="image" src="https://github.com/user-attachments/assets/485a7066-ae91-4174-b60f-a529dcf17efc">
+When you are in the game and it is your turn to play, you will see a small blue circle over the pieces of yours which you can make a move from. Once you click one of these pieces, if you are making a capture (you will from your second move onwards), after selecting the piece you can make a move from, you will see a small yellow circle on the tiles you can leap to and thereby capture the opponent's piece adjacent to yours. 
+<img width="601" alt="image" src="https://github.com/user-attachments/assets/792cdaa0-cc76-44b3-8d10-16523578d699">
 
 The starting position of the piece your opponent moved last turn will have a small light red circle over it, and their ending position will have a small regular red circle over it. 
 <img width="600" alt="image" src="https://github.com/user-attachments/assets/af56c607-c8d2-4be2-a310-f3dcd1922d41">
