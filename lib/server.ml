@@ -15,11 +15,9 @@ let make_moves_exn (game : Game.t) (move_list : Move.t list) =
 let do_disaster (game : Game.t) =
   let disasters =
     [ Crazy_info.Event.Eruption
-    ; Crazy_info.Event.Plague
-    ; Crazy_info.Event.Duplicates
-    ; Crazy_info.Event.Rotate
-    ; Crazy_info.Event.Flip_all
-    ; Crazy_info.Event.Monster
+      (* ; Crazy_info.Event.Plague ; Crazy_info.Event.Duplicates ;
+         Crazy_info.Event.Rotate ; Crazy_info.Event.Flip_all ;
+         Crazy_info.Event.Monster *)
     ]
   in
   let event = List.random_element_exn disasters in
@@ -250,7 +248,33 @@ let handle_end_query (server : t) _client (query : Rpcs.End_turn.Query.t) =
   let g = Hashtbl.find_exn server.game_player_piece_tbl query.player in
   g.piece_to_move <- Piece.flip g.piece_to_move;
   g.last_move_from_piece_to_move <- None;
-  return { Rpcs.End_turn.Response.game = g }
+  let event_opt_ref = ref None in
+  match g.crazy_info with
+  | None -> return { Rpcs.End_turn.Response.game = g }
+  | Some info ->
+    print_s (Crazy_info.sexp_of_t info);
+    let count, evt = info.turns_since_event_and_event in
+    if Crazy_info.Event.equal evt Crazy_info.Event.Impending_start
+    then (
+      let new_count = count + 1 in
+      info.turns_since_event_and_event <- new_count, evt;
+      if new_count >= 3
+      then (
+        let event = do_disaster g in
+        event_opt_ref := Some event))
+    else (
+      let rand_num = Random.int 10 in
+      if count >= rand_num
+      then event_opt_ref := Some (do_disaster g)
+      else info.turns_since_event_and_event <- count + 1, evt);
+    Game.decrement_and_prune_crazy_stuff g;
+    (match !event_opt_ref with
+     | None -> make_monsters_feast_or_move g
+     | Some ev ->
+       (match ev with
+        | Crazy_info.Event.Monster -> ()
+        | _ -> make_monsters_feast_or_move g));
+    return { Rpcs.End_turn.Response.game = g }
 ;;
 
 let handle_restart_query

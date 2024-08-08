@@ -21,6 +21,7 @@ module Colors = struct
   let purple = Graphics.rgb 244 120 255
   let _dark_purple = Graphics.rgb 116 3 153
   let _orange = Graphics.rgb 250 157 35
+  let _darker_purple = Graphics.rgb 69 0 110
 end
 
 module Constants = struct
@@ -98,6 +99,12 @@ let draw_header
     (block_size * board_height)
     (board_width * block_size)
     header_height;
+  Graphics.set_color Colors.black;
+  Graphics.draw_rect
+    0
+    (block_size * board_height)
+    (board_width * block_size)
+    header_height;
   let header_text =
     match game_state with
     | Game.Game_state.First_moves | Game.Game_state.Game_continues ->
@@ -153,6 +160,108 @@ let draw_play_area ~board_height ~board_width ~inverse_board =
           block_size)
 ;;
 
+let draw_monster_stuff { Position.row; column } ~board_height =
+  let open Constants in
+  let col = column * block_size in
+  let row = convert row ~board_height * block_size in
+  Graphics.set_color Colors._darker_purple;
+  Graphics.fill_arc
+    (col + (block_size / 2) - (block_size / 4))
+    (row + (block_size / 2))
+    (block_size / 8)
+    (block_size / 8)
+    180
+    360;
+  Graphics.fill_arc
+    (col + (block_size / 2) + (block_size / 4))
+    (row + (block_size / 2))
+    (block_size / 8)
+    (block_size / 8)
+    180
+    360;
+  Graphics.fill_arc
+    (col + (block_size / 2))
+    (row + (block_size / 2) - (block_size * 3 / 8))
+    (block_size / 4)
+    (block_size / 4)
+    0
+    180
+;;
+
+let draw_lava_stuff { Position.row; column } ~board_height =
+  let open Constants in
+  let col = column * block_size in
+  let row = convert row ~board_height * block_size in
+  Graphics.set_color Colors._yellow;
+  (* Graphics.fill_arc (col + (block_size / 2) - (block_size / 4)) (row +
+     (block_size / 2)) (block_size / 8) (block_size / 8) 180 360;
+     Graphics.fill_arc (col + (block_size / 2) + (block_size / 4)) (row +
+     (block_size / 2)) (block_size / 8) (block_size / 8) 180 360; *)
+  Graphics.fill_arc
+    (col + (block_size / 2))
+    (row + (block_size / 2) + (block_size / 8))
+    (block_size / 16)
+    (block_size / 8)
+    270
+    450;
+  Graphics.fill_arc
+    (col + (block_size / 2))
+    (row + (block_size / 2) - (block_size / 8))
+    (block_size / 8)
+    (block_size / 4)
+    90
+    270;
+  Graphics.fill_arc
+    (col + (block_size / 2))
+    (row + (block_size / 2) - (block_size / 8))
+    (block_size / 8)
+    (block_size / 4)
+    135
+    315;
+  Graphics.fill_arc
+    (col + (block_size / 2) - (block_size / 8))
+    (row + (block_size / 2) + (block_size / 8))
+    (block_size / 16)
+    (block_size / 8)
+    270
+    450;
+  Graphics.fill_arc
+    (col + (block_size / 2) - (block_size / 8))
+    (row + (block_size / 2) - (block_size / 8))
+    (block_size / 8)
+    (block_size / 4)
+    90
+    270;
+  Graphics.fill_arc
+    (col + (block_size / 2) - (block_size / 8))
+    (row + (block_size / 2) - (block_size / 8))
+    (block_size / 8)
+    (block_size / 4)
+    135
+    315;
+  Graphics.fill_arc
+    (col + (block_size / 2) + (block_size / 8))
+    (row + (block_size / 2) + (block_size / 8))
+    (block_size / 16)
+    (block_size / 8)
+    270
+    450;
+  Graphics.fill_arc
+    (col + (block_size / 2) + (block_size / 8))
+    (row + (block_size / 2) - (block_size / 8))
+    (block_size / 8)
+    (block_size / 4)
+    90
+    270;
+  Graphics.fill_arc
+    (col + (block_size / 2) + (block_size / 8))
+    (row + (block_size / 2) - (block_size / 8))
+    (block_size / 8)
+    (block_size / 4)
+    135
+    315
+;;
+
 let draw_pieces board_map ~board_height =
   Map.iteri board_map ~f:(fun ~key:pos ~data:piece ->
     match piece with
@@ -160,8 +269,11 @@ let draw_pieces board_map ~board_height =
     | Piece.O -> draw_block pos ~color:Colors.white ~board_height
     | Piece.Obstacle ->
       draw_block pos ~color:Colors._red ~board_height;
-      draw_smaller_block pos ~color:Colors._orange ~board_height
-    | Monster -> draw_block pos ~color:Colors._dark_purple ~board_height)
+      draw_smaller_block pos ~color:Colors._orange ~board_height;
+      draw_lava_stuff pos ~board_height
+    | Monster ->
+      draw_block pos ~color:Colors._dark_purple ~board_height;
+      draw_monster_stuff pos ~board_height)
 ;;
 
 let draw_highlighted_blocks
@@ -175,24 +287,6 @@ let draw_highlighted_blocks
     let col = col * block_size in
     let row = convert row ~board_height * block_size in
     Graphics.set_color Colors._light_blue;
-    Graphics.fill_circle
-      (col + (block_size / 2))
-      (row + (block_size / 2))
-      (block_size / 4))
-;;
-
-let _undraw_highlighted_blocks
-  (available_moves_list : Move.t list)
-  ~init_color
-  ~board_height
-  =
-  let open Constants in
-  List.iter available_moves_list ~f:(fun move ->
-    let row = move.starting_pos.row in
-    let col = move.starting_pos.column in
-    let col = col * block_size in
-    let row = convert row ~board_height * block_size in
-    Graphics.set_color init_color;
     Graphics.fill_circle
       (col + (block_size / 2))
       (row + (block_size / 2))
