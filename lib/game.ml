@@ -516,6 +516,12 @@ let place_obstacle t =
   match t.crazy_info with
   | None -> ()
   | Some crazy ->
+    crazy.withered_pieces_list
+    <- List.filter crazy.withered_pieces_list ~f:(fun (poss, _count) ->
+         not (Position.equal pos poss));
+    crazy.monster_locations_list
+    <- List.filter crazy.monster_locations_list ~f:(fun (poss, _count) ->
+         not (Position.equal pos poss));
     crazy.obstacle_location_list <- crazy.obstacle_location_list @ [ pos, 5 ];
     crazy.turns_since_event_and_event <- 0, Eruption
 ;;
@@ -609,6 +615,13 @@ let rotate_game_cw t =
   t.board <- !new_game_board;
   t.board_height <- _new_height;
   t.board_width <- _new_width;
+  t.last_move_played <- None;
+  (* (match t.last_move_played with | None -> () | Some { dir; starting_pos =
+     { row = srow; column = scol }; ending_pos } -> let new_move = { Move.dir
+     ; starting_pos = { Position.row = scol; column = _new_width - 1 - srow }
+     ; ending_pos = (match ending_pos with | None -> None | Some { row =
+     erow; column = ecol } -> Some { Position.row = ecol; column = _new_width
+     - 1 - erow }) } in t.last_move_played <- Some new_move); *)
   match t.crazy_info with
   | None -> ()
   | Some crazy ->
