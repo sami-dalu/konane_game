@@ -249,15 +249,15 @@ let handle_move_query (server : t) _client (query : Rpcs.Take_turn.Query.t) =
              let rand_num = Random.int 10 in
              if count >= rand_num
              then event_opt_ref := Some (do_disaster game)
-             else info.turns_since_event_and_event <- count + 1, evt))
+             else info.turns_since_event_and_event <- count + 1, evt);
+           Game.decrement_and_prune_crazy_stuff game;
+           (match !event_opt_ref with
+            | None -> make_monsters_feast_or_move game
+            | Some ev ->
+              (match ev with
+               | Crazy_info.Event.Monster -> ()
+               | _ -> make_monsters_feast_or_move game)))
        else game.last_move_from_piece_to_move <- Some move);
-    Game.decrement_and_prune_crazy_stuff game;
-    (match !event_opt_ref with
-     | None -> make_monsters_feast_or_move game
-     | Some ev ->
-       (match ev with
-        | Crazy_info.Event.Monster -> ()
-        | _ -> make_monsters_feast_or_move game));
     Game.check_for_win game;
     game.last_move_played <- Some move;
     return
