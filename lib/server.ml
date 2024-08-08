@@ -15,9 +15,11 @@ let make_moves_exn (game : Game.t) (move_list : Move.t list) =
 let do_disaster (game : Game.t) =
   let disasters =
     [ Crazy_info.Event.Eruption
-      (* ; Crazy_info.Event.Plague ; Crazy_info.Event.Duplicates ;
-         Crazy_info.Event.Rotate ; Crazy_info.Event.Flip_all ;
-         Crazy_info.Event.Monster *)
+    ; Crazy_info.Event.Plague
+    ; Crazy_info.Event.Duplicates
+    ; Crazy_info.Event.Rotate
+    ; Crazy_info.Event.Flip_all
+    ; Crazy_info.Event.Monster
     ]
   in
   let event = List.random_element_exn disasters in
