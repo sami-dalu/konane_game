@@ -25,13 +25,7 @@ end
 
 module Constants = struct
   let scaling_factor = 1.
-
-  (* let play_area_height = 600. *. scaling_factor |>
-     Float.iround_down_exn *)
   let header_height = 75. *. scaling_factor |> Float.iround_down_exn
-  (* let info_box_width = 150. *. scaling_factor |> Float.iround_down_exn *)
-
-  (* let play_area_width = 600. *. scaling_factor |> Float.iround_down_exn *)
   let block_size = 75. *. scaling_factor |> Float.iround_down_exn
 end
 
@@ -50,26 +44,18 @@ let init_exn (game_config : Game_config.t) =
        " %dx%d"
        (block_size * game_config.width)
        ((block_size * game_config.height) + header_height));
-  (* let height = play_area_height / block_size in let width =
-     play_area_width / block_size in *)
   let game =
     Game.new_game ~height:game_config.height ~width:game_config.width ()
   in
-  (* let one_move_game = Move.Exercises.make_move_exn ~game
-     {Move.Exercises.Move.starting_pos = {Position.row = 0; column = 0};
-     Move.Exercises.Move.ending_pos = None} in one_move_game *)
   game
 ;;
 
 let convert row ~board_height = board_height - 1 - row
 
-(* let draw_board ~color1 ~color2 = List.iter *)
 let draw_block { Position.row; column } ~color ~board_height =
   let open Constants in
   let col = column * block_size in
   let row = convert row ~board_height * block_size in
-  (* Graphics.set_color color2; Graphics.fill_rect (col + 1) (row + 1)
-     (block_size - 1) (block_size - 1); *)
   Graphics.set_color color;
   Graphics.fill_circle
     (col + (block_size / 2))
@@ -81,8 +67,6 @@ let draw_smaller_block { Position.row; column } ~color ~board_height =
   let open Constants in
   let col = column * block_size in
   let row = convert row ~board_height * block_size in
-  (* Graphics.set_color color2; Graphics.fill_rect (col + 1) (row + 1)
-     (block_size - 1) (block_size - 1); *)
   Graphics.set_color color;
   Graphics.fill_circle
     (col + (block_size / 2))
@@ -179,8 +163,6 @@ let draw_pieces board_map ~board_height =
       draw_smaller_block pos ~color:Colors._orange ~board_height
     | Monster -> draw_block pos ~color:Colors._dark_purple ~board_height)
 ;;
-
-(* Snake head is a different color *)
 
 let draw_highlighted_blocks
   (available_moves_list : Move.t list)
@@ -600,17 +582,8 @@ let display_event_message event ~board_height ~board_width =
 ;;
 
 let render (client_state : Client.t) =
-  (* We want double-buffering. See
-     https://v2.ocaml.org/releases/4.03/htmlman/libref/Graphics.html for more
-     info!
-
-     So, we set [display_mode] to false, draw to the background buffer, set
-     [display_mode] to true and then synchronize. This guarantees that there
-     won't be flickering! *)
   let open Constants in
   Graphics.display_mode false;
-  (* let current_window_width = Graphics.size_x () in let
-     current_window_height = Graphics.size_y () in *)
   let game_state = client_state.game.game_state in
   let board = client_state.game.board in
   let board_width = client_state.game.board_width in
@@ -642,8 +615,6 @@ let render (client_state : Client.t) =
     ~board_width
     ~inverse_board:client_state.game.inverse_board;
   draw_pieces board ~board_height;
-  (* draw_info_slide ~board_height ~board_width
-     client_state.game.crazy_info; *)
   (match client_state.game.crazy_info with
    | None -> ()
    | Some crazy -> draw_withering_pieces ~board_height ~crazy);
@@ -664,17 +635,6 @@ let render (client_state : Client.t) =
      then (
        if not (List.length client_state.moves_to_highlight = 0)
        then
-         (* undraw_opp_last_move client_state.game.last_move_played
-            ~board_height ~init_color_board: (match
-            client_state.game.piece_to_move with | Piece.X ->
-            Colors.dark_gray | Piece.O -> Colors.light_gray | Obstacle ->
-            Colors.light_red) ~init_color_piece: (match
-            client_state.game.piece_to_move with | Piece.X -> Colors.white |
-            Piece.O -> Colors.black | Obstacle -> Colors._red);
-            undraw_highlighted_blocks client_state.moves_to_highlight
-            ~init_color: (match client_state.game.piece_to_move with |
-            Piece.X -> Colors.black | Piece.O -> Colors.white | Obstacle ->
-            Colors._red) ~board_height; *)
          highlight_ending_positions
            client_state.moves_to_highlight
            ~board_height
@@ -687,8 +647,6 @@ let render (client_state : Client.t) =
               client_state.game
               ~my_piece:client_state.game.piece_to_move)
            ~board_height
-       (* undraw_end_turn_button client_state.game ~board_height
-          ~board_width *)
        | Some move ->
          draw_end_turn_button ~board_height ~board_width;
          draw_highlighted_blocks
@@ -706,10 +664,6 @@ let render (client_state : Client.t) =
   Graphics.display_mode true;
   Graphics.synchronize ()
 ;;
-
-(* (match move.ending_pos with | None -> [] | Some pos ->
-   Game.possible_captures_from_occupied_pos_exn ?dir_opt:move.dir game
-   pos) *)
 
 module Action = struct
   type t =
@@ -731,9 +685,6 @@ let read_key (client_state : Client.t) : Action.t =
         Graphics.sound 20 1000;
         Move (List.hd_exn move_list_to_take)
       | Game.Game_state.Game_continues ->
-        (* undraw_highlighted_blocks move_list_to_take ~init_color: (match
-           game.piece_to_move with | Piece.X -> Colors.black | Piece.O ->
-           Colors.white); highlight_ending_positions move_list_to_take; *)
         if not (List.length client_state.moves_to_highlight = 0)
         then (
           Core.print_endline "confirming move";

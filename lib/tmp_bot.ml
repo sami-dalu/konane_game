@@ -1,5 +1,4 @@
 open! Core
-(* open! Async *)
 
 let rec make_move_no_mutate ~(game : Game.t) (moves_made : Move.t list) =
   (* returns the game states and moves made to get to those game state(s )*)
@@ -118,8 +117,6 @@ let score game ~me ~depth maximizing_player ~evaluated_game =
     let num_of_my_edge_pieces =
       number_of_pieces_on_edge game ~piece_to_eval:me
     in
-    (* let num_of_enemy_edge_pieces = number_of_pieces_on_edge game
-       ~piece_to_eval:(Piece.flip me) in *)
     let available_moves_at_current_state =
       Game.available_captures_for_player game ~my_piece:me
     in
@@ -137,7 +134,6 @@ let score game ~me ~depth maximizing_player ~evaluated_game =
       + number_of_available_moves
       - (2 * number_of_enemy_moves)
       + (2 * num_of_my_edge_pieces)
-      (* - number_of_enemy_moves *)
       - 6
       + depth
     else
@@ -146,7 +142,6 @@ let score game ~me ~depth maximizing_player ~evaluated_game =
       - number_of_available_moves
       + (2 * number_of_enemy_moves)
       - (2 * num_of_my_edge_pieces)
-      (* + number_of_enemy_moves *)
       + 6
       - depth
 ;;
@@ -208,28 +203,3 @@ let use_minimax_to_find_best_moves game ~depth ~me =
   in
   best_moves
 ;;
-
-(* let new_game = Konanelib.Game.new_game ~height:8 ~width:8 in let game =
-   List.fold (List.init 55 ~f:(fun i -> i)) ~init:new_game ~f:(fun acc _i ->
-   let moves_to_make = Konanelib.Bot..use_minimax_to_find_best_moves ~depth:4
-   ~me:acc.piece_to_move acc in List.iter (List.rev moves_to_make) ~f:(fun
-   move -> Core.print_s (Konanelib.Move.sexp_of_t move);
-   Konanelib.Game.make_move_exn ~game:acc move); acc.piece_to_move <-
-   Konanelib.Piece.flip acc.piece_to_move; acc) in Konanelib.Game.print
-   game; *)
-
-(* let test_bot = Command.async ~summary:"Testing Bot" (let%map_open.Command
-   () = return () in fun () -> Core.print_s [%message "starting"]; let list =
-   List.init 64 ~f:(fun i -> i) in Core.print_s [%message (List.length list :
-   int)]; let _winner = List.fold list ~init:(Game.new_game ~height:8
-   ~width:8, Piece.X) ~f:(fun (board, piece) _num -> let best_move =
-   use_minimax_to_find_best_move board ~me:piece ~depth:6 in Core.print_s
-   [%message (best_move : Move.t)]; let _, next_piece = Game.make_move_exn
-   ~game:board best_move, Piece.flip piece in Game.print board; board,
-   next_piece) in return ()) ;;
-
-   let _command = Command.group ~summary:"Exercises" [ "test_bot", test_bot
-   ] *)
-
-(* let command = Command.group ~summary:"Game Strategies" [ "play",
-   command_play; "exercises", command ] ;; *)

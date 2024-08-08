@@ -1,25 +1,6 @@
 open! Core
 open! Async
 
-(* let handle_turn (_client : unit) (query : Rpcs.Take_turn.Query.t) = let
-   response = { Rpcs.Take_turn.Response.piece = query.you_play ; move = {
-   starting_pos = { Position.row = 0; column = 0 } ; ending_pos = None ; dir
-   = None } } in return response ;; *)
-
-(* let start_game_impl _client (_query : Rpcs.Start_game.Query.t) = *)
-(* print_s [%message "Query received" (query : Rpcs.Start_game.Query.t)]; let
-   game_over_query = { Rpcs.Game_over.Query.game = Game.new_game ~height:8
-   ~width:8 ; Rpcs.Game_over.Query.evaluation = Game.Game_state.Game_over {
-   winner = Piece.X } } in let%bind start_game_response =
-   Rpc.Connection.with_client (Tcp.Where_to_connect.of_host_and_port
-   query.host_and_port) (fun conn -> Rpc.Rpc.dispatch_exn Rpcs.Game_over.rpc
-   conn game_over_query) in print_s [%message "start_game_response"
-   (start_game_response : (Rpcs.Game_over.Response.t, exn) Result.t)]; *)
-(* return Rpcs.Start_game.Response.Game_not_started *)
-
-(* function which tries to start a test game *)
-(* let start_test_impl _client (query : Rpcs.Start_game.Query.t) = let ;; *)
-
 type t =
   { config_queue_tbl : (Game_config.t, Player.t Queue.t) Hashtbl.t
   ; game_player_piece_tbl : (Player.t, Game.t) Hashtbl.t
@@ -107,30 +88,6 @@ let make_monsters_feast_or_move (game : Game.t) =
     in
     info.monster_locations_list <- new_mons_list
 ;;
-
-(* let new_monster_pos_list = List.map monster_pos_list ~f:(fun (pos,
-   turns_remaining) -> if Position.equal pos { Position.row = r; column = c }
-   then new_position_of_monster, turns_remaining else pos, turns_remaining)
-   in (* (match possible_location_to_eat_at with | Some
-   position_of_piece_to_eat -> let map_with_monster_removed = Map.remove
-   game.board { Position.row = r; column = c } in let map_with_piece_ate =
-   Map.set map_with_monster_removed ~key:position_of_piece_to_eat
-   ~data:Piece.Monster in game.board <- map_with_piece_ate;
-   new_position_of_monster := position_of_piece_to_eat | None -> (* monster
-   should move somewhere random *) new_position_of_monster :=
-   List.random_element_exn valid_positions_to_move_or_eat_list; let
-   map_with_monster_removed = Map.remove game.board { Position.row = r;
-   column = c } in let map_with_monster_moved = Map.set
-   map_with_monster_removed ~key:!new_position_of_monster ~data:Piece.Monster
-   in game.board <- map_with_monster_moved); *) (* let new_monster_pos_list =
-   List.map monster_pos_list ~f:(fun (pos, turns_remaining) -> if
-   Position.equal pos { Position.row = r; column = c } then
-   !new_position_of_monster, turns_remaining else pos, turns_remaining) in *)
-   let old_crazy_info = Option.value_exn game.crazy_info in
-   old_crazy_info.monster_locations_list <- new_monster_pos_list) *)
-
-(* let _handle_test_query _client (query : Rpcs.Test.Query.t) :
-   Rpcs.Test.Response.t Deferred.t = return (query + 1) ;; *)
 
 let handle_start_query (server : t) _client (query : Rpcs.Start_game.Query.t)
   : Rpcs.Start_game.Response.t Deferred.t
@@ -267,7 +224,6 @@ let handle_move_query (server : t) _client (query : Rpcs.Take_turn.Query.t) =
 
 let handle_wait_query (server : t) _client (query : Rpcs.Wait_turn.Query.t) =
   let g = Hashtbl.find_exn server.game_player_piece_tbl query in
-  (* print_s [%message "before moves are made " (g : Game.t)]; *)
   match g.bot_difficulty with
   | None -> return g
   | Some difficulty ->
@@ -292,8 +248,6 @@ let handle_wait_query (server : t) _client (query : Rpcs.Wait_turn.Query.t) =
 
 let handle_end_query (server : t) _client (query : Rpcs.End_turn.Query.t) =
   let g = Hashtbl.find_exn server.game_player_piece_tbl query.player in
-  (* let new_g = { g with piece_to_move = Piece.flip g.piece_to_move ;
-     last_move_from_piece_to_move = None } in *)
   g.piece_to_move <- Piece.flip g.piece_to_move;
   g.last_move_from_piece_to_move <- None;
   return { Rpcs.End_turn.Response.game = g }

@@ -8,8 +8,6 @@ module Game_state = struct
   [@@deriving sexp, equal, bin_io]
 end
 
-(* module Direction = struct type t = | Up | Down | Left | Right end *)
-
 type t =
   { mutable board_height : int
   ; mutable board_width : int
@@ -453,7 +451,6 @@ let make_move_exn ~game (move : Move.t) =
   in
   game.board <- new_board;
   game.game_state <- new_game_state;
-  (* game.piece_to_move <- Piece.flip game.piece_to_move; *)
   print game
 ;;
 
@@ -616,12 +613,6 @@ let rotate_game_cw t =
   t.board_height <- _new_height;
   t.board_width <- _new_width;
   t.last_move_played <- None;
-  (* (match t.last_move_played with | None -> () | Some { dir; starting_pos =
-     { row = srow; column = scol }; ending_pos } -> let new_move = { Move.dir
-     ; starting_pos = { Position.row = scol; column = _new_width - 1 - srow }
-     ; ending_pos = (match ending_pos with | None -> None | Some { row =
-     erow; column = ecol } -> Some { Position.row = ecol; column = _new_width
-     - 1 - erow }) } in t.last_move_played <- Some new_move); *)
   match t.crazy_info with
   | None -> ()
   | Some crazy ->
@@ -650,9 +641,6 @@ let activate_duplicates t =
     crazy.duplicating_pieces <- true, 5;
     crazy.turns_since_event_and_event <- 0, Duplicates
 ;;
-
-(* let teleport_pieces game = () let monster_pieces game = () let
-   activate_duplicates game = () *)
 
 let%expect_test "black_remove_top_left" =
   let initial_game = new_game ~height:8 ~width:8 () in
