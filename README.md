@@ -44,6 +44,18 @@ There are two modes in Ultimate Konane: Normal and Crazy. The normal mode works 
 1) Volcanic eruptions, which will remove random pieces from the board and make squares not accessible
 2) Plagues, which will infect certain pieces and doom them for removal after a few turns
 3) Rotation of the board by 90 degrees clockwise
-4) Flipping the colors of all pieces on the board (i.e black pieces become white and white pieces become black)
+4) Flipping the colors of all pieces on the board (i.e black pieces become white pieces and white pieces become black pieces)
 5) Monsters, who can eat adjacent pieces, breaking loose
 6) Duplication serum leaking all across the board, making moving pieces leave a duplicate in their original starting spots
+
+# Playing the game
+When you are in the game and it is your turn to play, you will see a small blue circle over the pieces of yours which you can make a move from. Once you click one of these pieces, if you are making a capture (you will from your second move onwards), after selecting the piece you can make a move from, you will see a small yellow circle on the tiles you can leap to and thereby capture the adjacent opposite piece.
+<img width="601" alt="image" align="bottom" src="https://github.com/user-attachments/assets/792cdaa0-cc76-44b3-8d10-16523578d699">
+
+The starting position of the piece your opponent moved last turn will have a small light red circle over it, and their ending position will have a small regular red circle over it. 
+<br clear="left">
+<img width="600" alt="image" align="top" src="https://github.com/user-attachments/assets/af56c607-c8d2-4be2-a310-f3dcd1922d41">
+
+You can make multiple captures in Konane, as long as the captures are in the same cardinal direction with the same piece. If you can make another capture but would like to end your turn, press the green "END TURN" button in the top right corner of the window.
+
+If you would like to restart the game, you may do so at any time by pressing the red "RESTART GAME" button in the top left corner of the window. 
