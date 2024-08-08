@@ -6,8 +6,8 @@ By Sinjin Cho-Tupua and Sami Dalu
 Konane is a Hawaiian strategy board game wherein two players, black and white, take turns hopping over (capturing) each other’s pieces on a rectangular grid, similar to checkers. The pieces on the board are initially laid out in alternating colors. Black plays first by removing a black piece in one of the four corners or one of the four central squares. White responds by removing a white piece adjacent to the space left empty by black’s move. Captures are done orthogonally (i.e. horizontally and vertically rather than diagonally) to adjacent pieces. A player can make multiple captures in the same turn as long as the captures are in the same direction with the same piece. A player of Konane loses when they are unable to make any further captures. 
 
 # How to play the game
-In a Linux command line, run the executable from the most recent release using the following command:
-``dune exec konane.exe``
+In a Linux command line, navigate to your directory with the executable from the most recent release and run it using the following command:
+``./konane``
 
 You will then be greeted with the menu in the command line. When the command line presents you with a list of finite options, you can select your desired option by using either the arrow keys on your keyboard or by typing your option. In either case, confirm your choice by pressing the enter key. 
 
@@ -29,7 +29,7 @@ For two players to play against one another, they must be on the same server. To
 3) Enter the port that the server should be listening on
 
 After this server is created, each of the two human players can join a game on that server via the following steps:
-1) Running the ``dune exec konane.exe`` command in their own terminal windows
+1) Running the ``./konane`` command in their own terminal windows
 2) Selecting "Player v. Player"
 3) Selecting "Join a game"
 4) Entering their name (nickname) for the game
