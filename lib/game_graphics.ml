@@ -94,6 +94,9 @@ let draw_header
       else Colors.light_red
   in
   Graphics.set_color header_color;
+  (match game.crazy_info with
+   | None -> ()
+   | Some _ -> Graphics.set_color Colors.light_pink);
   Graphics.fill_rect
     0
     (block_size * board_height)
@@ -199,63 +202,63 @@ let draw_lava_stuff { Position.row; column } ~board_height =
      (block_size / 2)) (block_size / 8) (block_size / 8) 180 360; *)
   Graphics.fill_arc
     (col + (block_size / 2))
-    (row + (block_size / 2) + (block_size / 8))
+    (row + (block_size / 2) + (block_size / 8) + 8)
     (block_size / 16)
     (block_size / 8)
     270
     450;
   Graphics.fill_arc
     (col + (block_size / 2))
-    (row + (block_size / 2) - (block_size / 8))
+    (row + (block_size / 2) - (block_size / 8) + 8)
     (block_size / 8)
     (block_size / 4)
     90
     270;
   Graphics.fill_arc
     (col + (block_size / 2))
-    (row + (block_size / 2) - (block_size / 8))
+    (row + (block_size / 2) - (block_size / 8) + 8)
     (block_size / 8)
     (block_size / 4)
     135
     315;
   Graphics.fill_arc
     (col + (block_size / 2) - (block_size / 8))
-    (row + (block_size / 2) + (block_size / 8))
+    (row + (block_size / 2) + (block_size / 8) + 8)
     (block_size / 16)
     (block_size / 8)
     270
     450;
   Graphics.fill_arc
     (col + (block_size / 2) - (block_size / 8))
-    (row + (block_size / 2) - (block_size / 8))
+    (row + (block_size / 2) - (block_size / 8) + 8)
     (block_size / 8)
     (block_size / 4)
     90
     270;
   Graphics.fill_arc
     (col + (block_size / 2) - (block_size / 8))
-    (row + (block_size / 2) - (block_size / 8))
+    (row + (block_size / 2) - (block_size / 8) + 8)
     (block_size / 8)
     (block_size / 4)
     135
     315;
   Graphics.fill_arc
     (col + (block_size / 2) + (block_size / 8))
-    (row + (block_size / 2) + (block_size / 8))
+    (row + (block_size / 2) + (block_size / 8) + 8)
     (block_size / 16)
     (block_size / 8)
     270
     450;
   Graphics.fill_arc
     (col + (block_size / 2) + (block_size / 8))
-    (row + (block_size / 2) - (block_size / 8))
+    (row + (block_size / 2) - (block_size / 8) + 8)
     (block_size / 8)
     (block_size / 4)
     90
     270;
   Graphics.fill_arc
     (col + (block_size / 2) + (block_size / 8))
-    (row + (block_size / 2) - (block_size / 8))
+    (row + (block_size / 2) - (block_size / 8) + 8)
     (block_size / 8)
     (block_size / 4)
     135
@@ -754,7 +757,9 @@ let render (client_state : Client.t) =
            ~board_height));
   (match client_state.last_event with
    | None -> ()
-   | Some event -> display_event_message event ~board_height ~board_width);
+   | Some event ->
+     display_event_message event ~board_height ~board_width;
+     client_state.last_event <- None);
   Graphics.display_mode true;
   Graphics.synchronize ()
 ;;

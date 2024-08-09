@@ -5,4 +5,5 @@ type t =
   ; player : Player.t
   ; mutable moves_to_highlight : Move.t list
   ; mutable last_event : Crazy_info.Event.t option
+  ; mutable show_message : bool
   }

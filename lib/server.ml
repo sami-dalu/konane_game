@@ -204,8 +204,8 @@ let handle_move_query (server : t) _client (query : Rpcs.Take_turn.Query.t) =
                let event = do_disaster game in
                event_opt_ref := Some event))
            else (
-             let rand_num = Random.int 10 in
-             if count >= rand_num
+             let rand_num = Random.int 5 in
+             if count >= rand_num && count > 0
              then event_opt_ref := Some (do_disaster game)
              else info.turns_since_event_and_event <- count + 1, evt);
            Game.decrement_and_prune_crazy_stuff game;
