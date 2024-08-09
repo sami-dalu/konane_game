@@ -641,7 +641,7 @@ let display_event_message event ~board_height ~board_width =
     Graphics.moveto
       ((board_width * block_size * 3 / 8) - 25)
       ((board_height * block_size / 2) - 10);
-    Graphics.draw_string "A monster is loose! Fight or flee!"
+    Graphics.draw_string "An Evil Spirit is loose! Fight or flee!"
   | Crazy_info.Event.Plague ->
     Graphics.moveto
       ((board_width * block_size * 3 / 8) - 5)
